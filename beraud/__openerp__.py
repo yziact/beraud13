@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Beraud",
+    'name': "beraud",
 
     'summary': """
-        Module Beraud """,
+        Module beraud """,
 
     'description': """
-        Module Beraud
+        Module beraud
     """,
 
     'author': "Yziact",
@@ -19,5 +19,7 @@
         'base',
     ],
 
-    'data': [],
+    'data': [
+        'views/res_partner.xml',
+    ],
 }

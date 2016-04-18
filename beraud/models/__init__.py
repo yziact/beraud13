@@ -1,2 +1,1 @@
-import partner
-
+import Partner

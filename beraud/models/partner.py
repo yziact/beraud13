@@ -1,7 +1,8 @@
-from openerp import models, fields, api,
+from openerp import models, fields
 
-class ResPartner(models.Model):
+class Partner(models.Model):
     _inherit = 'res.partner'
 
-    company_id = fields.many2one('res.company', 'Company', select=1, required=True)
+    # myCompany_id = fields.Many2one('res.company', "Company", select=1)
+    #company_id = fields.Many2one(required=True)
 
