@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        ##############################################################################
+        #
+        #    herbarom module for OpenERP, Module Herbarom
+        #    Copyright (C) 2015 Smile
+        #              Chris Tribbeck [chris.tribbeck@smile.eu]
+        #
+        #    This file is a part of herbarom
+        #
+        #    herbarom is free software: you can redistribute it and/or modify
+        #    it under the terms of the GNU Affero General Public License as published by
+        #    the Free Software Foundation, either version 3 of the License, or
+        #    (at your option) any later version.
+        #
+        #    herbarom is distributed in the hope that it will be useful,
+        #    but WITHOUT ANY WARRANTY; without even the implied warranty of
+        #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        #    GNU Affero General Public License for more details.
+        #
+        #    You should have received a copy of the GNU Affero General Public License
+        #    along with this program.  If not, see [http://www.gnu.org/licenses/].
+        #
+        ##############################################################################
+
+        <record model="ir.ui.view" id="wizard_transfer_stock_intercompany_form_view">
+            <field name="name">wizard.transfer.stock.intercompany.form</field>
+            <field name="model">wizard.transfer.stock.intercompany</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group col="4" colspan="4">
+                        <group col="4" colspan="4" attrs="{'invisible': [('production_id', '=', False), ('picking_id', '=', False)]}">
+                            <field name="production_id" options="{'no_open': true, 'no_create': true}" attrs="{'invisible': [('production_id','=', False)]}" readonly="1" />
+                            <field name="picking_id" options="{'no_open': true, 'no_create': true}" attrs="{'invisible': [('picking_id','=', False)]}" readonly="1" />
+                            <field name="update_data"/>
+                            <field name="is_ok" invisible="1" />
+                        </group>
+                        <group col="2" colspan="2">
+                            <separator string="Source" colspan="2"/>
+                            <field name="company_src_id" options="{'no_open': true, 'no_create': true}" context="{'own_companies':True}"/>
+                            <field name="location_src_id" options="{'no_open': true, 'no_create': true}"/>
+                        </group>
+                        <group col="2" colspan="2">
+                            <separator string="Destination" colspan="2"/>
+                            <field name="company_dst_id" options="{'no_open': true, 'no_create': true}" context="{'own_companies':True}"/>
+                            <field name="location_dst_id" options="{'no_open': true, 'no_create': true}"/>
+                        </group>
+                        <separator string="Products to transfer" colspan="4"/>
+                        <field name="line_ids" colspan="4" nolabel="1" >
+                            <tree editable="top">
+                                <field name="product_id" options="{'no_open': true, 'no_create': true}" />
+                                <field name="quantity"/>
+                                <field name="restrict_lot_id" domain="[('product_id', '=', product_id)]"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <footer>
+                        <button name="perform_transfer" type="object"
+                            string="Perform transfer" class="oe_highlight"
+                            attrs="{'invisible': [('is_ok','=', False)]}"/>
+                        <button special="cancel" string="Cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+         <record id="action_wizard_transfer_stock_intercompany" model="ir.actions.act_window">
+            <field name="name">Perform intercompany transfer</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">wizard.transfer.stock.intercompany</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="wizard_transfer_stock_intercompany_form_view"/>
+            <field name="target">new</field>
+        </record>
+
+        <act_window id="act_wizard_transfer_stock_intercompay_production"
+            name="Perform intercompany transfer"
+            res_model="wizard.transfer.stock.intercompany"
+            src_model="mrp.production"
+            view_id="wizard_transfer_stock_intercompany_form_view"
+            target="new"
+            />
+
+        <act_window id="act_wizard_transfer_stock_intercompay_picking"
+            name="Perform intercompany transfer"
+            res_model="wizard.transfer.stock.intercompany"
+            src_model="stock.picking"
+            view_id="wizard_transfer_stock_intercompany_form_view"
+            target="new"
+            />
+
+        <act_window id="act_wizard_transfer_stock_intercompay_quant"
+            name="Perform intercompany transfer"
+            res_model="wizard.transfer.stock.intercompany"
+            src_model="stock.quant"
+            view_id="wizard_transfer_stock_intercompany_form_view"
+            target="new"
+            />
+
+
+
+        <menuitem name="Inter-company stock transfer"
+            id="menu_intercompany_stock_transfer"
+            parent="beraud.logistique"
+            action="action_wizard_transfer_stock_intercompany"
+            sequence="900" />
+
+    </data>
+</openerp>
