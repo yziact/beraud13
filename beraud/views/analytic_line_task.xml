@@ -1,0 +1,30 @@
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_task_form3_inherited">
+            <field name="name">project.task.line.form.inherited</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project_timesheet.view_task_form2_inherited"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='account_id']" position="after">
+                    <field name="billed" invisible="1"/>
+                </xpath>
+                <xpath expr="//tree/field[@name='date']" position="attributes">
+                    <attribute name="attrs">{'readonly': [('billed','=', True)]}</attribute>
+                    <attribute name="delete">False</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='user_id']" position="attributes">
+                    <attribute name="attrs">{'readonly': [('billed','=', True)]}</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='name']" position="attributes">
+                    <attribute name="attrs">{'readonly': [('billed','=', True)]}</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='account_id']" position="attributes">
+                    <attribute name="attrs">{'readonly': [('billed','=', True)]}</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='unit_amount']" position="attributes">
+                    <attribute name="attrs">{'readonly': [('billed','=', True)]}</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>

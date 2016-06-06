@@ -1,0 +1,47 @@
+<openerp>
+    <data>
+        <record id="beraud.stock_logistique_tree_view" model="ir.ui.view">
+            <field name="name">stock_logistique_tree_view</field>
+            <field name="model">stock.view.logistique</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree create="false" delete="false">
+                    <field name="company_id"/>
+                    <field name="location_id"/>
+                    <field name="product_id"/>
+                    <field name="lot_id"/>
+                    <field name="reserved_quantity"/>
+                    <field name="quantity" sum="Total"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="stock_logistique_search_view" model="ir.ui.view">
+            <field name="name">stock.logistique.search.view</field>
+            <field name="model">stock.view.logistique</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+               <search string="product_search">
+                   <field name="company_id"/>
+                   <field name="location_id"/>
+                   <field name="product_id"/>
+                   <field name="lot_id"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="beraud.action_logistique_tree_view" model="ir.actions.act_window">
+            <field name="name">Niveau des stocks</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.view.logistique</field>
+            <field name="view_type">tree</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="stock_logistique_search_view"/>
+        </record>
+
+        <menuitem name="Stock level" id="beraud.logistique" parent="stock.menu_stock_root"/>
+        <menuitem name="Stock level" id="beraud.logistique_level" parent="beraud.logistique"
+                  action="beraud.action_logistique_tree_view"/>
+    </data>
+</openerp>
+
