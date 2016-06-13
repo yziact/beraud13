@@ -173,6 +173,9 @@ class Internal_Invoice(models.Model):
             sale_line_ids_timesheet = self.create_line_ids_for_timesheet(time_ber, 6, 1, sale_invoice, account_id,'out_invoice', journal_id_sale)
             sale_line_ids += sale_line_ids_timesheet
 
+
+
+        if len(sale_line_ids) != 0:
             sale_invoice.compute_taxes()
 
             # creation de la facture jumelle cote achat
