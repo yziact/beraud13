@@ -28,6 +28,7 @@
     'data': [
         'views/res_partner.xml',
         'views/stock_view.xml',
+        'views/product_view.xml',
         'views/transfer_stock_intercompany_view.xml',
         'views/analytic_line_task.xml',
         'views/analytic_line_issue.xml',
