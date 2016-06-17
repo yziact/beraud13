@@ -1,0 +1,20 @@
+<odoo>
+    <template id="delivery.report_shipping2" inherit_id="stock.report_picking">
+            <xpath expr="//th[@name='td_sched_date_h']" position="after">
+                <th><strong>Votre référence</strong></th>
+                <th t-if="o.picking_type_id.code == 'outgoing'"><strong>Carrier</strong></th>
+                <th><strong>Weight</strong></th>
+            </xpath>
+            <xpath expr="//td[@name='td_sched_date']" position="after">
+                <td>
+                    <span t-field="o.sale_id.client_order_ref"/>
+                </td>
+                <td t-if="o.picking_type_id.code == 'outgoing'">
+                    <span t-field="o.carrier_id.partner_id.name"/>
+                </td>
+                <td>
+                    <span t-field="o.weight"/>
+                </td>
+            </xpath>
+    </template>
+</odoo>

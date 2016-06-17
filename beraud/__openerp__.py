@@ -33,5 +33,11 @@
         'views/analytic_line_task.xml',
         'views/analytic_line_issue.xml',
         'views/internal_invoice.xml',
+		
+		'report/layout/external_layout_header.xml',
+        'report/repair/report_mrprepairorder.xml',
+		'report/stock/report_picking.xml',
+        'report/stock/report_shipping2.xml',
+        'report/sale/report_sale.xml',
     ],
 }

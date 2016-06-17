@@ -21,7 +21,7 @@
                                     <span t-if="o.state == 'draft'">Repair Quotation #:</span>
                                     <span t-field="o.name"/>
                                 </h3>
-                                <div class="row mt32 mb32" id="contact" t-if="o.partner_id.user_id">
+                                <div class="row" id="contact" t-if="o.partner_id.user_id">
                                     <!-- Ajout des coordonnées du contact qui a créé le document -->
                                     <div class="col-xs-12">
                                         <p><strong>Commercial : </strong><span
@@ -29,7 +29,7 @@
                                             / <span t-field="o.partner_id.user_id.email"/></p>
                                     </div>
                                 </div>
-                                <div class="row mt32 mb32" id="contact">
+                                <div class="row" id="contact" t-if="o.partner_id.principal_contact">
                                     <!-- Ajout des coordonnées du contact qui a créé le document -->
                                     <div class="col-xs-12" >
                                         <p><strong>Contact : </strong><span
@@ -37,7 +37,7 @@
                                             / <span t-field="o.partner_id.principal_contact.email"/></p>
                                     </div>
                                 </div>
-                                <div class="row mt32 mb32" id="contact">
+                                <div class="row" id="contact">
                                     <!-- Ajout des coordonnées du contact administratif -->
                                     <div class="col-xs-12">
                                         <p><strong>V/Contact : </strong><span
@@ -49,6 +49,10 @@
                                         <strong>Date:</strong>
                                         <p t-esc="time.strftime('%Y-%m-%d')"/>
                                     </div>
+                                    <div class="col-xs-3" t-if="o.partner_id.ref">
+                                        <strong>Client:</strong>
+                                        <span t-field="o.partner_id.ref"/>
+                                    </div>
                                     <div t-if="o.product_id.name" class="col-xs-3">
                                         <strong>Product to Repair:</strong>
                                         <p t-field="o.product_id.name"/>
@@ -56,9 +60,6 @@
                                     <div class="col-xs-3" groups="stock.group_production_lot" t-if="o.lot_id">
                                         <strong>Lot Number</strong>
                                         <span t-field="o.lot_id.name"/>
-                                    </div>
-                                    <div class="col-xs-3" t-if="o.partner_id.ref">
-                                        <span t-field="o.partner_id.ref"/>
                                     </div>
                                     <div t-if="o.guarantee_limit" class="col-xs-3">
                                         <strong>Guarantee Limit:</strong>
@@ -157,6 +158,10 @@
                                     </div>
                                 </div>
 
+                                 <p t-if="o.state == 'draft'">Toutes les pièces supplémentaires utilisées suite au
+                                     démontage seront facturées en plus, ainsi que les heures de main d'oeuvre
+                                     supplémentaires.
+                                 </p>
                                 <p t-field="o.quotation_notes"/>
                                 <div class="oe_structure"/>
                             </div>
