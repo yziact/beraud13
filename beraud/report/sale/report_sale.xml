@@ -27,7 +27,7 @@
                                 <td>
                                     <strong>Numero</strong>
                                 </td>
-								<td>
+                                <td>
                                     <strong>Code client</strong>
                                 </td>
                                 <td t-if="doc.client_order_ref">
@@ -45,7 +45,7 @@
                                 </td>
                                 <td>
                                     <span t-field="doc.partner_id.ref"/>
-                                </td>								
+                                </td>
                                 <td t-if="doc.client_order_ref">
                                     <p t-field="doc.client_order_ref"/>
                                 </td>
@@ -99,7 +99,7 @@
                                 <th class="text-right">Qté</th>
                                 <th class="text-right">PU HT</th>
                                 <th t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">Rem.</th>
-								<th class="text-right">Montant</th>
+                                <th class="text-right">Montant</th>
                                 <th class="text-right">TVA</th>
                             </tr>
                         </thead>
@@ -111,7 +111,7 @@
                                              t-att-src="'data:image/png;base64,%s' % l.product_id.image_small"
                                              class="img-responsive"/>
                                     </td>
-                                    <td>
+                                    <td class="col-xs-4">
                                         <span t-field="l.name"/>
                                     </td>
                                     <td class="text-right">
@@ -128,7 +128,7 @@
                                         <span t-field="l.price_subtotal"
                                               t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/>
                                     </td>
-									<td class="text-right">
+                                    <td class="text-right">
                                         <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.tax_id))"/>
                                     </td>
                                 </tr>
