@@ -103,10 +103,10 @@
                                 <th class="text-right">TVA</th>
                             </tr>
                         </thead>
-                        <tbody class="sale_tbody">
+                        <tbody class="sale_tbody" style="font-size:9px;">
                             <t t-foreach="doc.order_line" t-as="l">
                                 <tr t-if="l.product_uom_qty">
-                                    <td>
+                                    <td class="col-xs-1">
                                         <img t-if="l.product_id.image_small"
                                              t-att-src="'data:image/png;base64,%s' % l.product_id.image_small"
                                              class="img-responsive"/>
