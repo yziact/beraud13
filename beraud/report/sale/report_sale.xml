@@ -1,74 +1,94 @@
 <openerp>
     <data>
         <template id="sale.report_saleorder_document">
-            <t t-call="report.external_layout">
+            <t t-call="report.external_layout" style="font-size:11px;">
                 <t t-set="doc" t-value="doc.with_context({'lang':doc.partner_id.lang})" />
-                <div class="page">
+                <div class="page" style="font-size:11px;">
                     <div class="oe_structure"/>
                     <div class="row">
                         <div class="col-xs-5 col-xs-offset-6">
                             <div t-field="doc.partner_id"
                                  t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
-                            Tel: <span t-field="doc.partner_id.phone"/> - Fax: <span t-field="doc.partner_id.fax"/>
+                            <span t-if="doc.partner_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
+                            <span t-if="doc.partner_id.fax"> - Fax: </span><span
+                                t-field="doc.partner_id.fax"/>
                         </div>
                     </div>
-
                     <h3>
-                        <span t-if="doc.state not in ['draft','sent']">Order # </span>
-                        <span t-if="doc.state in ['draft','sent']">Quotation # </span>
-                        <span t-field="doc.name"/>
+                        <span t-if="doc.state not in ['draft','sent']">Order </span>
+                        <span t-if="doc.state in ['draft','sent']">Quotation </span>
                     </h3>
-                    
-                    <div class="row" id="contact" t-if="doc.partner_id.user_id">
-                        <!-- Ajout des coordonnées du contact qui a créé le document -->
-                        <div class="col-xs-12">
-                            <p><strong>Commercial : </strong><span
-                                    t-field="doc.partner_id.user_id.name"/>
-                                / <span t-field="doc.partner_id.user_id.email"/></p>
-                        </div>
-                    </div>
-                    <div class="row" id="contact" t-if="doc.partner_id.principal_contact">
-                        <!-- Ajout des coordonnées du contact qui a créé le document -->
-                        <div class="col-xs-12" >
-                            <p><strong>Contact : </strong><span
-                                    t-field="doc.partner_id.principal_contact.name"/>
-                                / <span t-field="doc.partner_id.principal_contact.email"/></p>
-                        </div>
-                    </div>
-                    <div class="row" id="contact">
-                        <!-- Ajout des coordonnées du contact administratif -->
-                        <div class="col-xs-12">
-                            <p><strong>V/Contact : </strong><span
-                                    t-field="doc.create_uid.partner_id.name"/> /  <span t-field="doc.create_uid.email"/></p>
-                        </div>
-                    </div>
-
-                    <div class="row mt32 mb32" id="informations">
-                        <div t-if="doc.date_order" class="col-xs-3">
-                            <strong t-if="doc.state not in ['draft','sent']">Date Ordered:</strong>
-                            <strong t-if="doc.state in ['draft','sent']">Quotation Date:</strong>
-                            <p t-field="doc.date_order"/>
-                        </div>
-                        <div t-if="doc.client_order_ref" class="col-xs-3">
-                            <strong>Your Reference:</strong>
-                            <p t-field="doc.client_order_ref"/>
-                        </div>
-                        <!--div t-if="doc.user_id.name" class="col-xs-3">
-                            <strong>Salesperson:</strong>
-                            <p t-field="doc.user_id"/>
-                        </div-->
-                        <div name="payment_term" t-if="doc.payment_term_id" class="col-xs-3">
-                            <strong>Payment Term:</strong>
-                            <p t-field="doc.payment_term_id"/>
-                        </div>
-                    </div>
-
-                    <!-- Is there a discount on at least one line? -->
-                    <t t-set="display_discount" t-value="any([l.discount for l in doc.order_line])"/>
-
                     <table class="table table-condensed">
                         <thead>
                             <tr>
+                                <td t-if="doc.date_order">
+                                    <strong>Date</strong>
+                                </td>
+                                <td>
+                                    <strong>Numéro pièce</strong>
+                                </td>
+                                <td t-if="doc.client_order_ref">
+                                    <strong>Your Reference:</strong>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td t-if="doc.date_order">
+                                    <p t-field="doc.date_order"  t-field-options='{"format":"dd/MM/y"}'/>
+                                </td>
+                                <td>
+                                    <span t-field="doc.name"/>
+                                </td>
+                                <td t-if="doc.client_order_ref">
+                                    <p t-field="doc.client_order_ref"/>
+                                </td>
+                                <td>
+                                    <table class="table table-condensed" style="border:border-less;">
+                                        <tbody>
+                                            <tr t-if="doc.partner_id.user_id">
+                                                <td>
+                                                    <strong>Commercial : </strong>
+                                                </td>
+                                                <td>
+                                                    <span t-field="doc.partner_id.user_id.name"/>
+                                                    / <span t-field="doc.partner_id.user_id.email"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="doc.partner_id.principal_contact">
+                                                <td>
+                                                    <strong>Contact : </strong>
+                                                </td>
+                                                <td>
+                                                    <span t-field="doc.partner_id.principal_contact.name"/>
+                                                    / <span t-field="doc.partner_id.principal_contact.email"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <strong>V/Contact : </strong>
+                                                </td>
+                                                <td>
+                                                    <span t-field="doc.create_uid.partner_id.name"/> /
+                                                    <span t-field="doc.create_uid.email"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <div name="payment_term" t-if="doc.payment_term_id">
+                            <!--<strong>Payment Term:</strong>
+                            <p t-field="doc.payment_term_id"/>-->
+                        </div>
+                    </table>
+                    <!-- Is there a discount on at least one line? -->
+                    <t t-set="display_discount" t-value="any([l.discount for l in doc.order_line])"/>
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th></th>
                                 <th>Description</th>
                                 <th class="text-right">Quantity</th>
                                 <th class="text-right">Unit Price</th>
@@ -80,6 +100,11 @@
                         <tbody class="sale_tbody">
                             <t t-foreach="doc.order_line" t-as="l">
                                 <tr t-if="l.product_uom_qty">
+                                    <td>
+                                        <img t-if="l.product_id.image_small"
+                                             t-att-src="'data:image/png;base64,%s' % l.product_id.image_small"
+                                             class="img-responsive"/>
+                                    </td>
                                     <td>
                                         <span t-field="l.name"/>
                                     </td>

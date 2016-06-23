@@ -39,5 +39,6 @@
 		'report/stock/report_picking.xml',
         'report/stock/report_shipping2.xml',
         'report/sale/report_sale.xml',
+        'report/invoice/report_invoice.xml',
     ],
 }

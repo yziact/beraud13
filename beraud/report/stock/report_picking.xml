@@ -54,7 +54,7 @@
                                     / <span t-field="o.sale_id.partner_id.principal_contact.email"/></p>
                             </div>
                         </div>
-                        <div class="row" id="contact">
+                        <div class="row" id="contact" t-if="not o.picking_type_id.id in [1, 7]">
                             <!-- Ajout des coordonnées du contact administratif -->
                             <div class="col-xs-12">
                                 <p><strong>V/Contact : </strong><span
