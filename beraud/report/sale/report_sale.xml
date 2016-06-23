@@ -50,7 +50,7 @@
                                     <p t-field="doc.client_order_ref"/>
                                 </td>
                                 <td>
-                                    <table class="table table-condensed" style="border:border-less;">
+                                    <table class="table table-condensed" style="border:none;">
                                         <tbody>
                                             <tr t-if="doc.partner_id.user_id">
                                                 <td>
@@ -111,7 +111,7 @@
                                              t-att-src="'data:image/png;base64,%s' % l.product_id.image_small"
                                              class="img-responsive"/>
                                     </td>
-                                    <td class="col-xs-4">
+                                    <td class="col-xs-6">
                                         <span t-field="l.name"/>
                                     </td>
                                     <td class="text-right">
