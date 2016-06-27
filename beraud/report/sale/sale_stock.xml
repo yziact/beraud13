@@ -1,0 +1,17 @@
+<openerp>
+    <data>
+        <template id="sale_stock.report_saleorder_document_inherit_sale_stock"
+                  inherit_id="sale.report_saleorder_document">
+            <xpath expr="//td[@name='ref_client_head']" position="after">
+                <td t-if="doc.incoterm">
+                    <strong>Incoterms:</strong>
+                </td>
+            </xpath>
+            <xpath expr="//td[@name='ref_client_data']" position="after">
+                <td  t-if="doc.incoterm">
+                    <p t-field="doc.incoterm.code"/>
+                </td>
+            </xpath>
+        </template>
+    </data>
+</openerp>
