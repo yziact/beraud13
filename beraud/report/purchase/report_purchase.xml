@@ -39,7 +39,10 @@
                                     <strong>Your Order Reference</strong>
                                 </td>
                                 <td t-if="o.date_order">
-                                    <strong>Order Date:</strong>
+                                    <strong>Order Date</strong>
+                                </td>
+                                <td t-if="o.incoterm_id">
+                                    <strong>Incoterm</strong>
                                 </td>
                                 <td t-if="o.partner_id.user_id">
                                     <span><span><strong>Commercial: </strong></span><span t-field="o.partner_id.user_id.name"/> / <span t-field="o.partner_id.user_id.email"/></span>
@@ -56,6 +59,9 @@
                                 </td>
                                 <td t-if="o.date_order">
                                     <p t-field="o.date_order" t-field-options='{"format":"dd/MM/y"}'/>
+                                </td>
+                                <td t-if="o.incoterm_id">
+                                    <span t-field="o.incoterm_id.code"/>
                                 </td>
                                 <td>
                                     <table>

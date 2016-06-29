@@ -1,12 +1,12 @@
 <openerp>
     <data>
         <template id="sale.report_saleorder_document">
-            <t t-call="report.external_layout" style="font-size:11px;">
+            <t t-call="report.external_layout">
                 <t t-set="doc" t-value="doc.with_context({'lang':doc.partner_id.lang})" />
                 <div class="page" style="font-size:11px;">
                     <div class="oe_structure"/>
                     <div class="row">
-                        <div class="col-xs-5 col-xs-offset-6">
+                        <div class="col-xs-6 col-xs-offset-6">
                             <div t-field="doc.partner_id"
                                  t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
                             <span t-if="doc.partner_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
@@ -14,24 +14,29 @@
                                 t-field="doc.partner_id.fax"/>
                         </div>
                     </div>
+
                     <h3>
-                        <span t-if="doc.state not in ['draft','sent']">COMMANDE </span>
-                        <span t-if="doc.state in ['draft','sent']">DEVIS </span>
+                        <span t-if="doc.state not in ['draft','sent']">Commande</span>
+                        <span t-if="doc.state in ['draft','sent']">Devis</span>
                     </h3>
+
                     <table class="table table-condensed">
                         <thead>
                             <tr>
                                 <td t-if="doc.date_order">
-                                    <strong>Date</strong>
+                                    <strong>Date </strong>
                                 </td>
                                 <td>
-                                    <strong>Numero</strong>
+                                    <strong>Numero </strong>
                                 </td>
                                 <td>
                                     <strong>Code client</strong>
                                 </td>
-                                <td t-if="doc.client_order_ref">
+                                <td name="ref_client_head" t-if="doc.client_order_ref">
                                     <strong>V/Ref.</strong>
+                                </td>
+                                <td t-if="doc.partner_id.user_id">
+                                    <span><span><strong>Commercial: </strong></span><span t-field="doc.partner_id.user_id.name"/> / <span t-field="doc.partner_id.user_id.email"/></span>
                                 </td>
                             </tr>
                         </thead>
@@ -46,24 +51,15 @@
                                 <td>
                                     <span t-field="doc.partner_id.ref"/>
                                 </td>
-                                <td t-if="doc.client_order_ref">
+                                <td name="ref_client_data" t-if="doc.client_order_ref">
                                     <p t-field="doc.client_order_ref"/>
                                 </td>
                                 <td>
-                                    <table class="table table-condensed" style="border:none;">
+                                    <table>
                                         <tbody>
-                                            <tr t-if="doc.partner_id.user_id">
-                                                <td>
-                                                    <strong>Commercial</strong>
-                                                </td>
-                                                <td>
-                                                    <span t-field="doc.partner_id.user_id.name"/>
-                                                    / <span t-field="doc.partner_id.user_id.email"/>
-                                                </td>
-                                            </tr>
                                             <tr t-if="doc.partner_id.principal_contact">
                                                 <td>
-                                                    <strong>Contact</strong>
+                                                    <strong>Contact: </strong>
                                                 </td>
                                                 <td>
                                                     <span t-field="doc.partner_id.principal_contact.name"/>
@@ -72,7 +68,7 @@
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <strong>V/Contact</strong>
+                                                    <strong>V/Contact: </strong>
                                                 </td>
                                                 <td>
                                                     <span t-field="doc.create_uid.partner_id.name"/> /
@@ -84,10 +80,6 @@
                                 </td>
                             </tr>
                         </tbody>
-                        <div name="payment_term" t-if="doc.payment_term_id">
-                            <!--<strong>Payment Term:</strong>
-                            <p t-field="doc.payment_term_id"/>-->
-                        </div>
                     </table>
                     <!-- Is there a discount on at least one line? -->
                     <t t-set="display_discount" t-value="any([l.discount for l in doc.order_line])"/>

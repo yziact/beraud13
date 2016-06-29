@@ -3,7 +3,7 @@
         <t t-call="report.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-call="report.external_layout">
-                    <div class="page">
+                    <div class="page" style="font-size:11px;">
                         <br/>
                         <div class="row">
                             <div class="col-xs-6" t-if="o.picking_type_id.name=='Livraisons'">
@@ -40,29 +40,22 @@
                         </h3>
                         <div class="row" id="contact" t-if="o.sale_id.partner_id.user_id">
                             <!-- Ajout des coordonnées du contact qui a créé le document -->
-                            <div class="col-xs-12">
-                                <p><strong>Commercial : </strong><span
-                                        t-field="o.sale_id.partner_id.user_id.name"/>
-                                    / <span t-field="o.sale_id.partner_id.user_id.email"/></p>
-                            </div>
+                            <p><strong>Commercial : </strong><span
+                                    t-field="o.sale_id.partner_id.user_id.name"/>
+                                / <span t-field="o.sale_id.partner_id.user_id.email"/></p>
                         </div>
                         <div class="row" id="contact" t-if="o.sale_id.partner_id.principal_contact">
                             <!-- Ajout des coordonnées du contact qui a créé le document -->
-                            <div class="col-xs-12" >
-                                <p><strong>Contact : </strong><span
-                                        t-field="o.sale_id.partner_id.principal_contact.name"/>
-                                    / <span t-field="o.sale_id.partner_id.principal_contact.email"/></p>
-                            </div>
+                            <p><strong>Contact : </strong><span
+                                    t-field="o.sale_id.partner_id.principal_contact.name"/>
+                                / <span t-field="o.sale_id.partner_id.principal_contact.email"/></p>
                         </div>
                         <div class="row" id="contact" t-if="not o.picking_type_id.id in [1, 7]">
                             <!-- Ajout des coordonnées du contact administratif -->
-                            <div class="col-xs-12">
-                                <p><strong>V/Contact : </strong><span
-                                        t-field="o.create_uid.partner_id.name"/> /  <span t-field="o.create_uid.email"/></p>
-                            </div>
+                            <p><strong>V/Contact : </strong><span
+                                    t-field="o.create_uid.partner_id.name"/> /  <span t-field="o.create_uid.email"/></p>
                         </div>
                         <br/>
-                        <h1 t-field="o.name" class="mt0"/>
                         <table class="table table-condensed">
                             <thead>
                                 <tr>

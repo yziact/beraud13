@@ -37,10 +37,18 @@
 
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
+
         'report/repair/report_mrprepairorder.xml',
+
         'report/stock/report_picking.xml',
         'report/stock/report_shipping2.xml',
+
         'report/sale/report_sale.xml',
+        'report/sale/sale_stock.xml',
+
+        'report/purchase/report_purchase.xml',
+
         'report/invoice/report_invoice.xml',
+        'report/invoice/sale_stock.xml',
     ],
 }
