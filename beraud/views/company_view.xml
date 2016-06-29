@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="view_background_company_form" model="ir.ui.view">
+        <field name="name">res.company.form.inherit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="background_color"/>
+                <field name="border_color"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- theme CSS -->
+    <template id="assets_backend" inherit_id="web.assets_backend"
+              name="Theme CSS" priority="1">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="http://192.168.100.236:8069/beraud/dynamic_backend.css"/>
+        </xpath>
+    </template>
+
+  </data>
+</openerp>
+

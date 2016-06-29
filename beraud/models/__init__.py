@@ -4,3 +4,4 @@ import internal_invoice
 import product
 import partner
 import sale
+import company
