@@ -23,6 +23,7 @@
         'project_issue_sheet',
         'project_issue',
         'project',
+        'product_dimension',
     ],
 
     'data': [
