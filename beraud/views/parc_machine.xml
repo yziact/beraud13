@@ -1,0 +1,62 @@
+<openerp>
+    <data>
+        <record id="beraud.stock_parc_tree_view" model="ir.ui.view">
+            <field name="name">stock_parc_tree_view</field>
+            <field name="model">stock.view.parc</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree create="false" delete="false">
+                    <field name="company_id"/>
+                    <field name="location_id"/>
+                    <field name="partner_id"/>
+                    <field name="product_id"/>
+                    <field name="lot_id"/>
+                    <field name="quantity" sum="Total"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="stock_parc_search_view" model="ir.ui.view">
+            <field name="name">stock.parc.search.view</field>
+            <field name="model">stock.view.parc</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+               <search string="product_search">
+                   <field name="company_id"/>
+                   <field name="location_id"/>
+                   <field name="partner_id"/>
+                   <field name="product_id"/>
+                   <field name="lot_id"/>
+                   <filter name="partner" context="{'group_by':'partner_id'}"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="beraud.action_parc_tree_view" model="ir.actions.act_window">
+            <field name="name">Parc machine</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.view.parc</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="stock_parc_search_view"/>
+            <field name="context">{'search_default_partner':1}</field>
+            <field name="domain">[('product_id.categ_id','ilike','MACHINE')]</field>
+        </record>
+
+        <record model="ir.rule" id="beraud_rule_parc">
+            <field name="name">parc view rule</field>
+            <field name="model_id" ref="model_stock_view_parc"/>
+            <field name="domain_force">[('company_id','child_of',user.company_id.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_sale_salesman_all_leads'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <menuitem name="Parc Machine" id="beraud.parc" parent="base.menu_board_root"
+                  action="beraud.action_parc_tree_view" groups="base.group_user"/>
+        <menuitem name="Parc Machine" id="beraud.parc_machine" parent="beraud.parc" groups="base.group_user"/>
+    </data>
+</openerp>
+
