@@ -21,19 +21,19 @@
             <field name="model">stock.view.parc</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
-               <search string="product_search">
-                   <field name="company_id"/>
-                   <field name="location_id"/>
-                   <field name="partner_id"/>
-                   <field name="product_id"/>
-                   <field name="lot_id"/>
-                   <filter name="partner" context="{'group_by':'partner_id'}"/>
-               </search>
+                <search string="product_search">
+                    <field name="company_id"/>
+                    <field name="location_id"/>
+                    <field name="partner_id"/>
+                    <field name="product_id"/>
+                    <field name="lot_id"/>
+                    <filter name="partner" context="{'group_by':'partner_id'}"/>
+                </search>
             </field>
         </record>
 
         <record id="beraud.action_parc_tree_view" model="ir.actions.act_window">
-            <field name="name">Parc machine</field>
+            <field name="name">Liste des machines livrées aux clients</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">stock.view.parc</field>
             <field name="view_type">form</field>
@@ -54,9 +54,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <menuitem name="Parc Machine" id="beraud.parc" parent="base.menu_board_root"
+        <menuitem name="Parc Machines" id="beraud.parc" parent="base.menu_board_root"
                   action="beraud.action_parc_tree_view" groups="base.group_user"/>
-        <menuitem name="Parc Machine" id="beraud.parc_machine" parent="beraud.parc" groups="base.group_user"/>
+        <menuitem name="Parc Machines" id="beraud.parc_machine" parent="beraud.parc" groups="base.group_user"/>
     </data>
 </openerp>
 
