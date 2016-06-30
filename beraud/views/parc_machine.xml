@@ -27,7 +27,7 @@
                     <field name="partner_id"/>
                     <field name="product_id"/>
                     <field name="lot_id"/>
-                    <filter name="partner" context="{'group_by':'partner_id'}"/>
+                    <filter name="Groupées par Client" context="{'group_by':'partner_id'}"/>
                 </search>
             </field>
         </record>
