@@ -21,15 +21,21 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         ret = {}
 
         if self.advance_payment_method == 'proforma':
+            for order in sale_orders:
+                for line in order.order_line:
+                    line.qty_to_invoice = line.product_uom_qty
+
             inv_ids = sale_orders.action_invoice_create(final=True)
             for invoice in self.env['account.invoice'].browse( inv_ids ):
                 invoice.state = 'proforma'
 
+            if self._context.get('open_invoices', False):
+                return sale_orders.action_view_invoice()
+
+            return {'type': 'ir.actions.act_window_close'}
+
         else:
-            ret = super(SaleAdvancePaymentInvoice, self).create_invoice()
+            ret = super(SaleAdvancePaymentInvoice, self).create_invoices()
+            return ret
 
-        if self._context.get('open_invoices', False):
-            return sale_orders.action_view_invoice()
-
-        return {'type': 'ir.actions.act_window_close'}
 
