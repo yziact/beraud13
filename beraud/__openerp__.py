@@ -35,20 +35,17 @@
         'views/analytic_line_task.xml',
         'views/analytic_line_issue.xml',
         'views/internal_invoice.xml',
+        'views/parc_machine.xml',
+        'views/product_category.xml',
 
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
-
         'report/repair/report_mrprepairorder.xml',
-
         'report/stock/report_picking.xml',
         'report/stock/report_shipping2.xml',
-
         'report/sale/report_sale.xml',
         'report/sale/sale_stock.xml',
-
         'report/purchase/report_purchase.xml',
-
         'report/invoice/report_invoice.xml',
         'report/invoice/sale_stock.xml',
     ],

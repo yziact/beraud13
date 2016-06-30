@@ -5,3 +5,4 @@ import product
 import partner
 import sale
 import company
+import parc_machine
