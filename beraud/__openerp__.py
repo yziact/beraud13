@@ -38,6 +38,8 @@
         'views/parc_machine.xml',
         'views/product_category.xml',
 
+        'security/ir.model.access.csv',
+
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
         'report/repair/report_mrprepairorder.xml',
