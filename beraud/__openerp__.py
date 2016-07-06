@@ -37,6 +37,7 @@
         'views/internal_invoice.xml',
         'views/parc_machine.xml',
         'views/product_category.xml',
+        'views/sale_order.xml',
 
         'security/ir.model.access.csv',
 
