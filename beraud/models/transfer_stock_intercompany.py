@@ -63,7 +63,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
         Get the appropriate lines (if any)
         """
         values = super(wizard_transfer_stock_intercompany, self).default_get(fields_list)
-        values['company_dst_id'] = self.env.user.company_id.id
+        # values['company_dst_id'] = self.env.user.company_id.id
         if self.env.context.get('active_id'):
             model = self.env.context.get('active_model')
             lines = []
@@ -128,6 +128,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
 
             values['line_ids'] = lines
 
+        """
         else:
             warehouses = self.env['stock.warehouse'].search([
                 ('company_id', '=', self.env.user.company_id.id),
@@ -138,6 +139,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 ], limit=1)
             if warehouses:
                 values['location_dst_id'] = warehouses.lot_stock_id.id
+        """
 
         return values
 
