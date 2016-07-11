@@ -27,7 +27,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
             inv_ids = sale_orders.action_invoice_create(final=True)
             for invoice in self.env['account.invoice'].browse( inv_ids ):
-                invoice.state = 'proforma'
+                invoice.state = 'proforma2'
 
             if self._context.get('open_invoices', False):
                 return sale_orders.action_view_invoice()
