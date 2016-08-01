@@ -69,3 +69,4 @@ class MailComposeMessage(models.TransientModel):
             res[res_ids[0]].setdefault('attachment_ids', []).extend(
                 self.object_attachment_ids.ids)
         return res
+
