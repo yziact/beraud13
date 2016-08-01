@@ -9,6 +9,12 @@
                 <xpath expr="//field[@name='recurring_invoice']" position="after">
                     <field name="code_douane"/>
                 </xpath>
+                <xpath expr="//field[@name='property_stock_inventory']" position="after">
+                    <field name="casier"/>
+                </xpath>
+                <xpath expr="//field[@name='property_stock_inventory']" position="after">
+                    <field name="allee"/>
+                </xpath>
             </field>
         </record>
     </data>

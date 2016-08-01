@@ -12,6 +12,9 @@ class ProductTemplate(models.Model):
     description_sale = fields.Html('Sale Description',translate=True)
     description_picking = fields.Html('Picking Description', translate=True)
 
+    allee = fields.Char('Allée')
+    casier = fields.Char('Casier')
+
 
 class ProductCategory(models.Model):
     _inherit = "product.category"
