@@ -1,0 +1,15 @@
+<openerp>
+  <data>
+    <report 
+      id="action_report_mrp_repair_order_no_prices" 
+      model="mrp.repair" 
+      string="Ordre de Réparation" 
+      report_type="qweb-pdf"
+      name="beraud.report_no_prices" 
+      attachment_use="False"
+      file="beraud.report_no_prices" 
+      menu="True"
+      />
+  </data>
+</openerp>
+
