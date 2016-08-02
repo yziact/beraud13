@@ -16,8 +16,9 @@
                     </div>
 
                     <h3>
-                        <span t-if="doc.state not in ['draft','sent']">Commande</span>
-                        <span t-if="doc.state in ['draft','sent']">Devis</span>
+                        <span t-if="doc.state not in ['draft','sent']">Bon de Commande # </span>
+                        <span t-if="doc.state in ['draft','sent']">Devis # </span>
+                        <span t-field="doc.name"/>
                     </h3>
 
                     <table class="table table-condensed">
@@ -172,3 +173,4 @@
         </template>
     </data>
 </openerp>
+
