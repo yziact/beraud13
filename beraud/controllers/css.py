@@ -27,6 +27,8 @@ class CssInterface(http.Controller):
             company_background_color = user.company_id.background_color or 'black'
             company_border_color = user.company_id.border_color or 'black'
 
-            css_data = '.navbar-inverse { background-color: '+ company_background_color + '; border-color: '+ company_border_color + '; }'
+            css_data = '.navbar-inverse { background-color: '+ company_background_color + '; border-color: '+ company_border_color + '; }' \
+                    ' .o_web_client {background-color: #333333;} '
 
             return request.make_response(css_data, [('Content-Type', 'text/css')])
+

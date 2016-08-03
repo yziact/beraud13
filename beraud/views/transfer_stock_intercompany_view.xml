@@ -100,11 +100,11 @@
 
 
 
-        <menuitem name="Inter-company stock transfer"
+        <menuitem name="Transfert de stock Inter-societe"
             id="menu_intercompany_stock_transfer"
             parent="beraud.logistique"
             action="action_wizard_transfer_stock_intercompany"
-            sequence="900" />
+            sequence="900"/>
 
     </data>
 </openerp>
