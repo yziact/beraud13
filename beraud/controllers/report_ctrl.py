@@ -13,21 +13,20 @@ class PTReportController(ReportController):
     def report_download(self, data, token):
         #order_obj = http.request.env['sale.order']
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        
+        # only for mrp_repair reports...
+        if ("beraud.report_repair_devis" not in data) and ("beraud.report_no_prices" not in data) :
+            _logger.error("GETTING OUT")
+            return ReportController().report_download(data, token)
 
-        _logger.error("http context is : %s ", http.request.context)
-
-        _logger.error("cr is : %s ", cr)
-        _logger.error("data is : %s ", data)
-        _logger.error("token is : %s ", token)
+        #_logger.error("cr is : %s ", cr)
+        #_logger.error("data is : %s ", data)
         requestcontent = json.loads(data)
         order_obj = http.request.env['mrp.repair']
 
-        _logger.error("data of request : %s", data)
-        _logger.error("type of data of request : %s", type(data))
-        _logger.error("RQ of request : %s", requestcontent)
-        _logger.error("RQ type of request : %s", type(requestcontent))
-        _logger.error("RQ[0] is : %s", requestcontent[0])
-        _logger.error("RQ[1] is : %s", requestcontent[1])
+        #_logger.error("RQ of request : %s", requestcontent)
+        #_logger.error("RQ[0] is : %s", requestcontent[0])
+        #_logger.error("RQ[1] is : %s", requestcontent[1])
         
         url, typ = requestcontent[0], requestcontent[1]
         #url = '/report/pdf/mrp_repair.report_mrprepairorder/1?enable_editor=1'
