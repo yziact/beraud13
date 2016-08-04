@@ -13,13 +13,10 @@ class Export_Journal(models.Model):
 
 #### Fields ####
 
-
-    test_bool = fields.Boolean()
-
-    ber_vente = fields.Boolean("Journal vente Beraud")
-    ber_achat = fields.Boolean("Journal achat Beraud")
-    atm_vente = fields.Boolean("Journal vente Atome ")
-    atm_achat = fields.Boolean("Journal vente Atome")
+    # ber_vente = fields.Boolean("Journal vente Beraud")
+    # ber_achat = fields.Boolean("Journal achat Beraud")
+    # atm_vente = fields.Boolean("Journal vente Atome ")
+    # atm_achat = fields.Boolean("Journal vente Atome")
     date_debut = fields.Date(string="Date debut")
     date_fin = fields.Date(string="Date fin")
 
@@ -35,138 +32,180 @@ class Export_Journal(models.Model):
     file_atm_achat = fields.Char(string='Filename', size=256, readonly=True)
     value_atm_achat = fields.Binary(readonly=True)
 
-    @api.one
-    def action_test(self):
-        self.test_bool = True
 
     @api.multi
-    def action_export(self):
-
-        list_journal = []
+    def action_export(self, journal_id, value, date_debut, date_fin, filename):
         list_row = []
-
-        journal_env = self.env['account.journal']
         account_move_env = self.env['account.move.line']
+        data__line = account_move_env.search([('date', '>=', date_debut), ('date', '<=', date_fin), ('journal_id', '=', journal_id)])
 
-        date = str(datetime.date.today())
+        csvfile = StringIO.StringIO()
 
-        if self.ber_vente:
-            journal_id = journal_env.search([('type', '=', 'sale'), ('company_id', '=', 1)])
-            self.write({'file_ber_vente':"Export Beraud Vente %s" % (date)})
-            list_journal.append({'id': journal_id.id,
-                                 'value': 'value_ber_vente',
-                                 'filename': ' file_ber_vente',
-                                 'name': "Export Beraud Vente %s" % (date),
-                                 })
+        fieldnames = ['Code journal', 'Date de piece', 'No de compte general', 'Intitule compte general', 'No de piece',
+                      'No de facture', 'Reference', 'Reference rapprochement', 'No compte tiers', 'Code taxe', 'Provenance',
+                      'Libelle ecriture', 'Mode de reglement', 'Date d echeance', 'Code ISO devise',
+                      'Montant de la devise', 'Type de norme', 'Sens', 'Montant', 'Montant signe','Montant debit',
+                      'Montant credit', 'Type d ecriture','No de plan analytique', 'No de section', 'Information libre 1']
 
-        if self.ber_achat:
-            journal_id = journal_env.search([('type', 'is', 'purchase'), ('company_id', '=', 1)])
-            self.write({'file_ber_achat': "Export Beraud Achat %s" % (date)})
-            list_journal.append({'id': journal_id.id,
-                                 'value': 'value_ber_achat',
-                                 'filename': ' file_ber_achat',
-                                 'name': "Export Beraud Achat %s" % (date),
-                                 })
-        if self.atm_vente:
-            journal_id = journal_env.search([('type', 'is', 'sale'), ('company_id', '=', 3)])
-            self.write({'file_atm_vente': "Export Atom Vente %s" % (date)})
-            list_journal.append({'id': journal_id.id,
-                                 'value': 'value_atm_vente',
-                                 'filename': ' file_atm_vente',
-                                 'name': "Export Atom Vente %s" % (date),
-                                 })
-        if self.atm_achat:
-            journal_id = journal_env.search([('type', 'is', 'purchase'), ('company_id', '=', 3)])
-            self.write({'file_atm_achat': "Export Atom Achat %s" % (date)})
-            list_journal.append({'id': journal_id.id,
-                                 'value': 'value_atm_achat',
-                                 'filename': ' file_atm_achat',
-                                 'name': "Export Atom Achat %s" % (date),
-                                 })
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+        for line in data__line:
+            montant = str(math.fabs(line.amount_residual))
+            sens = ""
+            note = ""
+            origine = ""
+            if line.invoice_id.origin:
+                origine = line.invoice_id.origin.encode("utf-8")
+            if line.internal_note:
+                note = line.internal_note.encode("utf-8")
+            if line.debit == 0:
+                sens = "C"
+            else:
+                sens = "D"
 
-        for journal in list_journal:
-            data__line = account_move_env.search([('date', '>=', self.date_debut), ('date', '<=', self.date_fin), ('journal_id', '=', journal['id'])])
+            list_row.append({'Code journal': line.journal_id.code[:4].encode("utf-8"),
+                             'Date de piece': line.date.encode("utf-8"),
+                             'No de compte general': line.account_id.code[:8].encode("utf-8"),
+                             'Intitule compte general': line.account_id.name[:40].encode("utf-8"),
+                             'No de piece': str(line.invoice_id.number)[:13],
+                             'No de facture': str(line.invoice_id.number)[:10],
+                             'Reference': origine,
+                             'Reference rapprochement':"",
+                             'No compte tiers': line.partner_id.ref[:20].encode("utf-8"),
+                             'Code taxe': "",#line.tax_line_id.tax_id.description,
+                             'Provenance': "A",
+                             'Libelle ecriture':line.account_id.name.encode("utf-8"),
+                             'Mode de reglement': "",
+                             'Date d echeance': "",
+                             'Code ISO devise': "",
+                             'Montant de la devise': "",
+                             'Type de norme': "D",
+                             'Sens': sens,
+                             'Montant': montant[:12],
+                             'Montant signe': str(line.amount_residual)[:13],
+                             'Montant debit': str(line.debit)[:12],
+                             'Montant credit': str(line.credit)[:12],
+                             'Type d ecriture':"G",
+                             'No de plan analytique':"",
+                             'No de section':"",
+                             'Information libre 1': note,
+                             })
 
-            csvfile = StringIO.StringIO()
-
-            fieldnames = ['Code journal', 'Date de piece', 'No de compte general', 'Intitule compte general', 'No de piece',
-                          'No de facture', 'Reference', 'Reference rapprochement', 'No compte tiers', 'Code taxe', 'Provenance',
-                          'Libelle ecriture', 'Mode de reglement', 'Date d echeance', 'Code ISO devise',
-                          'Montant de la devise', 'Type de norme', 'Sens', 'Montant', 'Montant signe','Montant debit',
-                          'Montant credit', 'Type d ecriture','No de plan analytique', 'No de section', 'Information libre 1']
-
-
-
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
-            writer.writeheader()
-            for line in data__line:
-                montant = str(math.fabs(line.amount_residual))
-                sens = ""
-                note = ""
-                origine = ""
-                if line.invoice_id.origin:
-                    origine = line.invoice_id.origin.encode("utf-8")
-                if line.internal_note:
-                    note = line.internal_note.encode("utf-8")
-                if line.debit == 0:
-                    sens = "C"
-                else:
-                    sens = "D"
-
-                list_row.append({'Code journal': line.journal_id.code[:4].encode("utf-8"),
-                                 'Date de piece': line.date.encode("utf-8"),
-                                 'No de compte general': line.account_id.code[:8].encode("utf-8"),
-                                 'Intitule compte general': line.account_id.name[:40].encode("utf-8"),
-                                 'No de piece': str(line.invoice_id.number)[:13],
-                                 'No de facture': str(line.invoice_id.number)[:10],
-                                 'Reference': origine,
-                                 'Reference rapprochement':"",
-                                 'No compte tiers': line.partner_id.ref[:20].encode("utf-8"),
-                                 'Code taxe': "",#line.tax_line_id.tax_id.description,
-                                 'Provenance': "A",
-                                 'Libelle ecriture':line.account_id.name.encode("utf-8"),
-                                 'Mode de reglement': "",
-                                 'Date d echeance': "",
-                                 'Code ISO devise': "",
-                                 'Montant de la devise': "",
-                                 'Type de norme': "D",
-                                 'Sens': sens,
-                                 'Montant': montant[:12],
-                                 'Montant signe': str(line.amount_residual)[:13],
-                                 'Montant debit': str(line.debit)[:12],
-                                 'Montant credit': str(line.credit)[:12],
-                                 'Type d ecriture':"G",
-                                 'No de plan analytique':"",
-                                 'No de section':"",
-                                 'Information libre 1': note,
-                                 })
-
-            writer.writerows(list_row)
+        writer.writerows(list_row)
         fecvalue = csvfile.getvalue()
         self.write({
-            journal['value']: base64.encodestring(fecvalue),
+            value: base64.encodestring(fecvalue),
+            filename: filename,
         })
         csvfile.close()
+
+
+    @api.multi
+    def action_ber_vente(self):
+        journal_env = self.env['account.journal']
+
+        date = str(datetime.date.today())
+        journal_id = journal_env.search([('type', '=', 'sale'), ('company_id', '=', 1)]).id
+        self.write({'file_ber_vente': "Export Beraud Vente %s" % (date)})
+
+        value = 'value_ber_vente'
+        filename = 'file_ber_vente'
+        name = "Export Beraud Vente %s" %date
+
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename)
 
         action = {
             'name': 'FEC',
             'type': 'ir.actions.act_url',
-            'code' : '',
-            'url': ("web/content/?model=export.csv&id=" + str(
-                self.id) + "&filename_field=%s&field=%s&download=true&filename=%s" % (
-            journal['filename'], journal['value'], journal['name']), "web/content/?model=export.csv&id=" + str(
-                self.id) + "&filename_field=%s&field=%s&download=true&filename=%s" % (
-            journal['filename'], journal['value'], journal['name'])),
+            'url': "web/content/?model=export.ecriture_sage&id=" + str(
+                self.id) + "&filename_field=%s&field=%s&download=true&filename=%s.csv" % (filename, value, name),
+            'target': 'new',
+        }
+
+        return action
+
+    @api.multi
+    def action_ber_achat(self):
+        journal_env = self.env['account.journal']
+
+        date = str(datetime.date.today())
+        journal_id = journal_env.search([('type', 'is', 'purchase'), ('company_id', '=', 1)]).id
+        self.write({'file_ber_achat': "Export Beraud Achat %s" % (date)})
+
+        value = 'value_ber_achat'
+        filename = 'file_ber_achat'
+        name = "Export Beraud Achat %s" % date
+
+        self.action_export(journal_id, value, self.date_debut, self.date_fin)
+
+        action = {
+            'name': 'FEC',
+            'type': 'ir.actions.act_url',
+            'code': '',
+            'url': "web/content/?model=export.ecriture_sage&id=" + str(
+                self.id) + "&filename_field=%s&field=%s&download=true&filename=%s.csv" % (filename, value, name),
+            'target': 'new',
+        }
+
+        return action
+
+    @api.multi
+    def action_atm_vente(self):
+        journal_env = self.env['account.journal']
+
+        date = str(datetime.date.today())
+        journal_id = journal_env.search([('type', 'is', 'sale'), ('company_id', '=', 3)]).id
+        self.write({'file_atm_vente': "Export Atom Vente %s" % (date)})
+
+        value = 'value_atm_vente'
+        filename = 'file_atm_vente'
+        name = "Export Atom Vente %s" % date
+
+        self.action_export(journal_id, value, self.date_debut, self.date_fin)
+
+        action = {
+            'name': 'FEC',
+            'type': 'ir.actions.act_url',
+            'code': '',
+            'url': "web/content/?model=export.ecriture_sage&id=" + str(
+                self.id) + "&filename_field=%s&field=%s&download=true&filename=%s.csv" % (filename, value, name),
+            'target': 'new',
+        }
+
+        return action
+
+    @api.multi
+    def action_atm_achat(self):
+        journal_env = self.env['account.journal']
+
+        date = str(datetime.date.today())
+        journal_id = journal_env.search([('type', 'is', 'purchase'), ('company_id', '=', 3)]).id
+        self.write({'file_atm_achat': "Export Atom Achat %s" % (date)})
+
+        value = 'value_atm_achat'
+        filename = 'file_atm_achat'
+        name = "Export Atom Achat %s" % date
+
+        self.action_export(journal_id, value, self.date_debut, self.date_fin)
+
+        action = {
+            'name': 'FEC',
+            'type': 'ir.actions.act_url',
+            'code': '',
+            'url': "web/content/?model=export.ecriture_sage&id=" + str(
+                self.id) + "&filename_field=%s&field=%s&download=true&filename=%s.csv" % (filename, value, name),
             'target': 'new',
         }
 
         return action
 
 
-class Inherit_Account_Move_Line(models.Model):
-    _inherit ="account.move.line"
 
-    been_export = fields.Boolean()
+
+
+
+
+
 
 # class Export_Tiers(models.Model):
 #     _inherit = 'res.partner'

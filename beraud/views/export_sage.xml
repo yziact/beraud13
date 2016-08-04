@@ -1,0 +1,86 @@
+<openerp>
+    <data>
+        <record id="export_sage"  model="ir.ui.view">
+            <field name="name">Export Sage</field>
+            <field name="model">export.ecriture_sage</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group name="date">
+                        <field name="date_debut"/>
+                        <field name="date_fin"/>
+                    </group>
+                    <!--group name="checkbox">
+                        <group name="beraud">
+                            <field name="ber_vente"/>
+                            <field name="ber_achat"/>
+                        </group>
+                        <group name="atom">
+                            <field name="atm_vente"/>
+                            <field name="atm_achat"/>
+                        </group>
+                    </group-->
+                    <group>
+                        <button  name="action_ber_vente" string="Export ber_vente" type="object" class="btn btn-success" attrs="{'invisible': ['|',('date_fin','=',False),('date_debut','=',False)]}"/>
+                        <button  name="action_ber_achat" string="Export ber_achat" type="object" class="btn-success" attrs="{'invisible': ['|',('date_fin','=',False),('date_debut','=',False)]}"/>
+                        <button  name="action_atm_vente" string="Export atm_vente" type="object" class="btn-success" attrs="{'invisible': ['|',('date_fin','=',False),('date_debut','=',False)]}"/>
+                        <button  name="action_atm_achat" string="Export atm_achat" type="object" class="btn-success" attrs="{'invisible': ['|',('date_fin','=',False),('date_debut','=',False)]}"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_export_sage" model="ir.actions.act_window">
+            <field name="name">perform Export Sage</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">export.ecriture_sage</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="export_sage"/>
+            <field name="target">new</field>
+        </record>
+
+        <record model="ir.actions.server" id="action_test">
+            <field name="name">Action_mu</field>
+            <field name="model_id" ref="model_export_ecriture_sage"/>
+            <!--<field name="condition">test_bool</field>-->
+            <field name="code">
+                if self.test_bool:
+                    print "MU"
+            </field>
+        </record>
+
+
+        <act_window id="act_wizard_export_sage"
+                    name="Perform export"
+                    res_model="export.ecriture_sage"
+                    src_model="export.ecriture_sage"
+                    view_id="export_sage"
+                    target="new"
+        />
+        <!--parent="base.menu_accouting_root"-->
+        <menuitem name="Export Sage" id="menu_exort_sage" action="action_wizard_export_sage" groups="base.group_user" parent="account.menu_finance"/>
+    </data>
+</openerp>
+
+<!--
+
+<record id="ir_actions_server_timsheet_sheet" model="ir.actions.server">
+            <field name="sequence" eval="5"/>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_hr_timesheet_current_open"/>
+            <field name="code">action = pool.get('hr.timesheet.current.open').open_timesheet(cr, uid, None, context)</field>
+            <field name="condition">True</field>
+            <field name="name">My Timesheet</field>
+        </record>
+
+
+ <record id="contract_set_as_pending" model="ir.actions.server">
+            <field name="name">HR Contract: set as pending</field>
+            <field name="model_id" ref="model_hr_contract"/>
+            <field name="condition">True</field>
+            <field name="type">ir.actions.server</field>
+            <field name="state">code</field>
+            <field name="code">object.set_as_pending()</field>
+        </record>
+
+-->

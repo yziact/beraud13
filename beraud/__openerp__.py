@@ -39,6 +39,7 @@
         'views/product_category.xml',
         'views/sale_order.xml',
         'views/invoice_view.xml',
+        'views/export_sage.xml',
 
         'security/ir.model.access.csv',
 
