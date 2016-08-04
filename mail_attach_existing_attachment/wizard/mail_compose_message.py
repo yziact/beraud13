@@ -38,28 +38,10 @@ class MailComposeMessage(models.TransientModel):
             res['can_attach_attachment'] = True  # pragma: no cover
         return res
 
-    @api.model
-    def _get_attach_domain(self):
-        IDS = []
-        if self.env.context.get('active_model', False):
-            if self.env.context.get('active_id', False):
-                obj = self.env[ self.env.context.get('active_model') ].browse( self.env.context.get('active_id') )
-
-                if obj.order_line:
-                    for line in obj.order_line:
-                        attachments = self.env['ir.attachment'].search([('res_model', '=', 'product.product'), ('res_id', '=', line.product_id.id)])
-                        IDS += attachments.ids
-
-                attachments = self.env['ir.attachment'].search([('res_model', '=', 'sale.order'), ('res_id', '=', obj.id)])
-                IDS += attachments.ids
-
-        return [('id', 'in', IDS)]
-
     can_attach_attachment = fields.Boolean(string='Can Attach Attachment')
     object_attachment_ids = fields.Many2many(
         comodel_name='ir.attachment',
         relation='mail_compose_message_ir_attachments_object_rel',
-        domain=_get_attach_domain,
         column1='wizard_id', column2='attachment_id', string='Attachments')
 
     @api.multi
@@ -69,4 +51,3 @@ class MailComposeMessage(models.TransientModel):
             res[res_ids[0]].setdefault('attachment_ids', []).extend(
                 self.object_attachment_ids.ids)
         return res
-
