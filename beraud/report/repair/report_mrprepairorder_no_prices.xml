@@ -17,8 +17,11 @@
                   </div>
                 </div>
 
-                <h3 t-if="o.state != 'draft'">Repair Order</h3>
-                <h3 t-if="o.state == 'draft'">Repair Quotation</h3>
+                <h3>
+                  <span t-if="o.state != 'draft'">Ordre de Réparation # </span>
+                  <span t-if="o.state == 'draft'">Ordre de Réparation # </span>
+                  <span t-field="o.name" />
+                </h3>
 
                 <table class="table table-condensed">
                   <thead>
@@ -33,13 +36,13 @@
                         <strong>Client:</strong>
                       </td>
                       <td>
-                        <strong>Product to Repair:</strong>
+                        <strong>Produit à Réparer :</strong>
                       </td>
                       <td>
-                        <strong>Lot Number</strong>
+                        <strong>Numéro de Lot :</strong>
                       </td>
                       <td>
-                        <strong>Guarantee Limit:</strong>
+                        <strong>Limite de Garantie :</strong>
                       </td>
                       <td t-if="o.partner_id.user_id">
                         <span><span><strong>Commercial: </strong></span><span t-field="o.partner_id.user_id.name"/> / <span t-field="o.partner_id.user_id.email"/></span>
@@ -101,19 +104,19 @@
                     <tr>
                       <th>Description</th>
                       <!-- <th class="text-center">Tax</th> -->
-                      <th class="text-right">Quantity</th>
+                      <th class="text-right">Quantité</th>
                       <!-- <th class="text-right">Unit Price</th> -->
                       <!-- <th class="text-right">Price</th> -->
                     </tr>
                   </thead>
                   <tbody>
                     <t t-if="o.operations">
-                      <tr><td colspan="5"><strong>Operation Line(s)</strong></td></tr>
+                      <tr><td colspan="5"><strong>Ligne(s) d'Opération(s) :</strong></td></tr>
                       <tr t-foreach="o.operations" t-as="line">
                         <t t-if="(line.to_invoice is True)">
                           <td>
-                            <p t-if="line.type == 'add'"><i>(Add)</i> <span t-field="line.name" /></p>
-                            <p t-if="line.type == 'remove'">(<i>Remove</i>) <span t-field="line.name"/></p>
+                            <p t-if="line.type == 'add'"><i>(Ajouter)</i> <span t-field="line.name" /></p>
+                            <p t-if="line.type == 'remove'">(<i>Supprimer</i>) <span t-field="line.name"/></p>
                           </td>
                           <!-- 
                           <td class="text-center">
@@ -139,7 +142,7 @@
                       </tr>
                     </t>
                     <t t-if="o.fees_lines">
-                      <tr><td colspan="5"><strong>Fees Line(s)</strong></td></tr>
+                      <tr><td colspan="5"><strong>Ligne(s) d'Honoraire(s) :</strong></td></tr>
                       <tr t-foreach="o.fees_lines" t-as="fees">
                         <t t-if="fees.to_invoice is True">
                           <td>

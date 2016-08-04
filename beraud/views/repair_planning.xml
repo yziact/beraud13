@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record model="ir.ui.view" id="repair_calendar_view_id">
+      <field name="name">Beraud Repair Calendar</field>
+      <field name="model">mrp.repair</field>
+      <field name="arch" type="xml">
+        <calendar string="Calendrier des Réparations" date_stop="end_date" date_start="start_date"
+          create="False"
+          quick_add="False"
+          date_delay="duration" >
+          <field name="name"/>
+        </calendar>
+      </field>
+    </record>
+
+    <!-- <record id="action_calendar_event_notify" model="ir.actions.act_window"> -->
+    <record id="mrp_repair.action_repair_order_tree" model="ir.actions.act_window">
+      <field name="name">Meetings</field>
+      <field name="res_model">mrp.repair</field>
+      <field name="view_mode">tree,form,calendar</field>
+    </record>
+
+    <!--
+    <calendar string="Meetings" date_start="start" date_stop="stop" date_delay="duration" 
+      display="[name]" color="color_partner_id" attendee="partner_ids" avatar_model="res.partner"
+      use_contacts="True" event_open_popup="%(calendar.view_calendar_event_form_popup)s">
+    -->
+
+  </data>
+</openerp>
+
