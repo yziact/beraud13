@@ -4,8 +4,8 @@
     <!--
     <template id="mrp_repair.report_mrprepairorder"> 
       <t t-name="mrp_repair.report_mrprepairorder"> -->
-    <template id="beraud.report_repair_devis"> 
-      <t t-name="beraud.report_repair_devis">
+    <template id="report_repair_devis"> 
+      <t t-name="report_repair_devis">
         <t t-call="report.html_container">
           <t t-foreach="docs" t-as="o">
             <t t-call="report.external_layout">
