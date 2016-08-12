@@ -15,8 +15,10 @@ class PTReportController(ReportController):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
         
         # only for mrp_repair reports...
-        if ("beraud.report_repair_devis" not in data) and ("beraud.report_no_prices" not in data) :
-            _logger.error("GETTING OUT")
+        #if ("beraud.report_repair_devis" not in data) and ("beraud.report_no_prices" not in data) :
+        if (("module_reparations.report_repair_devis" not in data) and
+                ("module_reparations.report_no_prices" not in data)) :
+            #_logger.info("returning unaltered view")
             return ReportController().report_download(data, token)
 
         #_logger.error("cr is : %s ", cr)
@@ -33,24 +35,22 @@ class PTReportController(ReportController):
         #type = 'qweb-pdf'
         #assert type == 'qweb-pdf'
 
-        _logger.error("url is : %s", url)
         reportname = url.split('/report/pdf/')[1].split('?')[0]
         # reportname = u'sale.report_saleorder/37'
         reportname, doc_id = reportname.split('/')
         # reportname = u'sale.report_saleorder'
         # docids = 37
-        #assert doc_id
-        _logger.error("doc id is : %s", doc_id)
-        _logger.error("reportname is : %s", reportname)
+        #_logger.error("doc id is : %s", doc_id)
+        #_logger.error("reportname is : %s", reportname)
         doc_obj = order_obj.browse(int(doc_id))
 
         # get name of report as it is displayed on the pdf
         report = request.registry['report']._get_report_from_name(cr, uid, reportname)
-        _logger.error("report.name is : %s", report.name)
+        #_logger.error("report.name is : %s", report.name)
 
         # doc_obj.name is Sequence
         filename = report.name + ' - ' + doc_obj.name
-        _logger.error("Filename is : %s", filename)
+        #_logger.error("Filename is : %s", filename)
 
         response = ReportController().report_download(data, token)
         response.headers.set('Content-Disposition', 'attachment; filename=%s.pdf;' % filename)

@@ -10,27 +10,26 @@ class MrpRepair(models.Model):
     _inherit = 'mrp.repair'
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False,
-                        submenu=False):
+    def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         """ enlever le menu du rapport par défaut.  """
+
         res = super(MrpRepair, self).fields_view_get(
             view_id=view_id, view_type=view_type, toolbar=toolbar,
             submenu=submenu)
-        report_quotation = self.env.ref(
-                'mrp_repair.action_report_mrp_repair_order')
-        #_logger.error("report_quotation xml_id : %s", report_quotation.xml_id)
-        #_logger.error("report_quotation id : %s", report_quotation.id)
+
+        if not res.get('toolbar', {}).get('print', []):
+            _logger.error('print menu empty, returning unaltered view.')
+            return res
 
         #view_id = self.env['ir.model.data'].xmlid_to_res_id('mrp_repair.action_report_mrp_repair_order')
-        #_logger.error("VIEW ID 1 : %s", view_id)
+        report_quotation = self.env.ref('mrp_repair.action_report_mrp_repair_order')
 
-        #_logger.error("res toolbar print : %s", res['toolbar']['print'])
-        for print_submenu in res.get('toolbar', {}).get('print', []):
-            #_logger.error("print submenu : %s", print_submenu)
-            if print_submenu['id'] == report_quotation.id:
-                res['toolbar']['print'].remove(print_submenu)
+        #_logger.error("report_quotation xml_id : %s", report_quotation.xml_id)
+        #_logger.error("Report Quotation ID is : %s ", report_quotation.id)
 
-        return res
+        res['toolbar']['print'] = [dict(t) for t in res.get('toolbar', {}).get('print', []) if t['id'] != report_quotation.id]
+
+        return res 
 
     # not visible to the model until created, but exists in db
     create_date = fields.Datetime('Create Date', readonly=True)
