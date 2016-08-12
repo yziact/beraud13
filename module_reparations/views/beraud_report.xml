@@ -6,8 +6,8 @@
       model="mrp.repair" 
       string="Devis de Réparation"
       report_type="qweb-pdf"
-      name="beraud.report_repair_devis" 
-      file="beraud.report_repair_devis" 
+      name="module_reparations.report_repair_devis" 
+      file="module_reparations.report_repair_devis" 
       attachment_use="False"
       menu="True"
       />
@@ -17,8 +17,8 @@
       model="mrp.repair" 
       string="Ordre de Réparation" 
       report_type="qweb-pdf"
-      name="beraud.report_no_prices" 
-      file="beraud.report_no_prices" 
+      name="module_reparations.report_no_prices" 
+      file="module_reparations.report_no_prices" 
       attachment_use="False"
       menu="True"
       />
