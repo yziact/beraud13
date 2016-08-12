@@ -1,0 +1,37 @@
+<openerp>
+    <data>
+        <record id="export_tier"  model="ir.ui.view">
+            <field name="name">Export Tier</field>
+            <field name="model">export.tier</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <button  name="action_tier_ber" string="Export Tier Beraud" type="object" class="btn btn-success" icon="fa-download"/>
+                    </group>
+                    <group>
+                         <button  name="action_tier_atm" string="Export Tier Atom" type="object" class="btn-success" icon="fa-download"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_export_tier" model="ir.actions.act_window">
+            <field name="name">Export Tier</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">export.tier</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="export_tier"/>
+            <field name="target">new</field>
+        </record>
+
+        <act_window id="act_wizard_export_sage"
+                    name="Perform export"
+                    res_model="export.tier"
+                    src_model="export.tier"
+                    view_id="export_tier"
+                    target="new"
+        />
+        <!--parent="base.menu_accouting_root"-->
+        <menuitem name="Export Tier" id="menu_export_tier" action="action_wizard_export_tier" groups="base.group_user" parent="mail.menu_contacts"/>
+    </data>
+</openerp>
