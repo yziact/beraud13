@@ -34,6 +34,7 @@
     <record id="seq_purchase_order_b" model="ir.sequence">
       <field name="company_id" eval="1"/>
       <field name="name">Purchase Orders</field>
+      <field name="name">Purchase Orders</field>
       <field name="code">purchase.order</field>
       <field name="prefix">ACB</field>
       <field name="padding">5</field>
