@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+
+    <!-- company id : 1 pour BERAUD, 3 pour ATOM -->
+    <!-- id has to be unique (not overwrite the 'original one') -->
+
+    <!-- Sequences for sale.order -->
+    <record id="seq_sale_order_a" model="ir.sequence">
+      <field name="company_id" eval="3"/>
+      <field name="name">Sales Order</field>
+      <field name="code">sale.order</field>
+      <field name="prefix">VEA</field>
+      <field name="padding">5</field>
+    </record>
+
+    <record id="seq_sale_order_b" model="ir.sequence">
+      <field name="company_id" eval="1"/>
+      <field name="name">Sale Orders</field>
+      <field name="code">sale.order</field>
+      <field name="prefix">VEB</field>
+      <field name="padding">5</field>
+    </record>
+
+    <!-- Sequences for purchase.order -->
+    <record id="seq_purchase_order_a" model="ir.sequence">
+      <field name="company_id" eval="3"/>
+      <field name="name">Purchase Orders</field>
+      <field name="code">purchase.order</field>
+      <field name="prefix">ACA</field>
+      <field name="padding">5</field>
+    </record>
+
+    <record id="seq_purchase_order_b" model="ir.sequence">
+      <field name="company_id" eval="1"/>
+      <field name="name">Purchase Orders</field>
+      <field name="code">purchase.order</field>
+      <field name="prefix">ACB</field>
+      <field name="padding">5</field>
+    </record>
+
+  </data>
+</openerp>
+
+

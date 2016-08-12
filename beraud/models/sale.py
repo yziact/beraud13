@@ -6,8 +6,7 @@ import datetime
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    name = fields.Html(string='Description', required=True)
-
+    name = fields.Html(string='Description', required=True, default_focus=True)
 
 
 class SaleAdvancePaymentInvoice(models.TransientModel):
