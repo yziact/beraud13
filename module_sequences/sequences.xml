@@ -5,7 +5,7 @@
     <!-- company id : 1 pour BERAUD, 3 pour ATOM -->
     <!-- id has to be unique (not overwrite the 'original one') -->
 
-    <!-- Sequences for sale.order -->
+    <!-- Sequences for Sale Orders -->
     <record id="seq_sale_order_a" model="ir.sequence">
       <field name="company_id" eval="3"/>
       <field name="name">Sales Order</field>
@@ -22,7 +22,7 @@
       <field name="padding">5</field>
     </record>
 
-    <!-- Sequences for purchase.order -->
+    <!-- Sequences for Purchase Orders -->
     <record id="seq_purchase_order_a" model="ir.sequence">
       <field name="company_id" eval="3"/>
       <field name="name">Purchase Orders</field>
@@ -37,6 +37,23 @@
       <field name="name">Purchase Orders</field>
       <field name="code">purchase.order</field>
       <field name="prefix">ACB</field>
+      <field name="padding">5</field>
+    </record>
+
+    <!-- Sequences for Repair Orders -->
+    <record id="seq_repair_order_a" model="ir.sequence">
+      <field name="company_id" eval="3"/>
+      <field name="name">Repair Orders</field>
+      <field name="code">mrp.repair</field>
+      <field name="prefix">ORA</field>
+      <field name="padding">5</field>
+    </record>
+
+    <record id="seq_repair_order_b" model="ir.sequence">
+      <field name="company_id" eval="1"/>
+      <field name="name">Repair Orders</field>
+      <field name="code">mrp.repair</field>
+      <field name="prefix">ORB</field>
       <field name="padding">5</field>
     </record>
 
