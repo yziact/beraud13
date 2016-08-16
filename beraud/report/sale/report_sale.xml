@@ -20,6 +20,10 @@
                         <span t-if="doc.state in ['draft','sent']">Devis # </span>
                         <span t-field="doc.name"/>
                     </h3>
+                    <h6>
+                      <strong>Ref. Client :</strong>
+                      <span t-field="doc.partner_id.ref"/>
+                    </h6>
 
                     <table class="table table-condensed">
                         <thead>
@@ -30,9 +34,11 @@
                                 <td>
                                     <strong>Numero </strong>
                                 </td>
+                                <!--
                                 <td>
                                     <strong>Code client</strong>
                                 </td>
+                                -->
                                 <td name="ref_client_head" t-if="doc.client_order_ref">
                                     <strong>V/Ref.</strong>
                                 </td>
@@ -49,9 +55,11 @@
                                 <td>
                                     <span t-field="doc.name"/>
                                 </td>
+                                <!--
                                 <td>
                                     <span t-field="doc.partner_id.ref"/>
                                 </td>
+                                -->
                                 <td name="ref_client_data" t-if="doc.client_order_ref">
                                     <p t-field="doc.client_order_ref"/>
                                 </td>
