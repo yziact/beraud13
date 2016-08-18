@@ -16,7 +16,7 @@
                     </div>
 
                     <h3>
-                        <span t-if="doc.state not in ['draft','sent']">Bon de Commande # </span>
+                        <span t-if="doc.state not in ['draft','sent']">Confirmation de Commande # </span>
                         <span t-if="doc.state in ['draft','sent']">Devis # </span>
                         <span t-field="doc.name"/>
                     </h3>

@@ -13,40 +13,34 @@ class PTReportController(ReportController):
     def report_download(self, data, token):
         #order_obj = http.request.env['sale.order']
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+
+        reports_list = ['module_reparations.report_repair_devis',
+                        'module_reparations.report_no_prices']
         
-        # only for mrp_repair reports...
-        #if ("beraud.report_repair_devis" not in data) and ("beraud.report_no_prices" not in data) :
-        if (("module_reparations.report_repair_devis" not in data) and
-                ("module_reparations.report_no_prices" not in data)) :
-            #_logger.info("returning unaltered view")
+        _logger.error("/report/download route.")
+
+        to_rename = False
+        for report in reports_list :
+            if report in data :
+                to_rename = True
+
+        if not to_rename :
+            _logger.error("Report not listed for rename, returning.")
+            _logger.error("data received was : %s", data)
             return ReportController().report_download(data, token)
 
         #_logger.error("cr is : %s ", cr)
         #_logger.error("data is : %s ", data)
         requestcontent = json.loads(data)
-        order_obj = http.request.env['mrp.repair']
-
-        #_logger.error("RQ of request : %s", requestcontent)
-        #_logger.error("RQ[0] is : %s", requestcontent[0])
-        #_logger.error("RQ[1] is : %s", requestcontent[1])
-        
         url, typ = requestcontent[0], requestcontent[1]
-        #url = '/report/pdf/mrp_repair.report_mrprepairorder/1?enable_editor=1'
-        #type = 'qweb-pdf'
-        #assert type == 'qweb-pdf'
-
-        reportname = url.split('/report/pdf/')[1].split('?')[0]
         # reportname = u'sale.report_saleorder/37'
+        reportname = url.split('/report/pdf/')[1].split('?')[0]
         reportname, doc_id = reportname.split('/')
-        # reportname = u'sale.report_saleorder'
-        # docids = 37
-        #_logger.error("doc id is : %s", doc_id)
-        #_logger.error("reportname is : %s", reportname)
-        doc_obj = order_obj.browse(int(doc_id))
 
-        # get name of report as it is displayed on the pdf
+        # get report object and model object. And document object (?) need it for the id
         report = request.registry['report']._get_report_from_name(cr, uid, reportname)
-        #_logger.error("report.name is : %s", report.name)
+        model_obj = http.request.env[report.model]
+        doc_obj = model_obj.browse(int(doc_id))
 
         # doc_obj.name is Sequence
         filename = report.name + ' - ' + doc_obj.name

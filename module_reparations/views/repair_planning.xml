@@ -46,7 +46,7 @@
     </record>
 
     <!-- TREE VIEW -->
-    <!-- works fine, but not needed -->
+    <!-- works fine, but not needed 
     <record model="ir.ui.view" id="view_tree_inherited">
       <field name="name">Repair Tree View</field>
       <field name="model">mrp.repair</field>
@@ -57,7 +57,7 @@
           <attribute name="colors">red:state=='draft'</attribute>
         </tree>
       </field>
-    </record>
+    </record> -->
 
     <!-- ACTION -->
     <!-- id format important to inherit from mrp.repair original action -->
