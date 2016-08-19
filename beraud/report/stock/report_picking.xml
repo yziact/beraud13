@@ -36,7 +36,12 @@
                             </div>
                         </div>
                         <h3>
-                            <span t-field="o.name"/>
+                            <t t-if="o.picking_type_id.name=='Livraisons'">
+                                <span>Bon de Livraison N°</span><span t-field="o.name"/>
+                            </t>
+                            <t t-if="o.picking_type_id.id in [1, 7]">
+                                <span>Bon de Reception N°</span><span t-field="o.name"/>
+                            </t>
                         </h3>
                         <div class="row" id="contact" t-if="o.sale_id.partner_id.user_id">
                             <!-- Ajout des coordonnées du contact qui a créé le document -->
@@ -130,4 +135,13 @@
             </t>
         </t>
     </template>
+
+    <report
+            string="Operations de Transfert"
+            id="action_report_picking"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="stock.report_picking"
+            file="stock.report_picking_operations"
+        />
 </odoo>

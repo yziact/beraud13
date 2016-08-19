@@ -3,6 +3,7 @@
             <xpath expr="//th[@name='td_sched_date_h']" position="after">
                 <th><strong>Votre référence</strong></th>
                 <th t-if="o.picking_type_id.code == 'outgoing'"><strong>Carrier</strong></th>
+                <th t-if="o.sale_id.incoterm.id"><strong>Incoterm</strong></th>
                 <th><strong>Weight</strong></th>
             </xpath>
             <xpath expr="//td[@name='td_sched_date']" position="after">
@@ -11,6 +12,9 @@
                 </td>
                 <td t-if="o.picking_type_id.code == 'outgoing'">
                     <span t-field="o.carrier_id.partner_id.name"/>
+                </td>
+                <td t-if="o.sale_id.incoterm.id">
+                    <span t-field="o.sale_id.incoterm.name"/>
                 </td>
                 <td>
                     <span t-field="o.weight"/>
