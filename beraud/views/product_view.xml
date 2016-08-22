@@ -15,8 +15,13 @@
                 <xpath expr="//field[@name='property_stock_inventory']" position="after">
                     <field name="allee"/>
                 </xpath>
+                <xpath expr="//div[@name='volume']" position="after">
+                    <label for="nb_palette" string="Nombre de palettes"/>
+                    <div class="o_row">
+                        <field name="nb_palette"/>
+                    </div>
+                </xpath>
             </field>
         </record>
     </data>
 </openerp>
-
