@@ -15,6 +15,8 @@ class ProductTemplate(models.Model):
     allee = fields.Char('Allée')
     casier = fields.Char('Casier')
 
+    create_date = fields.Datetime('Create Date', readonly=True)
+
 
 class ProductCategory(models.Model):
     _inherit = "product.category"

@@ -1,5 +1,29 @@
 <openerp>
     <data>
+
+        <record id="product_template_tree_view" model="ir.ui.view">
+            <field name="name">product.template.tree.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="state" position="after">
+                    <field name="create_date"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- works in point_of_sale_view
+        <record id="product_template_tree_view" model="ir.ui.view">
+            <field name="name">product.template.tree.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="sequence" widget="handle" />
+                </field>
+            </field>
+        </record> -->
+
         <record id="beraud.stock_logistique_tree_view" model="ir.ui.view">
             <field name="name">stock_logistique_tree_view</field>
             <field name="model">stock.view.logistique</field>
@@ -44,6 +68,7 @@
         <menuitem name="Niveau Stock" id="beraud.logistique" parent="stock.menu_stock_root"/>
         <menuitem name="Niveau Stock" id="beraud.logistique_level" parent="beraud.logistique"
                   action="beraud.action_logistique_tree_view"/>
+
     </data>
 </openerp>
 
