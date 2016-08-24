@@ -17,10 +17,9 @@ class PurchaseOrder(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar,
             submenu=submenu)
 
-        _logger.error('Purchase Order Fields View Get')
-
+        #_logger.error('Purchase Order Fields View Get')
         if not res.get('toolbar', {}).get('print', []):
-            _logger.error('print menu empty, returning unaltered view.')
+            #_logger.error('print menu empty, returning unaltered view.')
             return res
 
         # this is for removal of the reports instead of the actions. Also removes the whole print menu it seems.
@@ -28,12 +27,7 @@ class PurchaseOrder(models.Model):
         report_id_list = []
         report_id_list.append(self.env['report']._get_report_from_name('purchase.report_purchaseorder').id)
         report_id_list.append(self.env['report']._get_report_from_name('purchase.report_purchasequotation').id)
-        _logger.error('\n\n report id list : %s', report_id_list)
 
-        for t in res.get('toolbar', {}).get('print', []):
-            _logger.error('t id : %s', t['id'])
-
-        #res['toolbar']['print'] = [dict(t) for t in res.get('toolbar', {}).get('print', []) if t['id'] != report_quotation.id]
         res['toolbar']['print'] = [dict(t) for t in res.get('toolbar', {}).get('print', []) if t['id'] not in report_id_list]
 
         return res 

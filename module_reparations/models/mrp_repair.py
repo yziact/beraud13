@@ -18,7 +18,7 @@ class MrpRepair(models.Model):
             submenu=submenu)
 
         if not res.get('toolbar', {}).get('print', []):
-            _logger.error('print menu empty, returning unaltered view.')
+            #_logger.error('print menu empty, returning unaltered view.')
             return res
 
         #view_id = self.env['ir.model.data'].xmlid_to_res_id('mrp_repair.action_report_mrp_repair_order')
@@ -42,6 +42,7 @@ class MrpRepair(models.Model):
     #end_date = fields.Datetime(string="End Date", required=True, store=True, compute='_get_end_date', inverse='_set_end_date', help="Date prévue de la fin de la réparation")
     end_date = fields.Datetime(string="Date de fin", required=True, store=True, help="Date prévue de la fin de la réparation")
 
+"""
     @api.depends('date_start', 'end_date')
     def _get_duration(self):
         for r in self:
@@ -64,4 +65,6 @@ class MrpRepair(models.Model):
     def char_to_td(self):
         """ takes char, returns timedelta """
         pass
+
+"""
 

@@ -17,20 +17,16 @@ class PTReportController(ReportController):
         reports_list = ['module_reparations.report_repair_devis',
                         'module_reparations.report_no_prices']
         
-        _logger.error("/report/download route.")
-
         to_rename = False
         for report in reports_list :
             if report in data :
                 to_rename = True
 
         if not to_rename :
-            _logger.error("Report not listed for rename, returning.")
-            _logger.error("data received was : %s", data)
+            #_logger.error("Report not listed for rename, returning.")
+            #_logger.error("data received was : %s", data)
             return ReportController().report_download(data, token)
 
-        #_logger.error("cr is : %s ", cr)
-        #_logger.error("data is : %s ", data)
         requestcontent = json.loads(data)
         url, typ = requestcontent[0], requestcontent[1]
         # reportname = u'sale.report_saleorder/37'
