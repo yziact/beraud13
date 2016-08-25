@@ -138,4 +138,3 @@ class stock_warehouse(models.Model):
         }
         super(stock_warehouse, self).write(cr, uid, warehouse.id, vals=vals, context=context)
 
-

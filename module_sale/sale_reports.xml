@@ -1,0 +1,18 @@
+<openerp>
+  <data>
+
+    <report 
+      id="action_report_module_sale_my_sale_order"
+      model="sale.order" 
+      string="Report des Ventes"
+      report_type="qweb-pdf"
+      name="module_sale.report_mysaleorder" 
+      file="module_sale.report_mysaleorder" 
+      attachment_use="False"
+      menu="True"
+      />
+
+  </data>
+</openerp>
+
+
