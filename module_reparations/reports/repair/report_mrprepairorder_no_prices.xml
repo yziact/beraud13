@@ -23,7 +23,7 @@
                   <span t-field="o.name" />
                 </h3>
 
-                <table class="table table-condensed">
+                <table class="table table-condensed table-bordered">
                   <thead>
                     <tr>
                       <td>

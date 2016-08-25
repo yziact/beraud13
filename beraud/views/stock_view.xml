@@ -65,8 +65,8 @@
             <field name="context">{'search_default_company':1}</field>
         </record>
 
-        <menuitem name="Niveau Stock" id="beraud.logistique" parent="stock.menu_stock_root"/>
-        <menuitem name="Niveau Stock" id="beraud.logistique_level" parent="beraud.logistique"
+        <!--<menuitem name="Niveau Stock" id="beraud.logistique" parent="stock.menu_stock_root"/>-->
+        <menuitem name="Niveau Stock" id="beraud.logistique_level" parent="stock.menu_stock_inventory_control"
                   action="beraud.action_logistique_tree_view"/>
 
     </data>

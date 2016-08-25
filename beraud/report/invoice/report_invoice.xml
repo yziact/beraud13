@@ -31,7 +31,7 @@
                         <span t-if="o.type == 'in_invoice'">Vendor Bill: </span>
                     </h2>
 
-                    <table class="table table-condensed">
+                    <table class="table table-condensed table-bordered">
                         <thead>
                             <tr>
                                 <td t-if="o.date_invoice">

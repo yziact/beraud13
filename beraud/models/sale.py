@@ -1,6 +1,7 @@
 # -*- Encoding: UTF-8 -*-
 
 from openerp import models, api, fields
+from lxml import etree
 import datetime
 
 class SaleOrderLine(models.Model):
@@ -38,3 +39,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
             return ret
 
 
+class SaleOrderInherit(models.Model):
+    _inherit = "sale.order"
+
+    contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})

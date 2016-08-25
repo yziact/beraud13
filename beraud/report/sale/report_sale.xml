@@ -6,12 +6,21 @@
                 <div class="page" style="font-size:11px;">
                     <div class="oe_structure"/>
                     <div class="row">
-                        <div class="col-xs-6 col-xs-offset-6">
-                            <div t-field="doc.partner_id"
+                        <div class="col-xs-3">
+                            <span><strong>Adresse de livraison : </strong></span>
+                            <div t-field="doc.partner_shipping_id"
                                  t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
-                            <span t-if="doc.partner_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
-                            <span t-if="doc.partner_id.fax"> - Fax: </span><span
-                                t-field="doc.partner_id.fax"/>
+                            <span t-if="doc.partner_shipping_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
+                            <span t-if="doc.partner_shipping_id.fax"> - Fax: </span><span
+                                t-field="doc.partner_shipping_id.fax"/>
+                        </div>
+                        <div class="col-xs-3 col-xs-offset-3">
+                            <span><strong>Adresse de facturation : </strong></span>
+                            <div t-field="doc.partner_invoice_id"
+                                 t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
+                            <span t-if="doc.partner_invoice_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
+                            <span t-if="doc.partner_invoice_id.fax"> - Fax: </span><span
+                                t-field="doc.partner_invoice_id.fax"/>
                         </div>
                     </div>
 
@@ -21,11 +30,13 @@
                         <span t-field="doc.name"/>
                     </h3>
                     <h6>
-                      <strong>Ref. Client :</strong>
-                      <span t-field="doc.partner_id.ref"/>
+                        <div>
+                            <span t-if="doc.contact"><strong>A l'attention de :</strong>  <span t-field="doc.contact.name"/> / <span t-field="doc.contact.email"/> </span>
+                        </div>
+                        <strong>Ref. Client :</strong>
+                        <span t-field="doc.partner_id.ref"/>
                     </h6>
-
-                    <table class="table table-condensed">
+                    <table class="table table-condensed table-bordered">
                         <thead>
                             <tr>
                                 <td t-if="doc.date_order">
@@ -43,7 +54,7 @@
                                     <strong>V/Ref.</strong>
                                 </td>
                                 <td t-if="doc.partner_id.user_id">
-                                    <span><span><strong>Commercial: </strong></span><span t-field="doc.partner_id.user_id.name"/> / <span t-field="doc.partner_id.user_id.email"/></span>
+                                    <span><span><strong>Resp. commercial: </strong></span><span t-field="doc.partner_id.user_id.name"/> / <span t-field="doc.partner_id.user_id.email"/></span>
                                 </td>
                             </tr>
                         </thead>
@@ -64,20 +75,11 @@
                                     <p t-field="doc.client_order_ref"/>
                                 </td>
                                 <td>
-                                    <table>
+                                    <table >
                                         <tbody>
-                                            <tr t-if="doc.partner_id.principal_contact">
-                                                <td>
-                                                    <strong>Contact: </strong>
-                                                </td>
-                                                <td>
-                                                    <span t-field="doc.partner_id.principal_contact.name"/>
-                                                    / <span t-field="doc.partner_id.principal_contact.email"/>
-                                                </td>
-                                            </tr>
                                             <tr>
                                                 <td>
-                                                    <strong>V/Contact: </strong>
+                                                    <strong>Votre contact: </strong>
                                                 </td>
                                                 <td>
                                                     <span t-field="doc.create_uid.partner_id.name"/> /
