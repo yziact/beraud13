@@ -2,12 +2,12 @@
   <data>
 
     <report 
-      id="action_report_module_purchase_myorder"
+      id="action_report_module_purchase_my_purchase_order"
       model="purchase.order" 
       string="Demande de Prix / Bon de Commande"
       report_type="qweb-pdf"
-      name="module_purchase.report_purchasemyorder" 
-      file="module_purchase.report_purchasemyorder" 
+      name="module_purchase.report_mypurchaseorder" 
+      file="module_purchase.report_mypurchaseorder" 
       attachment_use="False"
       menu="True"
       />

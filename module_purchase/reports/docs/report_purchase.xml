@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
-  <template id="report_purchasemyorder">
-    <t t-name="report_purchasemyorder">
+  <template id="report_mypurchaseorder">
+    <t t-name="report_mypurchaseorder">
       <t t-call="report.html_container">
         <t t-foreach="docs" t-as="o">
           <t t-call="report.external_layout">
@@ -190,4 +190,5 @@
 
     </data>
 </openerp>
+
 
