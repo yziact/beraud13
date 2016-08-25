@@ -15,7 +15,9 @@ class PTReportController(ReportController):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
 
         reports_list = ['module_reparations.report_repair_devis',
-                        'module_reparations.report_no_prices']
+                        'module_reparations.report_no_prices',
+                        'module_sale.report_mysaleorder',
+                        'module_purchase.report_mypurchaseorder']
         
         to_rename = False
         for report in reports_list :
