@@ -34,37 +34,10 @@ class MrpRepair(models.Model):
     # not visible to the model until created, but exists in db
     create_date = fields.Datetime('Create Date', readonly=True)
 
-    #duration = fields.Datetime('Durée de la réparation', compute='_get_duration')
-    #duration = fields.Char('Durée de la réparation', compute='_get_duration')
-
     date_start = fields.Datetime(string='Date de début', required=True, store=True, index=True, copy=False, default=fields.Datetime.now, help="Date du début de la réparation")
 
-    #end_date = fields.Datetime(string="End Date", required=True, store=True, compute='_get_end_date', inverse='_set_end_date', help="Date prévue de la fin de la réparation")
     end_date = fields.Datetime(string="Date de fin", required=True, store=True, help="Date prévue de la fin de la réparation")
 
-"""
-    @api.depends('date_start', 'end_date')
-    def _get_duration(self):
-        for r in self:
-            if not (r.date_start and r.end_date):
-                _logger.warning("date_start and end_date not set for record, duration set to 0")
-                r.duration = 0
-                continue
-            start = fields.Datetime.from_string(r.date_start)
-            end = fields.Datetime.from_string(r.end_date)
-            r.duration = self.secs_to_char((end - start).seconds)
+    invoice_method = fields.Selection(default='after_repair')
 
-    def secs_to_char(self, seconds):
-        """ takes seconds, returns formatted string hours:minutes """
-        m, s = divmod(seconds, 60)
-        h, m = divmod(m, 60)
-        s = "%d:%02d" % (h, m)
-        _logger.warning("returning time : %s", s)
-        return s
-
-    def char_to_td(self):
-        """ takes char, returns timedelta """
-        pass
-
-"""
 
