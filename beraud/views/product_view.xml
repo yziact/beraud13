@@ -6,9 +6,9 @@
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="priority" eval="90"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='recurring_invoice']" position="after">
+                <!--xpath expr="//field[@name='recurring_invoice']" position="after">
                     <field name="code_douane"/>
-                </xpath>
+                </xpath-->
                 <xpath expr="//field[@name='property_stock_inventory']" position="after">
                     <field name="casier"/>
                 </xpath>

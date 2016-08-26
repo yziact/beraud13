@@ -6,7 +6,7 @@ import datetime
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    code_douane = fields.Char('Code douane')
+    # code_douane = fields.Char('Code douane')
 
     description_purchase= fields.Html('Purchase Description', translate=True)
     description_sale = fields.Html('Sale Description', translate=True)

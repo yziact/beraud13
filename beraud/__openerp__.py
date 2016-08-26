@@ -25,6 +25,7 @@
         'project',
         'product_dimension',
         'account',
+        'report_intrastat',
     ],
 
     'data': [
@@ -40,7 +41,7 @@
         'views/product_category.xml',
         #'views/sale_order.xml',
         'views/export_sage.xml',
-        #'views/export_tier.xml',
+        'views/export_tier.xml',
 
         'security/ir.model.access.csv',
 
