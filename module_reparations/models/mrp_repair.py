@@ -4,6 +4,12 @@ from openerp import models, fields, api
 import datetime
 import logging 
 
+import sys
+sys.path.insert(0, '..')
+sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
+sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
+from utilsmod import utilsmod
+
 _logger = logging.getLogger(__name__)
 
 class MrpRepair(models.Model):
@@ -11,25 +17,10 @@ class MrpRepair(models.Model):
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        """ enlever le menu du rapport par défaut.  """
-
-        res = super(MrpRepair, self).fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar,
-            submenu=submenu)
-
-        if not res.get('toolbar', {}).get('print', []):
-            #_logger.error('print menu empty, returning unaltered view.')
-            return res
-
-        #view_id = self.env['ir.model.data'].xmlid_to_res_id('mrp_repair.action_report_mrp_repair_order')
-        report_quotation = self.env.ref('mrp_repair.action_report_mrp_repair_order')
-
-        #_logger.error("report_quotation xml_id : %s", report_quotation.xml_id)
-        #_logger.error("Report Quotation ID is : %s ", report_quotation.id)
-
-        res['toolbar']['print'] = [dict(t) for t in res.get('toolbar', {}).get('print', []) if t['id'] != report_quotation.id]
-
-        return res 
+        mask = utilsmod.ReportMask(['mrp_repair.action_report_mrp_repair_order'])
+        res = super(PurchaseOrder, self).fields_view_get(
+            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        return mask.fields_view_get_masked(res, self)
 
     # not visible to the model until created, but exists in db
     create_date = fields.Datetime('Create Date', readonly=True)

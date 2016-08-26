@@ -44,27 +44,11 @@ class SaleOrderInherit(models.Model):
 
     contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
 
-
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        """ enlever le menu du rapport par défaut.  """
-
-        res = super(SaleOrderInherit, self).fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar,
-            submenu=submenu)
-
-        if not res.get('toolbar', {}).get('print', []):
-            #_logger.error('print menu empty, returning unaltered view.')
-            return res
-
-        report_id_list = []
-        report_id_list.append(self.env['report']._get_report_from_name('sale.report_saleorder').id)
-
-        #_logger.error("report_quotation xml_id : %s", report_quotation.xml_id)
-        #_logger.error("Report Quotation ID is : %s ", report_quotation.id)
-
-        res['toolbar']['print'] = [dict(t) for t in res.get('toolbar', {}).get('print', []) if t['id'] not in report_id_list]
-
-        return res 
+        mask = utilsmod.ReportMask(['sale.report_saleorder'])
+        res = super(PurchaseOrder, self).fields_view_get(
+            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        return mask.fields_view_get_masked(res, self)
 
 
