@@ -10,6 +10,9 @@
             <xpath expr="//button[@name='action_done']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
+            <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                <field name="contact" domain="[('parent_id', '=', partner_id)]"/>
+            </xpath>
         </field>
     </record>
 </odoo>

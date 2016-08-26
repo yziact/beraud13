@@ -437,7 +437,7 @@ class ResPartnerInherit(models.Model):
         record_write = super(ResPartnerInherit, self).write(vals)
         return record_write
 
-    @api.multi
+    @api.model
     def create(self, vals):
         vals['exported'] = False
         record = super(ResPartnerInherit, self).create(vals)

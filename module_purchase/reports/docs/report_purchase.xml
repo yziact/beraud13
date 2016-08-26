@@ -36,7 +36,7 @@
                     <h3 t-if="o.state == 'draft'">Demande de Prix #<span t-field="o.name" /></h3>
                     <h3 t-if="o.state != 'draft'">Bon de Commande #<span t-field="o.name" /></h3>
 
-                    <table class="table table-condensed">
+                    <table class="table table-condensed table-bordered">
                         <thead>
                             <tr>
                                 <td t-if="o.name">

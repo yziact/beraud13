@@ -61,7 +61,7 @@
                                     t-field="o.create_uid.partner_id.name"/> /  <span t-field="o.create_uid.email"/></p>
                         </div>
                         <br/>
-                        <table class="table table-condensed">
+                        <table class="table table-condensed table-bordered">
                             <thead>
                                 <tr>
                                     <th><strong>Commitment Date</strong></th>
@@ -135,7 +135,6 @@
             </t>
         </t>
     </template>
-
     <report
             string="Operations de Transfert"
             id="action_report_picking"

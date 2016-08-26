@@ -17,7 +17,7 @@
                     </group>
                 </xpath>
                 <xpath expr="//field[@name='image']" position="after">
-                    <label for="exported" string=" " class="fa fa-exclamation-triangle fa-3x" style="color:#ff4d00; font-size:20px;" attrs="{'invisible': [('exported','=',True)]}"/>
+                    <label for="exported" string=" " class="fa fa-asterisk fa-3x" style="font-size:20px;" attrs="{'invisible': [('exported','=',True)]}"/>
                     <field name="exported"  attrs="{'invisible': True}"/>
                     <!--div class="fa fa-exclamation-triangle fa-2x" style="color:#ff4d00;"  attrs="{'invisible': True}" /-->
                 </xpath>
@@ -29,9 +29,11 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.res_partner_kanban_view"/>
             <field name="arch" type="xml">
-               <xpath expr="//div[@class='oe_kanban_details']" position="after">
-                   <label for="exported" string=" " class="fa fa-exclamation-triangle fa-3x" style="color:#ff4d00; font-size:20px; float: right;" attrs="{'invisible': [('exported','=',True)]}"/>
-                   <field name="exported" attrs="{'invisible':True}"/>
+               <xpath expr="//div[@class='o_kanban_image']" position="before">
+                   <div>
+                       <label for="exported" string=" " class="fa fa-asterisk fa-3x" style="font-size:15px; float: right;" attrs="{'invisible': [('exported','=',True)]}"/>
+                       <field name="exported" attrs="{'invisible':True}"/>
+                   </div>
                </xpath>
             </field>
         </record>

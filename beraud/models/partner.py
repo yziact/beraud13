@@ -7,7 +7,7 @@ class Res_Partner_Inherit(models.Model):
     is_principal = fields.Boolean(string="contact principal")
     principal_contact = fields.Many2one('res.partner', compute='_get_principal_contact')
 
-    @api.multi
+
     def _get_principal_contact(self):
         for partner in self:
             principal = self.search([("parent_id",'=', partner.id),('is_principal','=',True)], limit=1)
