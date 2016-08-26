@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
   <data>
-    <!--
-    <template id="mrp_repair.report_mrprepairorder"> 
-      <t t-name="mrp_repair.report_mrprepairorder"> -->
     <template id="report_repair_devis"> 
       <t t-name="report_repair_devis">
         <t t-call="report.html_container">

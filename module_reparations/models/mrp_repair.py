@@ -2,7 +2,6 @@
 
 from openerp import models, fields, api
 import datetime
-import logging 
 
 import sys
 sys.path.insert(0, '..')
@@ -10,6 +9,7 @@ sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
 from utilsmod import utilsmod
 
+import logging 
 _logger = logging.getLogger(__name__)
 
 class MrpRepair(models.Model):
@@ -17,8 +17,9 @@ class MrpRepair(models.Model):
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        mask = utilsmod.ReportMask(['mrp_repair.action_report_mrp_repair_order'])
-        res = super(PurchaseOrder, self).fields_view_get(
+        mask = utilsmod.ReportMask(['module_reparations.report_repair_devis',
+                                    'module_reparations.report_no_prices'])
+        res = super(MrpRepair, self).fields_view_get(
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(res, self)
 

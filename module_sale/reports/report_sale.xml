@@ -1,48 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
-        <template id="report_mysaleorder">
-            <t t-call="report.external_layout">
-                <t t-foreach="docs" t-as="doc">
+<data>
+    <template id="report_mysaleorder">
+        <t t-call="report.external_layout">
+            <t t-foreach="docs" t-as="doc">
                 <div class="page" style="font-size:11px;">
                     <div class="oe_structure"/>
                     <div class="row">
                         <div class="col-xs-3">
-                            <span><strong>Adresse de livraison : </strong></span>
+                            <span><strong>Adresse de livraison</strong></span>
                             <div t-field="doc.partner_shipping_id"
-                                 t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
-                            <span t-if="doc.partner_shipping_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
-                            <span t-if="doc.partner_shipping_id.fax"> - Fax: </span><span
-                                t-field="doc.partner_shipping_id.fax"/>
+                                t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true, "phone_icons": true}' />
                         </div>
                         <div class="col-xs-3 col-xs-offset-3">
-                            <span><strong>Adresse de facturation : </strong></span>
+                            <span><strong>Adresse de facturation</strong></span>
                             <div t-field="doc.partner_invoice_id"
-                                 t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
+                                t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true, "phone_icons": true}' />
+                            <!--
                             <span t-if="doc.partner_invoice_id.phone">Tel: </span><span t-field="doc.partner_id.phone"/>
                             <span t-if="doc.partner_invoice_id.fax"> - Fax: </span><span
-                                t-field="doc.partner_invoice_id.fax"/>
+                                t-field="doc.partner_invoice_id.fax"/> -->
                         </div>
+                    </div>
 
                     <h3>
                         <span t-if="doc.state not in ['draft','sent']">Confirmation de Commande # </span>
                         <span t-if="doc.state in ['draft','sent']">Devis # </span>
                         <span t-field="doc.name"/>
                     </h3>
+
                     <h6>
                         <div>
                             <span t-if="doc.contact"><strong>A l'attention de :</strong>  <span t-field="doc.contact.name"/> / <span t-field="doc.contact.email"/> </span>
                         </div>
-                        <strong>Ref. Client :</strong>
+                        <strong>Ref. Client : </strong>
                         <span t-field="doc.partner_id.ref"/>
                     </h6>
                     <table class="table table-condensed table-bordered">
                         <thead>
                             <tr>
                                 <td t-if="doc.date_order">
-                                    <strong>Date </strong>
+                                    <strong>Date</strong>
                                 </td>
                                 <td>
-                                    <strong>Numero </strong>
+                                    <strong>Numero</strong>
                                 </td>
                                 <!--
                                 <td>
@@ -53,7 +54,7 @@
                                     <strong>V/Ref.</strong>
                                 </td>
                                 <td t-if="doc.partner_id.user_id">
-                                    <span><span><strong>Resp. commercial: </strong></span><span t-field="doc.partner_id.user_id.name"/> / <span t-field="doc.partner_id.user_id.email"/></span>
+                                    <span><span><strong>Resp. commercial : </strong></span><span t-field="doc.partner_id.user_id.name"/> / <span t-field="doc.partner_id.user_id.email"/></span>
                                 </td>
                             </tr>
                         </thead>
@@ -78,7 +79,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>
-                                                    <strong>Votre contact: </strong>
+                                                    <strong>Votre contact : </strong>
                                                 </td>
                                                 <td>
                                                     <span t-field="doc.create_uid.partner_id.name"/> /

@@ -4,7 +4,7 @@
     <report 
       id="action_report_module_sale_my_sale_order"
       model="sale.order" 
-      string="Report des Ventes"
+      string="Devis / Commande"
       report_type="qweb-pdf"
       name="module_sale.report_mysaleorder" 
       file="module_sale.report_mysaleorder" 

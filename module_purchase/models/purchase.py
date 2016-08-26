@@ -2,7 +2,6 @@
 
 from openerp import models, fields, api
 import datetime
-import logging 
 
 import sys
 sys.path.insert(0, '..')
@@ -10,6 +9,7 @@ sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
 from utilsmod import utilsmod
 
+import logging 
 _logger = logging.getLogger(__name__)
 
 class PurchaseOrder(models.Model):
