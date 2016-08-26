@@ -1,0 +1,13 @@
+<odoo>
+    <record id="inherit_form_project" model="ir.ui.view">
+        <field name="name">project form</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options_active']" position="inside">
+                <field name="tag_ids" widget="many2many_tags" placeholder="Tags..."/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
