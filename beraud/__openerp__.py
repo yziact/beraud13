@@ -25,6 +25,13 @@
         'project',
         'product_dimension',
         'account',
+
+        # our modules
+        'module_report_filename',
+        'module_sequences',
+        'module_reparations',
+        'module_sale',
+        'module_purchase',
     ],
 
     'data': [
