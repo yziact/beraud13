@@ -5,34 +5,42 @@
     <!-- company id : 1 pour BERAUD, 3 pour ATOM -->
     <!-- id has to be unique (not overwrite the 'original one') -->
 
-    <!-- Sequences for Sale Orders -->
-    <record id="seq_sale_order_a" model="ir.sequence">
+    <!--*********************************** -->
+    <!--**** Sequences for Sale Orders **** -->
+    <!--*********************************** -->
+    <record model="ir.sequence" id="seq_sale_order_a">
       <field name="company_id" eval="3"/>
+      <field name="active">TRUE</field>
       <field name="name">Sales Order</field>
       <field name="code">sale.order</field>
       <field name="prefix">VEA</field>
       <field name="padding">5</field>
     </record>
 
-    <record id="seq_sale_order_b" model="ir.sequence">
+    <record model="ir.sequence" id="seq_sale_order_b">
       <field name="company_id" eval="1"/>
+      <field name="active">TRUE</field>
       <field name="name">Sale Orders</field>
       <field name="code">sale.order</field>
       <field name="prefix">VEB</field>
       <field name="padding">5</field>
     </record>
 
-    <!-- Sequences for Purchase Orders -->
-    <record id="seq_purchase_order_a" model="ir.sequence">
+    <!--*************************************** -->
+    <!--**** Sequences for Purchase Orders **** -->
+    <!--*************************************** -->
+    <record model="ir.sequence" id="seq_purchase_order_a">
       <field name="company_id" eval="3"/>
+      <field name="active">TRUE</field>
       <field name="name">Purchase Orders</field>
       <field name="code">purchase.order</field>
       <field name="prefix">ACA</field>
       <field name="padding">5</field>
     </record>
 
-    <record id="seq_purchase_order_b" model="ir.sequence">
+    <record model="ir.sequence" id="seq_purchase_order_b">
       <field name="company_id" eval="1"/>
+      <field name="active">TRUE</field>
       <field name="name">Purchase Orders</field>
       <field name="name">Purchase Orders</field>
       <field name="code">purchase.order</field>
@@ -40,24 +48,54 @@
       <field name="padding">5</field>
     </record>
 
-    <!-- Sequences for Repair Orders -->
-    <record id="seq_repair_order_a" model="ir.sequence">
+    <!--************************************* -->
+    <!--**** Sequences for Repair Orders **** -->
+    <!--************************************* -->
+    <record model="ir.sequence" id="seq_repair_order_a">
       <field name="company_id" eval="3"/>
+      <field name="active">TRUE</field>
       <field name="name">Repair Orders</field>
       <field name="code">mrp.repair</field>
       <field name="prefix">ORA</field>
       <field name="padding">5</field>
     </record>
 
-    <record id="seq_repair_order_b" model="ir.sequence">
+    <record model="ir.sequence" id="seq_repair_order_b">
       <field name="company_id" eval="1"/>
+      <field name="active">TRUE</field>
       <field name="name">Repair Orders</field>
       <field name="code">mrp.repair</field>
       <field name="prefix">ORB</field>
       <field name="padding">5</field>
     </record>
 
+    <!--******************************** -->
+    <!--**** Sequences for Contacts **** -->
+    <!--******************************** -->
+    <record model="ir.sequence" id="seq_partner_a">
+        <field name="company_id" eval="3"/>
+        <field name="active">TRUE</field>
+        <field name="name">Sequence Interne Contacts</field>
+        <field name="code">res.partner</field>
+        <field name="prefix">CA</field>
+        <field name="padding">7</field>
+        <field name="number_increment">1</field>
+        <field name="number_next_actual">1</field>
+        <field name="implementation">standard</field>
+    </record>
+
+    <record model="ir.sequence" id="seq_partner_b">
+        <field name="company_id" eval="1"/>
+        <field name="active">TRUE</field>
+        <field name="name">Sequence Interne Contacts</field>
+        <field name="code">res.partner</field>
+        <field name="prefix">CB</field>
+        <field name="padding">7</field>
+        <field name="number_increment">1</field>
+        <field name="number_next_actual">1</field>
+        <field name="implementation">standard</field>
+    </record>
+
   </data>
 </openerp>
-
 
