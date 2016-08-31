@@ -6,7 +6,7 @@
         <t t-call="report.html_container">
           <t t-foreach="docs" t-as="o">
             <t t-call="report.external_layout">
-              <div class="page" style="font-size:11px;">
+              <div class="page" style="font-size:11px;position:relative;">
                 <div class="oe_structure"/>
                 <div class="row">
                   <div class="col-xs-6 col-xs-offset-6">
@@ -209,6 +209,12 @@
                   supplémentaires.
                 </p>
 
+                <div class="row">
+                  <div class="col-xs-2 col-xs-offset-8">
+                      <p> Signature du client : </p>
+                  </div>
+                </div>
+
                 <!--
                 <p t-field="o.quotation_notes"/>
                 <div class="oe_structure"/>
@@ -216,6 +222,12 @@
 
                 <p t-field="o.internal_notes"/>
                 <div class="oe_structure"/>
+
+                <div style="position:absolute;left:50%;top:1000px;">
+                    <div style="position:relative;left:-50%;">
+                        <p>Une copie de cette Ordre de Réparation sera joint à la facture.</p>
+                    </div>
+                </div>
 
               </div>
             </t>
