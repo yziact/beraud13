@@ -1,10 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 import xmlrpclib
 import csv
 import sys 
-reload(sys) 
 sys.setdefaultencoding("utf-8")
 import unicodedata
 

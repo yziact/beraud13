@@ -3,6 +3,9 @@
   <data>
 
     <!-- INHERITED FORM VIEW -->
+          <!--
+          <field name="end_date" attrs="{'required':[('state','not in','['draft', 'cancel'])]}" />
+          -->
     <record model="ir.ui.view" id="view_repair_form_inherited">
       <field name="name">mrp.repair.form.inherited</field>
       <field name="model">mrp.repair</field>

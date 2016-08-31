@@ -28,7 +28,7 @@ class MrpRepair(models.Model):
 
     date_start = fields.Datetime(string='Date de début', required=True, store=True, index=True, copy=False, default=fields.Datetime.now, help="Date du début de la réparation")
 
-    end_date = fields.Datetime(string="Date de fin", required=True, store=True, help="Date prévue de la fin de la réparation")
+    end_date = fields.Datetime(string="Date de fin", store=True, help="Date prévue de la fin de la réparation")
 
     invoice_method = fields.Selection(default='after_repair')
 
