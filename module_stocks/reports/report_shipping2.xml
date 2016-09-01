@@ -1,5 +1,5 @@
 <odoo>
-    <template id="delivery.report_shipping2" inherit_id="stock.report_picking">
+    <template id="report_my_shipping2" inherit_id="module_stocks.report_my_picking">
             <xpath expr="//th[@name='td_sched_date_h']" position="after">
                 <th><strong>Votre référence</strong></th>
                 <th t-if="o.picking_type_id.code == 'outgoing'"><strong>Carrier</strong></th>

@@ -1,5 +1,5 @@
 <odoo>
-    <template id="stock.report_picking">
+    <template id="report_my_picking">
         <t t-call="report.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-call="report.external_layout">

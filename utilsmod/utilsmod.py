@@ -19,11 +19,11 @@ class ReportMask(object):
         if not res:
             raise Exception("No res received in fields_view_get_masked, in %s", __name__)
 
-        #_logger.error('Purchase Order Fields View Get')
         if not res.get('toolbar', {}).get('print', []):
             #_logger.error('print menu empty, returning unaltered view.')
             return res
 
+        print "report list is : %s" % self.report_list
         report_id_list = []
         for report in self.report_list:
             report_id_list.append(obj.env['report']._get_report_from_name(report).id)

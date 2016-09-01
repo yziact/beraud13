@@ -37,10 +37,10 @@
 
     'data': [
         'views/res_partner.xml',
-        'views/stock_view.xml',
+        #'views/stock_view.xml',
+        #'views/transfer_stock_intercompany_view.xml',
         'views/company_view.xml',
         'views/product_view.xml',
-        'views/transfer_stock_intercompany_view.xml',
         'views/analytic_line_task.xml',
         'views/analytic_line_issue.xml',
         'views/internal_invoice.xml',
@@ -54,11 +54,11 @@
 
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
-        'report/stock/report_picking.xml',
-        'report/stock/report_shipping2.xml',
+        #'report/stock/report_picking.xml',
+        #'report/stock/report_shipping2.xml',
         #'report/sale/report_sale.xml',
         #'report/sale/sale_stock.xml',
-        'report/purchase/report_purchase.xml',
+        #'report/purchase/report_purchase.xml',
         'report/invoice/report_invoice.xml',
         'report/invoice/sale_stock.xml',
     ],
