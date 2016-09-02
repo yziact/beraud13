@@ -23,7 +23,6 @@ class ReportMask(object):
             #_logger.error('print menu empty, returning unaltered view.')
             return res
 
-        print "report list is : %s" % self.report_list
         report_id_list = []
         for report in self.report_list:
             report_id_list.append(obj.env['report']._get_report_from_name(report).id)

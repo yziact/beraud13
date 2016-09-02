@@ -2,7 +2,6 @@
 <openerp>
     <data>
 
-        <!--
         <record id="product_template_tree_view" model="ir.ui.view">
             <field name="name">product.template.tree.inherit</field>
             <field name="model">product.template</field>
@@ -12,7 +11,21 @@
                     <field name="create_date"/>
                 </field>
             </field>
-        </record> -->
+        </record>
+
+        <record id="my_stock_picking_view" model="ir.ui.view">
+            <field name="name">My Stock Move Picking Tree</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_picking_tree"/>
+            <field name="arch" type="xml">
+                <tree position="inside">
+                    <field name="stock_qty_ber"/>
+                    <field name="stock_qty_ber_reserved"/>
+                    <field name="stock_qty_atom"/>
+                    <field name="stock_qty_atom_reserved"/>
+                </tree>
+            </field>
+        </record>
 
         <!-- works in point_of_sale_view
         <record id="product_template_tree_view" model="ir.ui.view">
@@ -43,7 +56,7 @@
         </record>
 
         <record id="stock_logistique_search_view" model="ir.ui.view">
-            <field name="name">stock.logistique.search.view</field>
+            <field name="name">stock_logistique_search_view</field>
             <field name="model">stock.view.logistique</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
@@ -67,10 +80,10 @@
             <field name="context">{'search_default_company':1}</field>
         </record>
 
-        <!--<menuitem name="Niveau Stock" id="beraud.logistique" parent="stock.menu_stock_root"/>-->
-        <menuitem name="Niveau Stock" id="logistique_level" parent="stock.menu_stock_inventory_control"
-                  action="module_stocks.action_logistique_tree_view"/>
+        <menuitem name="Niveau Stock" id="module_stocks.logistique" parent="stock.menu_stock_root"/>
+        <menuitem name="Niveau Stock" id="logistique_level" parent="stock.menu_stock_inventory_control" action="module_stocks.action_logistique_tree_view"/>
 
     </data>
 </openerp>
+
 

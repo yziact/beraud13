@@ -14,12 +14,12 @@
       />
 
     <report 
-      id="act_report_my_picking" 
+      id="act_report_my_shipping2" 
       model="stock.picking" 
-      string="Ordre de Réparation" 
+      string="Report de Shipping 2" 
       report_type="qweb-pdf"
-      name="module_reparations.report_no_prices" 
-      file="module_reparations.report_no_prices" 
+      name="module_stocks.report_my_shipping2" 
+      file="module_stocks.report_my_shipping2" 
       attachment_use="False"
       menu="True"
       />

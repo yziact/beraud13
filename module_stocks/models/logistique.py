@@ -17,7 +17,7 @@ class stock_view_logistique(models.Model):
     # reservations = fields.Many2many('stock.move', 'Réservations', compute='_get_reservations')
 
     def init(self, cr):
-        # tools.sql.drop_view_if_exists(cr, 'stock_view_logistique')
+        #tools.sql.drop_view_if_exists(cr, 'stock_view_logistique')
         cr.execute("""
         CREATE OR REPLACE VIEW stock_view_logistique AS (
            SELECT row_number() OVER(win) as id,
@@ -96,3 +96,5 @@ class stock_view_logistique(models.Model):
     #         if not quant.reservation_id.id in MV_IDS:
     #             MV_IDS.append(quant.reservation_id.id)
     #             self.reservations += quant.reservation_id
+
+
