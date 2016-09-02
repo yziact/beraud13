@@ -6,6 +6,7 @@ class Res_Partner_Inherit(models.Model):
 
     is_principal = fields.Boolean(string="contact principal")
     principal_contact = fields.Many2one('res.partner', compute='_get_principal_contact')
+    user_id = fields.Many2many('res.users')
 
 
     def _get_principal_contact(self):
