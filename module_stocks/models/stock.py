@@ -44,7 +44,6 @@ class StockMove(models.Model):
     @api.multi
     def _compute_stock_nums(self):
         for move in self:
-            ls = ['stock_real','stock_virtual','stock_real_value','stock_virtual_value']
 
             ber_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/BER/Stock')])
             atom_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/ATOM/Stock')])
