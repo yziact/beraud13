@@ -10,10 +10,7 @@
                     <field name="code_douane"/>
                 </xpath-->
                 <xpath expr="//field[@name='categ_id']" position="after">
-                    <field name="casier"/>
-                </xpath>
-                <xpath expr="//field[@name='categ_id']" position="after">
-                    <field name="allee"/>
+                    <field name="emplacement"/>
                 </xpath>
                 <xpath expr="//div[@name='volume']" position="after">
                     <label for="nb_palette" string="Nombre de palettes"/>
