@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-  <data noupdate="1">
+  <data noupdate="0">
 
     <!-- company id : 1 pour BERAUD, 3 pour ATOM -->
     <!-- id has to be unique (not overwrite the 'original one') -->
@@ -10,7 +10,6 @@
     <!--*********************************** -->
     <record model="ir.sequence" id="seq_sale_order_a">
       <field name="company_id" eval="3"/>
-      <field name="active">TRUE</field>
       <field name="name">Sales Order</field>
       <field name="code">sale.order</field>
       <field name="prefix">VEA</field>
@@ -19,7 +18,6 @@
 
     <record model="ir.sequence" id="seq_sale_order_b">
       <field name="company_id" eval="1"/>
-      <field name="active">TRUE</field>
       <field name="name">Sale Orders</field>
       <field name="code">sale.order</field>
       <field name="prefix">VEB</field>
@@ -31,7 +29,6 @@
     <!--*************************************** -->
     <record model="ir.sequence" id="seq_purchase_order_a">
       <field name="company_id" eval="3"/>
-      <field name="active">TRUE</field>
       <field name="name">Purchase Orders</field>
       <field name="code">purchase.order</field>
       <field name="prefix">ACA</field>
@@ -40,8 +37,6 @@
 
     <record model="ir.sequence" id="seq_purchase_order_b">
       <field name="company_id" eval="1"/>
-      <field name="active">TRUE</field>
-      <field name="name">Purchase Orders</field>
       <field name="name">Purchase Orders</field>
       <field name="code">purchase.order</field>
       <field name="prefix">ACB</field>
@@ -53,7 +48,6 @@
     <!--************************************* -->
     <record model="ir.sequence" id="seq_repair_order_a">
       <field name="company_id" eval="3"/>
-      <field name="active">TRUE</field>
       <field name="name">Repair Orders</field>
       <field name="code">mrp.repair</field>
       <field name="prefix">ORA</field>
@@ -62,7 +56,6 @@
 
     <record model="ir.sequence" id="seq_repair_order_b">
       <field name="company_id" eval="1"/>
-      <field name="active">TRUE</field>
       <field name="name">Repair Orders</field>
       <field name="code">mrp.repair</field>
       <field name="prefix">ORB</field>

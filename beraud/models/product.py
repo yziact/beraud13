@@ -14,8 +14,8 @@ class ProductTemplate(models.Model):
 
     nb_palette = fields.Integer('Nombre de palettes')
 
-    allee = fields.Char('Allée')
-    casier = fields.Char('Casier')
+    allee = fields.Char(string=u'Allée')
+    casier = fields.Char(string=u'Casier')
 
     create_date = fields.Datetime('Create Date', readonly=True)
 
