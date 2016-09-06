@@ -6,8 +6,7 @@
         Module Reparations Beraud """,
 
     'description': """
-        Module Reparations Beraud
-    """,
+        Module Reparations Beraud """,
 
     'author': "Yziact",
     'website': "http://www.yziact.fr",
@@ -19,17 +18,12 @@
         'base',
         'product',
         'stock',
-        'mrp',
-        'project_issue_sheet',
-        'project_issue',
-        'project',
-        'product_dimension',
-        'account',
+        'mrp_repair',
     ],
 
     'data': [
-        'views/beraud_report.xml',
-        'views/repair_planning.xml',
+        'views/reparations_reports.xml',
+        'views/repair_views.xml',
 
         'security/ir.model.access.csv',
 
