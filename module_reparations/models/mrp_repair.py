@@ -47,21 +47,21 @@ class MrpRepairInh(models.Model):
         for repair in self.browse(cr, uid, ids, context={}) :
             print "clientsite : %s" % repair.clientsite
 
-            # the picking type is always incoming, but depends on the warehouse it comes from...
-            # this will determine the sequence of the generated stock picking
-            src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-            wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
-            print "SRC LOC : %s" % src_loc
-            print "WH : %s" % src_loc
-
-            picking_type = self.pool.get('stock.picking.type').search(
-                cr, uid, [('code', '=', 'incoming'), ('warehouse_id', '=', wh)])
-            print "picking type : %s" % picking_type
-
-            if not picking_type:
-                raise UserError("Something went wrong while selecting the picking type.")
-
             if not repair.clientsite:
+                # the picking type is always incoming, but depends on the warehouse it comes from...
+                # this will determine the sequence of the generated stock picking
+                src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
+                wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
+                print "SRC LOC : %s" % src_loc
+                print "WH : %s" % src_loc
+
+                picking_type = self.pool.get('stock.picking.type').search(
+                    cr, uid, [('code', '=', 'incoming'), ('warehouse_id', '=', wh)])
+                print "picking type : %s" % picking_type
+
+                if not picking_type:
+                    raise UserError("Something went wrong while selecting the picking type.")
+
                 # Create picking
                 picking_id = sp_obj.create(cr, uid, {
                     'origin':repair.name,
@@ -111,10 +111,34 @@ class MrpRepairInh(models.Model):
             elif repair.clientsite:
                 # no pickings to generate, but stock moves to be made
                 # from the technician's vehicle stock location
-                res = {'warning': {
-                    'title': 'Warning',
-                    'message': 'My warning message.'}}
-                return res
+                # add article to repair itself to the picking (we'll receive it to repair it)
+                move_list.append(move_obj.create(cr, uid, {
+                    'origin': repair.name,
+                    'name': repair.name,
+                    'product_uom': repair.product_id.uom_id.id,
+                    #'picking_type_id': picking_type[0],
+                    'product_id': repair.product_id.id,
+                    'product_uom_qty': abs(repair.product_qty),
+                    #'state': 'draft',
+                    'location_id': repair.location_id.id,
+                    'location_dest_id': repair.location_dest_id.id,
+                }, context={}))
+
+                # add operation lines to the picking
+                for line in repair.operations:
+                    print "creating move : %s" % line.name
+                    # add move lines to the picking
+                    move_list.append(move_obj.create(cr, uid, {
+                        'origin': repair.name,
+                        'name': line.name,
+                        'product_uom': line.product_id.uom_id.id,
+                        #'picking_type_id': picking_type[0], 
+                        'product_id': line.product_id.id,
+                        'product_uom_qty': abs(line.product_uom_qty),
+                        #'state': 'draft',
+                        'location_id': line.location_id.id, # line location
+                        'location_dest_id': line.location_dest_id.id, #line location
+                    }, context={}))
 
         return res
 
@@ -139,38 +163,38 @@ class MrpRepairInh(models.Model):
 
         for repair in self.browse(cr, uid, ids, context=context):
             print "clientsite : %s" % repair.clientsite
-            
-            src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-            wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
-            print "SRC LOC : %s" % src_loc
-            print "WH : %s" % src_loc
-
-            picking_type = self.pool.get('stock.picking.type').search(
-                cr, uid, [('code', '=', 'outgoing'), ('warehouse_id', '=', wh)])
-            print "picking type : %s" % picking_type
-
-            if not picking_type:
-                raise UserError("Something went wrong while selecting the picking type.")
-
             move_ids = []
+            # create move for each repair_line
+            for move in repair.operations:
+                move_id = move_obj.create(cr, uid, {
+                    'name': move.name,
+                    'product_id': move.product_id.id,
+                    'restrict_lot_id': move.lot_id.id,
+                    'product_uom_qty': move.product_uom_qty,
+                    'product_uom': move.product_uom.id,
+                    'partner_id': repair.address_id and repair.address_id.id or False,
+                    'location_id': move.location_id.id,
+                    'location_dest_id': move.location_dest_id.id,
+                })
+                move_ids.append(move_id)
+                repair_line_obj.write(cr, uid, [move.id], {
+                    'move_id': move_id, 
+                    'state': 'done'
+                }, context=context)
+
+            move_id = None
             if not repair.clientsite:
-                # create move for each repair_line
-                for move in repair.operations:
-                    move_id = move_obj.create(cr, uid, {
-                        'name': move.name,
-                        'product_id': move.product_id.id,
-                        'restrict_lot_id': move.lot_id.id,
-                        'product_uom_qty': move.product_uom_qty,
-                        'product_uom': move.product_uom.id,
-                        'partner_id': repair.address_id and repair.address_id.id or False,
-                        'location_id': move.location_id.id,
-                        'location_dest_id': move.location_dest_id.id,
-                    })
-                    move_ids.append(move_id)
-                    repair_line_obj.write(cr, uid, [move.id], {
-                        'move_id': move_id, 
-                        'state': 'done'
-                    }, context=context)
+                src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
+                wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
+                print "SRC LOC : %s" % src_loc
+                print "WH : %s" % src_loc
+
+                picking_type = self.pool.get('stock.picking.type').search(
+                    cr, uid, [('code', '=', 'outgoing'), ('warehouse_id', '=', wh)])
+                print "picking type : %s" % picking_type
+
+                if not picking_type:
+                    raise UserError("Something went wrong while selecting the picking type.")
 
                 # Create picking
                 # Create move corresponding to repaired article, added to the picking
@@ -197,13 +221,26 @@ class MrpRepairInh(models.Model):
                     'location_dest_id': repair.location_dest_id.id,
                     'restrict_lot_id': repair.lot_id.id,
                     'picking_id': picking_id,
+                    'picking_type_id': picking_type[0],
                 })
-                #move_ids.append(move_id)
-                #move_obj.action_done(cr, uid, move_ids, context=context)
-                self.write(cr, uid, [repair.id], {'state': 'done', 'move_id': move_id}, context={})
-                res[repair.id] = move_id
-                return res
-
             elif repair.clientsite:
-                return res
+                move_id = move_obj.create(cr, uid, {
+                    'name': repair.name,
+                    'product_id': repair.product_id.id,
+                    'product_uom': repair.product_uom.id or repair.product_id.uom_id.id,
+                    'product_uom_qty': repair.product_qty,
+                    'partner_id': repair.address_id and repair.address_id.id or False,
+                    'location_id': repair.location_id.id,
+                    'location_dest_id': repair.location_dest_id.id,
+                    'restrict_lot_id': repair.lot_id.id,
+                })
+
+            #move_ids.append(move_id)
+            #move_obj.action_done(cr, uid, move_ids, context=context)
+            if move_id == None:
+                raise UserError("Something went wrong while create the move for the repaired item")
+
+            self.write(cr, uid, [repair.id], {'state': 'done', 'move_id': move_id}, context={})
+            res[repair.id] = move_id
+            return res
 
