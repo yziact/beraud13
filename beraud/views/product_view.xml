@@ -1,14 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <openerp>
     <data>
+
+      <!--
         <record id="product_template_inherit_form_view" model="ir.ui.view">
-            <field name="name">product.template.inherit.form.view</field>
+            <field name="name">My Product Template Form View Inherited</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="priority" eval="90"/>
             <field name="arch" type="xml">
-                <!--xpath expr="//field[@name='recurring_invoice']" position="after">
-                    <field name="code_douane"/>
-                </xpath-->
                 <xpath expr="//field[@name='categ_id']" position="after">
                     <field name="emplacement"/>
                 </xpath>
@@ -20,5 +21,8 @@
                 </xpath>
             </field>
         </record>
+        -->
+
     </data>
 </openerp>
+
