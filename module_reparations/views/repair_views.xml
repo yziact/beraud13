@@ -2,7 +2,7 @@
 <openerp>
     <data>
 
-        <!-- INHERITED FORM VIEW -->
+      <!-- INHERITED FORM VIEW -->
         <record model="ir.ui.view" id="view_repair_form_inherited">
             <field name="name">Repair Form View Inherited</field>
             <field name="model">mrp.repair</field>
@@ -14,6 +14,9 @@
                 </xpath>
                 <xpath expr="//field[@name='address_id']" position="after">
                     <field name="clientsite"/>
+                    <field name="tech"
+                        attrs="{'invisible': [('clientsite', '=', False)],
+                        'required': [('clientsite', '=', True)]}" />
                 </xpath>
             </field>
         </record>
@@ -21,6 +24,7 @@
         <!-- CALENDAR POPUP VIEW -->
         <!-- important to set the priority to 2 so it doesn't override the view_repair_form_inherited -->
         <!-- 
+                    <field name="tech" attrs="{'invisible': [('clientsite', '!=', False)]}" />
         <div name="button_box" position="inside">
         <button name="106" type="action" icon="fa-sitemap" class="oe_stat_button" attrs="{'invisible': [('product_variant_count', '&lt;=', 1)]}" groups="product.group_product_variant">
         <field string="Variants" name="product_variant_count" widget="statinfo"/>

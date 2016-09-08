@@ -8,20 +8,13 @@ sys.path.insert(0, '..')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
 from utilsmod import utilsmod
+from openerp.exceptions import UserError
 
 import logging 
 _logger = logging.getLogger(__name__)
 
 class MrpRepairInh(models.Model):
     _inherit = 'mrp.repair'
-
-    @api.model
-    def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        mask = utilsmod.ReportMask(['module_reparations.report_repair_devis',
-                                    'module_reparations.report_no_prices'])
-        res = super(MrpRepairInh, self).fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
-        return mask.fields_view_get_masked(res, self)
 
     # not visible to the model until created, but exists in db
     create_date = fields.Datetime('Create Date', readonly=True)
@@ -31,8 +24,66 @@ class MrpRepairInh(models.Model):
 
     invoice_method = fields.Selection(default='after_repair')
     clientsite = fields.Boolean(string="Réparation sur Site Client : ", default=False)
+    
+    tech = fields.Many2one('res.users', string="Technicien") 
 
-    #bls_count = fields.function(_get_product_variant_count, type='integer', string='# of Product Variants')
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        mask = utilsmod.ReportMask(['module_reparations.report_repair_devis',
+                                    'module_reparations.report_no_prices'])
+        res = super(MrpRepairInh, self).fields_view_get(
+            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        return mask.fields_view_get_masked(res, self)
+
+    @api.onchange('tech') 
+    def tech_change(self):
+        print "tech has changed !"
+        if not self.tech:
+            return
+        else:
+            self._set_dest_lines_to_tech()
+
+    def _get_stock_loc_from_tech(self):
+
+        print "get stock loc from tech"
+        # get stock location corresponding to technician
+        # src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
+        print self.tech.name
+        loc_obj = self.env['stock.location']
+        tech_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
+        print tech_loc_id.id
+
+        if not tech_loc_id:
+            raise UserError("Le Technicien spécifié n'a pas d'emplacement de stock assigné")
+
+        return tech_loc_id.id
+
+    def _set_dest_lines_to_tech(self):
+
+        mrp_repair_line_obj = self.env['mrp.repair.line']
+        loc_obj = self.env["stock.location"]
+        tech_loc_id = self._get_stock_loc_from_tech()
+
+        if not self.tech:
+            return
+
+        tech_loc = loc_obj.browse(tech_loc_id) 
+
+        for line in self.operations:
+            print "updating lines with location : %s" % tech_loc.name
+            line.write({ 'location_dest_id':tech_loc.id })
+
+    @api.model
+    def create(self, vals):
+        rec = super(MrpRepairInh, self).create(vals)
+        rec._set_dest_lines_to_tech()
+        return rec
+
+    @api.multi
+    def write(self, vals):
+        res = super(MrpRepairInh, self).write(vals)
+        self._set_dest_lines_to_tech()
+        return res
 
     def action_confirm(self, cr, uid, ids, context):
 
@@ -47,6 +98,7 @@ class MrpRepairInh(models.Model):
         for repair in self.browse(cr, uid, ids, context={}) :
             print "clientsite : %s" % repair.clientsite
 
+### BERAUD REPAIR CASE ###
             if not repair.clientsite:
                 # the picking type is always incoming, but depends on the warehouse it comes from...
                 # this will determine the sequence of the generated stock picking
@@ -108,23 +160,43 @@ class MrpRepairInh(models.Model):
                         'location_dest_id': line.location_dest_id.id, #line location
                     }, context={}))
 
+### CLIENT REPAIR CASE ###
             elif repair.clientsite:
-                # no pickings to generate, but stock moves to be made
+                if not repair.tech:
+                    raise UserError("Technicien non-spécifié")
+
+                # get stock location corresponding to technician
+                #src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
+                print repair.tech.name
+                tech_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
+                print tech_loc_id
+
+                if not tech_loc_id:
+                    raise UserError("Le Technicien spécifié n'a pas d'emplacement de stock assigné")
+
+                tech_loc = loc_obj.browse(cr, uid, tech_loc_id[0], context={}) 
+                print tech_loc.name
+
+                repair._set_dest_lines_to_tech()
+
+                # no pickings to generate, but stock moves to be created and reserved
                 # from the technician's vehicle stock location
                 # add article to repair itself to the picking (we'll receive it to repair it)
+                # reserve move from STOCK to technician's car.
+                # The guy giving the product, will confirm the move himself.
                 move_list.append(move_obj.create(cr, uid, {
                     'origin': repair.name,
                     'name': repair.name,
                     'product_uom': repair.product_id.uom_id.id,
                     #'picking_type_id': picking_type[0],
                     'product_id': repair.product_id.id,
+                    'state': 'assigned', # maybe that works, maybe it doesn't
                     'product_uom_qty': abs(repair.product_qty),
-                    #'state': 'draft',
                     'location_id': repair.location_id.id,
-                    'location_dest_id': repair.location_dest_id.id,
+                    'location_dest_id': tech_loc.id,
                 }, context={}))
 
-                # add operation lines to the picking
+                ## create and reserve moves corresponding to the operation lines
                 for line in repair.operations:
                     print "creating move : %s" % line.name
                     # add move lines to the picking
@@ -135,12 +207,22 @@ class MrpRepairInh(models.Model):
                         #'picking_type_id': picking_type[0], 
                         'product_id': line.product_id.id,
                         'product_uom_qty': abs(line.product_uom_qty),
-                        #'state': 'draft',
+                        'state': 'assigned',
                         'location_id': line.location_id.id, # line location
-                        'location_dest_id': line.location_dest_id.id, #line location
+                        'location_dest_id': tech_loc.id, #line location
                     }, context={}))
 
         return res
+
+    #@api.multi
+    #def write(self, vals):
+        #write_res = super(Users, self).write(vals)
+        #if vals.get('groups_id'):
+            ## form: {'group_ids': [(3, 10), (3, 3), (4, 10), (4, 3)]} or {'group_ids': [(6, 0, [ids]}
+            #user_group_ids = [command[1] for command in vals['groups_id'] if command[0] == 4]
+            #user_group_ids += [id for command in vals['groups_id'] if command[0] == 6 for id in command[2]]
+            #self.env['mail.channel'].search([('group_ids', 'in', user_group_ids)])._subscribe_users()
+        #return write_res
 
     def action_repair_done(self, cr, uid, ids, context=None):
         """ Creates stock move for operation and stock move for final product of repair order.
