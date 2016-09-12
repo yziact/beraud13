@@ -101,3 +101,8 @@ class StockMove(models.Model):
             move.stock_qty_atom_reserved = qr
 
 
+class StockLocation(models.Model):
+    _inherit = "stock.location"
+
+    tech = fields.Many2one('res.users', string="Technicien")
+
