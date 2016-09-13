@@ -25,6 +25,8 @@
 
         'purchase_reports.xml',
         'reports/docs/report_purchase.xml',
+
+        'views/purchase_views.xml',
     ],
 }
 

@@ -1,0 +1,13 @@
+<odoo>
+    <record id="view_order_form_beraud" model="ir.ui.view">
+        <field name="name">Purchase Order Beraud</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+          <xpath expr="//button[@name='print_quotation']" position="attributes">
+            <attribute name="invisible">1</attribute>
+          </xpath>
+        </field>
+    </record>
+</odoo>
+
