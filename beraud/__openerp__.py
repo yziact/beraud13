@@ -25,20 +25,20 @@
         'project',
         'product_dimension',
         'account',
+        'report_intrastat',
 
         # our modules
         'module_report_filename',
         'module_sequences',
+        'module_stocks',
         'module_reparations',
         'module_sale',
         'module_purchase',
-        'report_intrastat',
+        'module_project',
     ],
 
     'data': [
         'views/res_partner.xml',
-        #'views/stock_view.xml',
-        #'views/transfer_stock_intercompany_view.xml',
         'views/company_view.xml',
         'views/product_view.xml',
         'views/analytic_line_task.xml',
@@ -46,7 +46,6 @@
         'views/internal_invoice.xml',
         'views/parc_machine.xml',
         'views/product_category.xml',
-        #'views/sale_order.xml',
         'views/export_sage.xml',
         'views/export_tier.xml',
 
@@ -54,11 +53,6 @@
 
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
-        #'report/stock/report_picking.xml',
-        #'report/stock/report_shipping2.xml',
-        #'report/sale/report_sale.xml',
-        #'report/sale/sale_stock.xml',
-        #'report/purchase/report_purchase.xml',
         'report/invoice/report_invoice.xml',
         'report/invoice/sale_stock.xml',
     ],
