@@ -19,6 +19,9 @@
         'product',
         'stock',
         'mrp_repair',
+
+        # our modules
+        'module_stocks',
     ],
 
     'data': [
