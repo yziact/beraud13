@@ -86,7 +86,7 @@ class StockPicking(models.Model):
             'context': context
         }
 
-    @api.v7
+    #@api.v7
     def action_assign(self, cr, uid, ids, context=None):
 
         move_obj = self.pool.get('stock.move')
