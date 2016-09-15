@@ -39,6 +39,9 @@
       </field>
     </record>
 
+    <!-- make the menu not be in the group noone -->
+    <menuitem id="stock.menu_stock_warehouse_mgmt" name="Operations" parent="stock.menu_stock_root" sequence="2" groups="base.group_user"/>
+
     <!-- works in point_of_sale_view
         <record id="product_template_tree_view" model="ir.ui.view">
             <field name="name">product.template.tree.inherit</field>
