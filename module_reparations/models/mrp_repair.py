@@ -33,7 +33,10 @@ class MrpRepairInh(models.Model):
     invoice_method = fields.Selection(default='after_repair')
     clientsite = fields.Boolean(string="Réparation sur Site Client : ", default=False)
 
-    tech = fields.Many2one('res.users', string="Technicien") 
+    tech = fields.Many2one('res.users', string="Technicien", domain=[('company_id','in',[1,3])]) 
+
+    #operations = fields.one2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=True, states={'draft': [('readonly', False)]}, copy=True),
+    operations = fields.One2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=False, copy=True)
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
@@ -60,6 +63,12 @@ class MrpRepairInh(models.Model):
         loc_obj = self.env['stock.location']
         tech_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
         print tech_loc_id.id
+
+        all_locs_recs = loc_obj.search([])
+        all_locs_objs = []
+        for r in all_locs_recs :
+            all_locs_objs.append(loc_obj.browse(r.id))
+            print r.tech.name
 
         if not tech_loc_id:
             raise UserError("Le Technicien spécifié n'a pas d'emplacement de stock assigné")
@@ -407,4 +416,5 @@ class MrpRepairInh(models.Model):
                     move_obj.action_done(cr, uid, move_id, context={})
                     
         return res
+
 

@@ -13,10 +13,12 @@
                     <field name="end_date"/>
                 </xpath>
                 <xpath expr="//field[@name='address_id']" position="after">
-                    <field name="clientsite"/>
+                  <field name="clientsite"
+                    attrs="{'readonly': [('state', '!=', 'draft')]}" />
                     <field name="tech"
-                        attrs="{'invisible': [('clientsite', '=', False)],
-                        'required': [('clientsite', '=', True)]}" />
+                      attrs="{'invisible': [('clientsite', '=', False)],
+                      'required': [('clientsite', '=', True)],
+                      'readonly': [('state', '!=', 'draft')] }" />
                 </xpath>
             </field>
         </record>

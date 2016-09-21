@@ -29,6 +29,7 @@
         'views/repair_views.xml',
 
         'security/ir.model.access.csv',
+        'security/repair_security.xml',
 
         'reports/layout/external_layout_header.xml',
         'reports/layout/external_layout_footer.xml',
