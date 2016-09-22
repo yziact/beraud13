@@ -31,7 +31,11 @@ class MailComposeMessage(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
+        print "default get"
         res = super(MailComposeMessage, self).default_get(fields_list)
+        print "fields_list : %s" % fields_list
+        print "res : %s" % res
+
         if res.get('res_id') and res.get('model') and \
                 res.get('composition_mode', '') != 'mass_mail' and\
                 not res.get('can_attach_attachment'):
@@ -46,8 +50,31 @@ class MailComposeMessage(models.TransientModel):
 
     @api.multi
     def get_mail_values(self, res_ids):
+        print "get mail values"
         res = super(MailComposeMessage, self).get_mail_values(res_ids)
         if self.object_attachment_ids.ids and self.model and len(res_ids) == 1:
             res[res_ids[0]].setdefault('attachment_ids', []).extend(
                 self.object_attachment_ids.ids)
         return res
+
+    @api.multi
+    def onchange_template_id(self, template_id, composition_mode, model, res_id):
+        print "OUR onchange_template_id"
+        res = super(MailComposeMessage, self).onchange_template_id(template_id, composition_mode, model, res_id)
+
+        print "MODEL : %s" % model
+        print "res_id : %s" % res_id
+
+        if model == 'sale.order':
+            s_obj = self.env['sale.order'].browse(res_id)
+
+            for line in s_obj.order_line:
+                attach_recs = self.env['ir.attachment'].search([('res_name', 'ilike', line.product_id.name)])
+                for i in attach_recs:
+                    print "i.name : %s" % i.name
+                    print "i.id : %s" % i.id
+                    res['value']['attachment_ids'].append((4, i.id))
+                
+        return res
+
+
