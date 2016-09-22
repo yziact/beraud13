@@ -4,4 +4,5 @@ import partner
 import company
 import parc_machine
 import export
+import compta
 
