@@ -21,9 +21,9 @@
                     <field name="exported"  attrs="{'invisible': True}"/>
                     <!--div class="fa fa-exclamation-triangle fa-2x" style="color:#ff4d00;"  attrs="{'invisible': True}" /-->
                 </xpath>
-                <!--xpath expr="user_id" position="attributes">
+                <xpath expr="//field[@name='user_id']" position="attributes">
                     <attribute name="widget">many2many_tags</attribute>
-                </xpath-->
+                </xpath>
 
             </field>
         </record>
