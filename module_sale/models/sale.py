@@ -52,6 +52,7 @@ class SaleOrderInherit(models.Model):
     _inherit = "sale.order"
 
     contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
+    commercial = fields.Many2one('res.users', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):

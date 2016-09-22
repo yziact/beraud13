@@ -21,6 +21,12 @@
             <xpath expr="//field[@name='partner_shipping_id']" position="after">
                 <field name="contact" domain="[('parent_id', '=', partner_id)]"/>
             </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="commercial"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
         </field>
     </record>
 
