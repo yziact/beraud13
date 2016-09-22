@@ -48,6 +48,7 @@
         'views/product_category.xml',
         'views/export_sage.xml',
         'views/export_tier.xml',
+        'views/payment_term.xml',
 
         'security/ir.model.access.csv',
 

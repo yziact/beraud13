@@ -25,89 +25,115 @@ class Export_Journal(models.Model):
     file_atm_achat = fields.Char(string='Filename', size=256, readonly=True)
     value_atm_achat = fields.Binary(readonly=True)
 
+    def formatDate(self, dateEN):
+        date = dateEN.split('-')
+        formatted_date = date[2]+date[1]+date[0][-2:]
+        return  formatted_date
+
+
 
     @api.multi
-    def action_export(self, journal_id, value, date_debut, date_fin, filename):
+    def action_export(self, journal_id, value, date_debut, date_fin, filename, code, collectif):
         list_row = []
+
+        account_move = self.env['account.move']
         account_move_env = self.env['account.move.line']
-        data__line = account_move_env.search([('date', '>=', date_debut), ('date', '<=', date_fin), ('journal_id', '=', journal_id)])
+        data_move = account_move.search([('date', '>=', date_debut), ('date', '<=', date_fin), ('journal_id', '=', journal_id), ('exported', '=', False)])
 
         csvfile = StringIO.StringIO()
-
         fieldnames = ['Code journal', 'Date de piece', 'No de compte general', 'Intitule compte general', 'No de piece',
                       'No de facture', 'Reference', 'Reference rapprochement', 'No compte tiers', 'Code taxe', 'Provenance',
                       'Libelle ecriture', 'Mode de reglement', 'Date d echeance', 'Code ISO devise',
                       'Montant de la devise', 'Type de norme', 'Sens', 'Montant', 'Montant signe','Montant debit',
                       'Montant credit', 'Type d ecriture','No de plan analytique', 'No de section', 'Information libre 1']
-
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
-        for line in data__line:
-            montant = str(math.fabs(line.amount_residual))
-            sens = ""
-            note = ""
-            origine = ""
-            code = ""
-            dateL = ""
-            tier = ""
-            nbcompte = ""
-            nomcompte = ""
-            nb_piece = ""
-            nb_invoice = ""
-            label = ""
-            if line.invoice_id.origin:
-                origine = line.invoice_id.origin.encode("utf-8")
-            if line.internal_note:
-                note = line.internal_note.encode("utf-8")
-            if line.debit == 0:
-                sens = "C"
-            else:
-                sens = "D"
-            if line.journal_id.code:
-                code = line.journal_id.code[:4].encode("utf-8")
-            if line.date:
-                dateL = line.date.encode("utf-8")
-            if line.account_id.code:
-                nbcompte = line.account_id.code[:8].encode("utf-8")
-            if line.account_id.name:
-                nomcompte = line.account_id.name[:40].encode("utf-8")
-            if line.invoice_id.number :
-                nb_piece = str(line.invoice_id.number)[:13]
-            if line.invoice_id.number:
-                nb_invoice = str(line.invoice_id.number)[:10]
-            if line.partner_id.ref:
-                tier = line.partner_id.ref[:20].encode("utf-8")
-            if line.account_id.name :
-                label = line.account_id.name.encode("utf-8")
 
-            list_row.append({'Code journal': code,
-                             'Date de piece': dateL ,
-                             'No de compte general': nbcompte,
-                             'Intitule compte general': nomcompte,
-                             'No de piece': nb_piece,
-                             'No de facture': nb_invoice ,
-                             'Reference': origine,
-                             'Reference rapprochement': "",
-                             'No compte tiers': tier,
-                             'Code taxe': "",
-                             'Provenance': "A",
-                             'Libelle ecriture': label,
-                             'Mode de reglement': "",
-                             'Date d echeance': "",
-                             'Code ISO devise': "",
-                             'Montant de la devise': "",
-                             'Type de norme': "D",
-                             'Sens': sens,
-                             'Montant': montant[:12],
-                             'Montant signe': str(line.amount_residual)[:13],
-                             'Montant debit': str(line.debit)[:12],
-                             'Montant credit': str(line.credit)[:12],
-                             'Type d ecriture':"G",
-                             'No de plan analytique':"",
-                             'No de section':"",
-                             'Information libre 1': note,
-                             })
+        for move in data_move:
+            data__line = account_move_env.search([('move_id', '=', move.id)])
+            dict_sum_line = {}
 
+            for line in data__line:
+                montant = str(math.fabs(line.amount_residual))
+                tax = ""
+                sens = ""
+                note = ""
+                origine = ""
+                dateL = ""
+                tier = ""
+                nbcompte = ""
+                nomcompte = ""
+                nb_piece = ""
+                nb_invoice = ""
+                label = ""
+                date_due = ""
+                term = ""
+                if line.invoice_id.origin:
+                    origine = line.invoice_id.origin.encode("windows-1252")
+                if line.internal_note:
+                    note = line.internal_note.encode("windows-1252")
+                if line.debit == 0:
+                    sens = "C"
+                else:
+                    sens = "D"
+                if line.date:
+                    dateL = self.formatDate(line.date.encode("windows-1252"))
+                if line.account_id.code:
+                    nbcompte = line.account_id.code[:8].encode("windows-1252")
+                if line.account_id.name:
+                    nomcompte = line.account_id.name[:40].encode("windows-1252")
+                if line.invoice_id.number :
+                    nb_piece = str(line.invoice_id.number)[:13]
+                if line.invoice_id.number:
+                    nb_invoice = str(line.invoice_id.number)[:10]
+                if line.partner_id.ref:
+                    tier = line.partner_id.ref[:20].encode("windows-1252")
+                if line.invoice_id:
+                    label = "Facture " + line.invoice_id.partner_id.name.encode("windows-1252")
+                if line.invoice_id.date_due:
+                    date_due = self.formatDate(line.invoice_id.date_due)
+                if line.tax_line_id :
+                    tax = line.tax_line_id.description
+                if line.invoice_id.payment_term_id:
+                    term = line.invoice_id.payment_term_id.type_sage
+
+                if not nbcompte in dict_sum_line:
+                    dict_sum_line[nbcompte] = {'Code journal': code,
+                                             'Date de piece': dateL ,
+                                             'No de compte general': collectif,
+                                             'Intitule compte general': nomcompte,
+                                             'No de piece': nb_piece,
+                                             'No de facture': nb_invoice,
+                                             'Reference': origine,
+                                             'Reference rapprochement': "",
+                                             'No compte tiers': tier,
+                                             'Code taxe': tax,
+                                             'Provenance': "A",
+                                             'Libelle ecriture': label,
+                                             'Mode de reglement': term,
+                                             'Date d echeance': date_due,
+                                             'Code ISO devise': "",
+                                             'Montant de la devise': "",
+                                             'Type de norme': "D",
+                                             'Sens': sens,
+                                             'Montant': montant[:12],
+                                             'Montant signe': str(line.amount_residual).replace('.', ',')[:13],
+                                             'Montant debit': str(line.debit).replace('.', ',')[:12],
+                                             'Montant credit': str(line.credit).replace('.', ',')[:12],
+                                             'Type d ecriture':"G",
+                                             'No de plan analytique':"0",
+                                             'No de section':"",
+                                             'Information libre 1': note,
+                                             }
+                else :
+                    dict_sum_line[nbcompte]['Montant'] = str(float(dict_sum_line[nbcompte]['Montant'].replace(',', '.')) + float(montant))[:12]
+                    dict_sum_line[nbcompte]['Montant signe'] = str(float(dict_sum_line[nbcompte]['Montant signe'].replace(',', '.')) + line.amount_residual)[:13]
+                    dict_sum_line[nbcompte]['Montant debit'] = str(float(dict_sum_line[nbcompte]['Montant debit'].replace(',', '.')) + line.debit)[:12]
+                    dict_sum_line[nbcompte]['Montant credit'] = str(float(dict_sum_line[nbcompte]['Montant credit'].replace(',', '.')) + line.credit)[:12]
+
+            for dict in dict_sum_line:
+                list_row.append(dict_sum_line[dict])
+            move.exported = True
         writer.writerows(list_row)
         fecvalue = csvfile.getvalue()
         self.write({
@@ -128,8 +154,9 @@ class Export_Journal(models.Model):
         value = 'value_ber_vente'
         filename = 'file_ber_vente'
         name = "Export Beraud Vente %s" %date
+        nb_compte_collectif = '41100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif)
 
         action = {
             'name': 'ecriture_sage',
@@ -152,8 +179,9 @@ class Export_Journal(models.Model):
         value = 'value_ber_achat'
         filename = 'file_ber_achat'
         name = "Export Beraud Achat %s" % date
+        nb_compte_collectif = '40100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif)
 
         action = {
             'name': 'ecriture_sage',
@@ -176,8 +204,9 @@ class Export_Journal(models.Model):
         value = 'value_atm_vente'
         filename = 'file_atm_vente'
         name = "Export Atom Vente %s" % date
+        nb_compte_collectif = '41100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif)
 
         action = {
             'name': 'ecriture_sage',
@@ -200,8 +229,10 @@ class Export_Journal(models.Model):
         value = 'value_atm_achat'
         filename = 'file_atm_achat'
         name = "Export Atom Achat %s" % date
+        nb_compte_collectif = '40100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename)
+
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif)
 
         action = {
             'name': 'ecriture_sage',
@@ -212,6 +243,14 @@ class Export_Journal(models.Model):
         }
 
         return action
+
+
+class AccountMove(models.Model):
+    _inherit = 'account.move'
+
+    exported = fields.Boolean()
+
+
 
 class Export_Tiers(models.Model):
     _name = 'export.tier'
@@ -260,37 +299,37 @@ class Export_Tiers(models.Model):
 
                 if partner_fils:
                     contact = partner_fils.title + " " + partner_fils.name
-                    contact = contact[:35].encode("utf-8")
+                    contact = contact[:35].encode("windows-1252")
                 if partner.customer:
                     if partner.ref:
-                        ref = partner.ref.strip()[:17].encode("utf-8")
+                        ref = partner.ref.strip()[:17].encode("windows-1252")
                     if partner.property_account_receivable_id:
-                        code = partner.property_account_receivable_id.code.encode("utf-8")
+                        code = partner.property_account_receivable_id.code.encode("windows-1252")
                     if partner.street:
-                        street = partner.street[:35].encode("utf-8")
+                        street2 = partner.street[:35].encode("windows-1252")
                     if partner.street2:
-                        street2 = partner.street2[:35].encode("utf-8")
+                        street = partner.street2[:35].encode("windows-1252")
                     if partner.zip:
-                        zip = partner.zip[:9].encode("utf-8")
+                        zip = partner.zip[:9].encode("windows-1252")
                     if partner.city:
-                        city = partner.city[:35].encode("utf-8")
+                        city = partner.city[:35].encode("windows-1252")
                     if partner.country_id:
-                        country_id = partner.country_id.name[:35].encode("utf-8")
+                        country_id = partner.country_id.name[:35].encode("windows-1252")
                     if partner.phone:
-                        phone = partner.phone[:21].encode("utf-8")
+                        phone = partner.phone[:21].encode("windows-1252")
                     if partner.fax:
-                        fax = partner.fax[:21].encode("utf-8")
+                        fax = partner.fax[:21].encode("windows-1252")
                     if partner.email:
-                        email = partner.email[:69].encode("utf-8")
+                        email = partner.email[:69].encode("windows-1252")
                     if partner.comment:
-                        comment = partner.comment.encode("utf-8")
+                        comment = partner.comment.encode("windows-1252")
 
-                    list_row.append({'Numero compte': ref,
-                                     u'intitule': partner.name[:35].encode("utf-8"),
+                    list_row.append({'Numero compte': code,
+                                     u'intitule': partner.name[:35].encode("windows-1252"),
                                      'Type': 0,
-                                     u'N compte principal': code,
+                                     u'N compte principal': '41100000',
                                      u'Qualite': "",
-                                     'Classement': partner.name[:17].encode("utf-8"),
+                                     'Classement': partner.name[:17].encode("windows-1252"),
                                      'Contact': contact,
                                      'Adresse': street,
                                      u'Complement adresse': street2,
@@ -322,34 +361,34 @@ class Export_Tiers(models.Model):
                                      })
                 if partner.supplier:
                     if partner.ref:
-                        ref = partner.ref.strip()[:17].encode("utf-8")
+                        ref = partner.ref.strip()[:17].encode("windows-1252")
                     if partner.property_account_receivable_id:
-                        code = partner.property_account_receivable_id.code.encode("utf-8")
+                        code = partner.property_account_payable_id.code.encode("windows-1252")
                     if partner.street:
-                        street = partner.street[:35].encode("utf-8")
+                        street2 = partner.street[:35].encode("windows-1252")
                     if partner.street2:
-                        street2 = partner.street2[:35].encode("utf-8")
+                        street = partner.street2[:35].encode("windows-1252")
                     if partner.zip:
-                        zip = partner.zip[:9].encode("utf-8")
+                        zip = partner.zip[:9].encode("windows-1252")
                     if partner.city:
-                        city = partner.city[:35].encode("utf-8")
+                        city = partner.city[:35].encode("windows-1252")
                     if partner.country_id:
-                        country_id = partner.country_id.name[:35].encode("utf-8")
+                        country_id = partner.country_id.name[:35].encode("windows-1252")
                     if partner.phone:
-                        phone = partner.phone[:21].encode("utf-8")
+                        phone = partner.phone[:21].encode("windows-1252")
                     if partner.fax:
-                        fax = partner.fax[:21].encode("utf-8")
+                        fax = partner.fax[:21].encode("windows-1252")
                     if partner.email:
-                        email = partner.email[:69].encode("utf-8")
+                        email = partner.email[:69].encode("windows-1252")
                     if partner.comment:
-                        comment = partner.comment.encode("utf-8")
+                        comment = partner.comment.encode("windows-1252")
 
-                    list_row.append({'Numero compte':ref,
-                                     u'intitule': partner.name[:35].encode("utf-8"),
+                    list_row.append({'Numero compte':code,
+                                     u'intitule': partner.name[:35].encode("windows-1252"),
                                      'Type': 1,
-                                     u'N compte principal': code,
+                                     u'N compte principal': '40100000',
                                      u'Qualite': "",
-                                     'Classement': partner.name[:17].encode("utf-8"),
+                                     'Classement': partner.name[:17].encode("windows-1252"),
                                      'Contact': contact,
                                      'Adresse': street,
                                      u'Complement adresse': street2,
@@ -377,7 +416,7 @@ class Export_Tiers(models.Model):
                                      'Pays banque': "",
                                      'Code BIC banque': "",
                                      'Code IBAN banque': "",
-                                     'Information libre 1': partner.comment })
+                                     'Information libre 1': comment })
 
             partner.write({'exported': True})
         writer.writerows(list_row)
@@ -433,7 +472,8 @@ class ResPartnerInherit(models.Model):
 
     @api.multi
     def write(self, vals):
-        vals['exported'] = False
+        if not len(vals.keys()) == 1 and vals.keys()[0] == 'exported':
+            vals['exported'] = False
         record_write = super(ResPartnerInherit, self).write(vals)
         return record_write
 

@@ -1,7 +1,7 @@
 <openerp>
     <data>
         <record id="export_sage"  model="ir.ui.view">
-            <field name="name">Export Sage</field>
+            <field name="name">Exportation des Journaux vers Comptabilité</field>
             <field name="model">export.ecriture_sage</field>
             <field name="arch" type="xml">
                 <form>
@@ -24,7 +24,7 @@
         </record>
 
         <record id="action_wizard_export_sage" model="ir.actions.act_window">
-            <field name="name">perform Export Sage</field>
+            <field name="name">Exportation des Journaux vers Comptabilité</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">export.ecriture_sage</field>
             <field name="view_mode">form</field>
@@ -40,6 +40,7 @@
                     target="new"
         />
         <!--parent="base.menu_accouting_root"-->
-        <menuitem name="Export Sage" id="menu_exort_sage" action="action_wizard_export_sage" groups="base.group_user" parent="account.menu_finance"/>
+        <menuitem name="Exports Comptables" id="menu_export_root" parent="account.menu_finance"/>
+        <menuitem name="Export des Journaux vers Comptabilité Sage" id="menu_export_sage" action="action_wizard_export_sage" parent="menu_export_root"/>
     </data>
 </openerp>
