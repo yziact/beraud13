@@ -76,7 +76,7 @@ class StockPicking(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'wizard.transfer.stock.intercompany',
-            'name':"LE TSIS",
+            'name':"Transfert de Stocks Inter-Sociétés",
             'view_mode': 'form',
             #'view_id': False,
             #'nodestroy': True,
