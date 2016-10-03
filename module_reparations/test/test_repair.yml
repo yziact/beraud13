@@ -1,0 +1,34 @@
+-
+  In order to test the stock, I create a new product
+-
+
+  !record {model: product.product, id: repair_product}:
+    name: prodname0
+    type: product
+
+  !record {model: product.product, id: repair_line_product0}:
+    name: prodlinename0
+    type: product
+
+  !record {model: product.product, id: repair_line_product1}:
+    name: prodlinename1
+    type: product
+- 
+  I create a new repair too
+-
+  !record {model: mrp_repair.mrp_repair, id: the_repair}:
+    name: inventory prod
+    type: product
+-
+  I add an repair line 
+-
+
+  !record {model: stock.inventory.line, id: inventory_testline0}:
+    inventory_id: stock.inventory_test0
+    product_uom_id: product.product_uom_unit
+    product_id: inventory_product
+    product_qty: 10
+    location_id: stock.stock_location_14
+
+
+

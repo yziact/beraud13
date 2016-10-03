@@ -26,6 +26,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
     @api.multi
     def create_invoices(self):
+        #print "*** our create invoices"
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
         ret = {}
 
@@ -46,7 +47,6 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         else:
             ret = super(SaleAdvancePaymentInvoice, self).create_invoices()
             return ret
-
 
 class SaleOrderInherit(models.Model):
     _inherit = "sale.order"

@@ -15,6 +15,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 import logging 
 _logger = logging.getLogger(__name__)
 
+
 class MrpRepairInh(models.Model):
     _inherit = 'mrp.repair'
 
@@ -33,10 +34,31 @@ class MrpRepairInh(models.Model):
     invoice_method = fields.Selection(default='after_repair')
     clientsite = fields.Boolean(string="Réparation sur Site Client : ", default=False)
 
-    tech = fields.Many2one('res.users', string="Technicien", domain=[('company_id','in',[1,3])]) 
+    tech = fields.Many2one('res.users', string="Technicien", domain=[('company_id','in',[1,3])], company_dependent=False) 
+    #tech2 = fields.Many2many('res.users', compute='_compute_techs', string='Les Techs', store=False)
+
+    #tasks_ids = fields.Many2many('project.task', compute='_compute_tasks_ids', string='Tasks associated to this sale')
+    #tech = fields.Many2one('res.users', string="Technicien", company_dependent=False) 
 
     #operations = fields.one2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=True, states={'draft': [('readonly', False)]}, copy=True),
     operations = fields.One2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=False, copy=True)
+
+    #@api.onchange('tech2') 
+    #def tech2_changed(self):
+    #    self._compute_techs()
+        
+    @api.multi
+    def _compute_techs(self):
+        print "***in compute techs."
+        #superself = self.sudo()
+        #tech_ids = superself.env['res.users'].search([('name', 'ilike', 'Isabelle Graillat')])
+        #import pdb; pdb.set_trace();
+        #tech_ids = self.env['res.users'].sudo().search([('name', 'ilike', 'Isabelle Graillat')])
+        #tech_ids = self.env['res.users'].sudo().search([])
+        #print "tech_ids : %s" % tech_ids
+
+        #repair.tech2 = self.env['project.task'].search([('sale_line_id', 'in', order.order_line.ids)])
+        #self.tech2 = tech_ids
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
@@ -60,11 +82,11 @@ class MrpRepairInh(models.Model):
         # get stock location corresponding to technician
         # src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
         print self.tech.name
-        loc_obj = self.env['stock.location']
+        loc_obj = self.env['stock.location'].sudo()
         tech_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
         print tech_loc_id.id
 
-        all_locs_recs = loc_obj.search([])
+        all_locs_recs = loc_obj.search([]).sudo()
         all_locs_objs = []
         for r in all_locs_recs :
             all_locs_objs.append(loc_obj.browse(r.id))
@@ -78,7 +100,7 @@ class MrpRepairInh(models.Model):
     def _set_dest_lines_to_tech(self):
 
         mrp_repair_line_obj = self.env['mrp.repair.line']
-        loc_obj = self.env["stock.location"]
+        loc_obj = self.env["stock.location"].sudo()
         tech_loc_id = self._get_stock_loc_from_tech()
 
         if not self.tech:
@@ -116,7 +138,6 @@ class MrpRepairInh(models.Model):
         move_list = []
 
         for repair in self.browse(cr, uid, ids, context={}) :
-            print "clientsite : %s" % repair.clientsite
 
 ### BERAUD SITE REPAIR CONFIRM CASE ###
             if not repair.clientsite:
@@ -188,19 +209,24 @@ class MrpRepairInh(models.Model):
 
 ### CLIENT SITE REPAIR CONFIRM CASE ###
             elif repair.clientsite:
+
                 if not repair.tech:
                     raise UserError("Technicien non-spécifié")
 
                 # get stock location corresponding to technician
-                #src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-                print repair.tech.name
-                tech_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
-                print tech_loc_id
+                src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
+                print "tech_name : %s" % repair.tech.name
+                print "src_loc : %s" % src_loc
+                #tech_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
+                tech_loc_id = repair.sudo().env['stock.location'].search([('tech', 'ilike', repair.tech.name)])
+                print "tech_loc_id : %s" % tech_loc_id
+                print "tech_loc_id[0] : %s" % tech_loc_id[0]
+                #print "repair.tech_loc_id : %s" % repair.tech_loc_id
 
                 if not tech_loc_id:
                     raise UserError("Le Technicien spécifié n'a pas d'emplacement de stock assigné")
 
-                tech_loc = loc_obj.browse(cr, uid, tech_loc_id[0], context={}) 
+                tech_loc = repair.sudo().env['stock.location'].browse(tech_loc_id[0].id) 
                 print tech_loc.name
 
                 repair._set_dest_lines_to_tech()

@@ -27,6 +27,7 @@
     'data': [
         'views/reparations_reports.xml',
         'views/repair_views.xml',
+        'views/partner_view.xml',
 
         'security/ir.model.access.csv',
         'security/repair_security.xml',
@@ -36,5 +37,8 @@
         'reports/repair/report_mrprepairorder.xml',
         'reports/repair/report_mrprepairorder_no_prices.xml',
     ],
+    #'test': [
+    #    'test/test_repair.yml',
+    #]
 }
 

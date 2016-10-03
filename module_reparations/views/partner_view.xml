@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record model="ir.ui.view" id="res_partner_new_form_inherited">
+      <field name="name">Res Partner Form View Inherited</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form" />
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='website']" position="after">
+          <field name="employee"/>
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</openerp>
+
