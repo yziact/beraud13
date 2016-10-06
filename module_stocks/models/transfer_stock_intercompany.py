@@ -171,9 +171,12 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 ], limit=1)
             if not location_trn:
                 raise UserError(_("No stock transit location could be found!"))
+
             for line in wizard.line_ids:
+                print "product : %s" % line.product_id
                 move_vals = {
                     'name': _('Intercompany transit %s - Source') % (line.product_id.name),
+                    'origin': 'TSIS move',
                     'product_id': line.product_id.id,
                     'product_uom': line.product_id.uom_id.id,
                     'product_uom_qty': line.quantity,
@@ -185,6 +188,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                     'isSale': True
                 }
                 move1 = move_obj.create(move_vals)
+
                 move_vals.update({
                     'name': _('Intercompany transit %s - Destination') % (line.product_id.name),
                     'company_id': wizard.company_dst_id.id,
@@ -195,22 +199,22 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                     'isSale': False
                 })
                 move2 = move_obj.create(move_vals)
+
                 move1.action_confirm()
                 if move1.state != 'confirmed':
                     raise UserError(_("The first movement could not be confirmed!"))
-                move1.action_assign()
-                if move1.state != 'assigned':
-                    raise UserError(_("The first movement could not be assigned!"))
+
                 move1.action_done()
                 if move1.state != 'done':
                     raise UserError(_("The first movement could not be terminated!"))
+
+                # set owner of quant to company that received the move
                 move1.sudo().quant_ids.write({'company_id': wizard.company_dst_id.id})
+
                 move2.action_confirm()
                 if move2.state != 'confirmed':
                     raise UserError(_("The second movement could not be confirmed!"))
-                move2.action_assign()
-                if move2.state != 'assigned':
-                    raise UserError(_("The second movement could not be assigned!"))
+
                 move2.action_done()
                 if move2.state != 'done':
                     raise UserError(_("The second movement could not be terminated!"))

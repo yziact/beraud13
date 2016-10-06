@@ -16,7 +16,6 @@
     'version': '0.1',
 
     'depends': [
-        'base',
         'stock',
         'mrp',
         'product',
@@ -33,5 +32,6 @@
         'reports/report_shipping2.xml',
 
     ],
+
 }
 
