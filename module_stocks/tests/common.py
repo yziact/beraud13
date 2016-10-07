@@ -23,6 +23,7 @@ class TestsCommon(common.TransactionCase):
         #    'groups_id': [(6, 0, [group_manager.id])]
         #})
 
+        """
         self.user_beraud = self.env['res.users'].create({
             'name': 'Beraud User',
             'login': 'userberaud',
@@ -33,17 +34,18 @@ class TestsCommon(common.TransactionCase):
             'groups_id': [(6, 0, [group_user.id])],
             'company_id': 1,
         })
+        """
 
-        self.user_atom = self.env['res.users'].create({
-            'name': 'Atom User',
-            'login': 'useratom',
-            'alias_name': 'atom_user_alias',
-            'email': 'm.u@example.com',
-            'signature': '--\nMark',
-            'notify_email': 'none',
-            'groups_id': [(6, 0, [group_user.id])],
-            'company_id': 1,
-        })
+        #self.user_atom = self.env['res.users'].create({
+            #'name': 'Atom User',
+            #'login': 'useratom',
+            #'alias_name': 'atom_user_alias',
+            #'email': 'm.u@example.com',
+            #'signature': '--\nMark',
+            #'notify_email': 'none',
+            #'groups_id': [(6, 0, [group_user.id])],
+            #'company_id': 1,
+        #})
 
         #self.partner = self.env.ref('base.res_partner_1')
         self.ProductObj = self.env['product.product']

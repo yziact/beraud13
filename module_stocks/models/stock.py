@@ -42,13 +42,13 @@ class StockPicking(models.Model):
         
         if c_dst_id == 1: # dest is Beraud 
             # loc_rs : list of ids.
-            src_qty = move.stock_qty_atom
-            dst_qty = move.stock_qty_ber
+            src_qty = move.stock_qty_atom_dispo
+            dst_qty = move.stock_qty_ber_dispo
             loc_src_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
             loc_dst_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
         elif c_dst_id == 3:
-            src_qty = move.stock_qty_ber
-            dst_qty = move.stock_qty_atom
+            src_qty = move.stock_qty_ber_dispo
+            dst_qty = move.stock_qty_atom_dispo
             loc_src_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
             loc_dst_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
         else:
@@ -117,23 +117,23 @@ class StockPicking(models.Model):
 
             for move in pick.move_lines:
 
-                if move.stock_qty_atom == 0 and move.stock_qty_ber == 0:
+                if move.stock_qty_atom_dispo == 0 and move.stock_qty_ber_dispo == 0:
                     print "both at zero, returning"
                     continue
                     
-                if move.stock_qty_atom + move.stock_qty_ber <= 0:
+                if move.stock_qty_atom_dispo + move.stock_qty_ber_dispo <= 0:
                     print "both stocks not enough to make more than zero, returning"
                     continue
 
                 #if client belongs to Beraud, the product will be taken from beraud stock
                 #so it needs to take from atom
                 if pick.partner_id.company_id.id == 1: 
-                    if move.stock_qty_ber < move.product_uom_qty:
-                        if move.stock_qty_atom > 0:
+                    if move.stock_qty_ber_dispo < move.product_uom_qty:
+                        if move.stock_qty_atom_dispo > 0:
                             #open tsis atom -> beraud
                             print "client belongs to Beraud but beraud stock too low and stocks from Atom disponible, opening tsis"
                             return self._open_tsis(cr, uid, ids, move, 3, 1, context)
-                        elif move.stock_qty_ber == 0:
+                        elif move.stock_qty_ber_dispo == 0:
                             #if atom doesnt have anymore stock, and we have 0 quantity, do nothing
                             # call the normal function, that will also do nothing
                             print "doing nothing, nothing can be reserved. calling super"
@@ -149,12 +149,12 @@ class StockPicking(models.Model):
                 #if client belongs to Atom, the product will be taken from atom stock
                 #so it needs to take from beraud
                 if pick.partner_id.company_id.id == 3: 
-                    if move.stock_qty_atom < move.product_uom_qty:
-                        if move.stock_qty_ber > 0:
+                    if move.stock_qty_atom_dispo < move.product_uom_qty:
+                        if move.stock_qty_ber_dispo > 0:
                             #open tsis beraud -> atom
                             print "client belongs to Atom but atom stock too low and stocks from Beraud disponible, opening tsis"
                             return self._open_tsis(cr, uid, ids, move, 1, 3, context)
-                        elif move.stock_qty_atom == 0:
+                        elif move.stock_qty_atom_dispo == 0:
                             #if beraud doesnt have anymore stock, and we have 0 quantity, do nothing
                             # call the normal function, that will also do nothing
                             print "doing nothing, nothing can be reserved, calling super"
@@ -175,8 +175,8 @@ import time
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    stock_qty_ber = fields.Float(compute='_compute_stock_nums', string=u"Quantité Stock Beraud")
-    stock_qty_atom = fields.Float(compute='_compute_stock_nums', string=u"Quantité Stock Atom")
+    stock_qty_ber_dispo = fields.Float(compute='_compute_stock_nums', string=u"Quantité Stock Beraud")
+    stock_qty_atom_dispo = fields.Float(compute='_compute_stock_nums', string=u"Quantité Stock Atom")
 
     stock_qty_ber_reserved = fields.Float(compute='_compute_stock_nums', string=u"Quantité Réservée Stock Beraud")
     stock_qty_atom_reserved = fields.Float(compute='_compute_stock_nums', string=u"Quantité Réservée Stock Atom")
@@ -192,7 +192,6 @@ class StockMove(models.Model):
         for move in self:
 
             print "product : %s" % move.product_id
-
             ber_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
             atom_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/Stock')])
 
@@ -219,30 +218,43 @@ class StockMove(models.Model):
             print "sq_ids_beraud : ", sq_ids_beraud
             print "sq_ids_atom : ", sq_ids_atom
 
-            qt = 0
-            qr = 0
+            qt = 0.0
+            qr = 0.0
+            move.stock_qty_ber_dispo = 0.0
+            move.stock_qty_ber_reserved = 0.0
             for i in sq_ids_beraud:
                 #print "name : %s " % self.env['product.product'].browse(i.product_id.id).name_template
                 #print "location : %s " % self.env['stock.location'].browse(i.location_id.id).complete_name
-                qt+=i.qty
                 if i.reservation_id :
                     qr+=i.qty
+                else:
+                    qt+=i.qty
 
-            move.stock_qty_ber = qt
+            move.stock_qty_ber_dispo = qt
             move.stock_qty_ber_reserved = qr
+            print "move.stock_qty_ber_dispo : ", move.stock_qty_ber_dispo 
+            print "move.stock_qty_ber_reserved : ", move.stock_qty_ber_reserved 
 
-            qt = 0
-            qr = 0
+            qt = 0.0
+            qr = 0.0
+            move.stock_qty_atom_dispo = 0.0
+            move.stock_qty_atom_reserved = 0.0
             for i in sq_ids_atom:
                 #print "name : %s " % self.env['product.product'].browse(i.product_id.id).name_template
                 #print "location : %s " % self.env['stock.location'].browse(i.location_id.id).complete_name
                 #print "reservation_id : %s " % self.env['stock.move'].browse(i.reservation_id.id).name
-                qt+=i.qty
                 if i.reservation_id :
                     qr+=i.qty
+                else:
+                    qt+=i.qty
 
-            move.stock_qty_atom = qt
+            move.stock_qty_atom_dispo = qt
             move.stock_qty_atom_reserved = qr
+
+            move.stock_qty_atom_reserved = qr
+            move.stock_qty_atom_reserved = qr
+            print "move.stock_qty_atom_dispo : ", move.stock_qty_atom_dispo 
+            print "move.stock_qty_atom_reserved : ", move.stock_qty_atom_reserved 
 
         print "time taken by _compute_stock_nums : %s" % (time.clock()-start)
 

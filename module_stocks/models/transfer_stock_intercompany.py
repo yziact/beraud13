@@ -173,7 +173,6 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 raise UserError(_("No stock transit location could be found!"))
 
             for line in wizard.line_ids:
-                print "product : %s" % line.product_id
                 move_vals = {
                     'name': _('Intercompany transit %s - Source') % (line.product_id.name),
                     'origin': 'TSIS move',
@@ -208,6 +207,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 if move1.state != 'done':
                     raise UserError(_("The first movement could not be terminated!"))
 
+                print "MOVE 1 QUANT IDS : ",move1.sudo().quant_ids
                 # set owner of quant to company that received the move
                 move1.sudo().quant_ids.write({'company_id': wizard.company_dst_id.id})
 
@@ -218,6 +218,8 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 move2.action_done()
                 if move2.state != 'done':
                     raise UserError(_("The second movement could not be terminated!"))
+
+                print "MOVE 2 QUANT IDS : ",move2.sudo().quant_ids
 
     @api.onchange('company_src_id', 'company_dst_id')
     def onchange_company_src_dst_id(self):
