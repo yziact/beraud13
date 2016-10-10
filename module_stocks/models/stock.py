@@ -39,7 +39,7 @@ class StockPicking(models.Model):
         src_qty = None
         dest_qty = None
         wanted_qty = move.product_uom_qty
-        
+
         if c_dst_id == 1: # dest is Beraud 
             # loc_rs : list of ids.
             src_qty = move.stock_qty_atom_dispo
@@ -71,9 +71,9 @@ class StockPicking(models.Model):
         qty = 0
         if (src_qty + dst_qty) <= wanted_qty :
             qty = src_qty
-        else: 
+        else:
             qty = wanted_qty - dst_qty
-        
+
         move.availability = 10;
         wizard_id = self.pool.get('wizard.transfer.stock.intercompany').create(cr, uid, {
             'company_src_id':c_src_id, # Beraud
@@ -95,7 +95,7 @@ class StockPicking(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'wizard.transfer.stock.intercompany',
-            'name':"Transfert de Stocks Inter-Sociétés",
+            'name':u"Transfert de Stocks Inter-Sociétés",
             'view_mode': 'form',
             #'view_id': False,
             #'nodestroy': True,
@@ -120,7 +120,7 @@ class StockPicking(models.Model):
                 if move.stock_qty_atom_dispo == 0 and move.stock_qty_ber_dispo == 0:
                     print "both at zero, returning"
                     continue
-                    
+
                 if move.stock_qty_atom_dispo + move.stock_qty_ber_dispo <= 0:
                     print "both stocks not enough to make more than zero, returning"
                     continue
@@ -143,7 +143,7 @@ class StockPicking(models.Model):
                             print "reserving normally, even if not enough. calling super"
                             res = super(StockPicking, self).action_assign(cr, uid, ids, context)
                     else:
-                        print "client belongs to Atom, stocks OK, not opening tsis"
+                        print "client belongs to Beraud, stocks OK, not opening tsis"
                         res = super(StockPicking, self).action_assign(cr, uid, ids, context)
 
                 #if client belongs to Atom, the product will be taken from atom stock
@@ -175,8 +175,8 @@ import time
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    stock_qty_ber_dispo = fields.Float(compute='_compute_stock_nums', string=u"Quantité Stock Beraud")
-    stock_qty_atom_dispo = fields.Float(compute='_compute_stock_nums', string=u"Quantité Stock Atom")
+    stock_qty_ber_dispo = fields.Float(compute='_compute_stock_nums', string=u"Quantité Disponible Stock Beraud")
+    stock_qty_atom_dispo = fields.Float(compute='_compute_stock_nums', string=u"Quantité Disponible Stock Atom")
 
     stock_qty_ber_reserved = fields.Float(compute='_compute_stock_nums', string=u"Quantité Réservée Stock Beraud")
     stock_qty_atom_reserved = fields.Float(compute='_compute_stock_nums', string=u"Quantité Réservée Stock Atom")
@@ -191,7 +191,7 @@ class StockMove(models.Model):
         print "in _compute_stock_nums"
         for move in self:
 
-            print "product : %s" % move.product_id
+            #print "product : %s" % move.product_id
             ber_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
             atom_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/Stock')])
 
@@ -206,17 +206,21 @@ class StockMove(models.Model):
             for i in atom_loc_rs:
                 atom_loc_ids.append(i.id)
 
-            print "ber_loc_ids : ", ber_loc_ids
-            print "atom_loc_ids : ", atom_loc_ids
+            #print "ber_loc_ids : ", ber_loc_ids
+            #print "atom_loc_ids : ", atom_loc_ids
             #prods_in_ber = [x for x in sq_objs if x.product_id == move.product_id and x.location_id.id in ber_loc_ids]
             #prods_in_atom = [x for x in sq_objs if x.product_id == move.product_id and x.location_id.id in atom_loc_ids]
+
+            #print "[csn] move.product_id.name : ", move.product_id.name
+            #print "[csn] move.product_id.location_id : ", move.location_id
+            #print "[csn] move.product_id.location_dest_id : ", move.location_dest_id
 
             sq_ids_beraud = self.env['stock.quant'].sudo().search([('product_id','=',move.product_id.id),('location_id.id','in',ber_loc_ids)])
             sq_ids_atom = self.env['stock.quant'].sudo().search([('product_id','=',move.product_id.id),('location_id.id','in',atom_loc_ids)])
 
             # stock.quant(1,2,3...)
-            print "sq_ids_beraud : ", sq_ids_beraud
-            print "sq_ids_atom : ", sq_ids_atom
+            #print "sq_ids_beraud : ", sq_ids_beraud
+            #print "sq_ids_atom : ", sq_ids_atom
 
             qt = 0.0
             qr = 0.0
@@ -232,8 +236,8 @@ class StockMove(models.Model):
 
             move.stock_qty_ber_dispo = qt
             move.stock_qty_ber_reserved = qr
-            print "move.stock_qty_ber_dispo : ", move.stock_qty_ber_dispo 
-            print "move.stock_qty_ber_reserved : ", move.stock_qty_ber_reserved 
+            #print "[csn]move.stock_qty_ber_dispo : ", move.stock_qty_ber_dispo
+            #print "[csn]move.stock_qty_ber_reserved : ", move.stock_qty_ber_reserved
 
             qt = 0.0
             qr = 0.0
@@ -250,11 +254,8 @@ class StockMove(models.Model):
 
             move.stock_qty_atom_dispo = qt
             move.stock_qty_atom_reserved = qr
-
-            move.stock_qty_atom_reserved = qr
-            move.stock_qty_atom_reserved = qr
-            print "move.stock_qty_atom_dispo : ", move.stock_qty_atom_dispo 
-            print "move.stock_qty_atom_reserved : ", move.stock_qty_atom_reserved 
+            #print "[csn]move.stock_qty_atom_dispo : ", move.stock_qty_atom_dispo
+            #print "[csn]move.stock_qty_atom_reserved : ", move.stock_qty_atom_reserved
 
         print "time taken by _compute_stock_nums : %s" % (time.clock()-start)
 
