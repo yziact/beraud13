@@ -111,11 +111,13 @@ class StockPicking(models.Model):
         move_obj = self.pool.get('stock.move')
         loc_obj = self.pool.get('stock.location')
 
+
         print "our action assign"
         res = {}
         for pick in self.browse(cr, uid, ids, context=context):
 
             for move in pick.move_lines:
+                move._compute_stock_nums()
 
                 if move.stock_qty_atom_dispo == 0 and move.stock_qty_ber_dispo == 0:
                     print "both at zero, returning"
@@ -191,7 +193,7 @@ class StockMove(models.Model):
         print "in _compute_stock_nums"
         for move in self:
 
-            #print "product : %s" % move.product_id
+            print "product : %s" % move.product_id
             ber_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
             atom_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/Stock')])
 
@@ -211,16 +213,16 @@ class StockMove(models.Model):
             #prods_in_ber = [x for x in sq_objs if x.product_id == move.product_id and x.location_id.id in ber_loc_ids]
             #prods_in_atom = [x for x in sq_objs if x.product_id == move.product_id and x.location_id.id in atom_loc_ids]
 
-            #print "[csn] move.product_id.name : ", move.product_id.name
-            #print "[csn] move.product_id.location_id : ", move.location_id
-            #print "[csn] move.product_id.location_dest_id : ", move.location_dest_id
+            print "[csn] move.product_id.name : ", move.product_id.name
+            print "[csn] move.product_id.location_id : ", move.location_id
+            print "[csn] move.product_id.location_dest_id : ", move.location_dest_id
 
             sq_ids_beraud = self.env['stock.quant'].sudo().search([('product_id','=',move.product_id.id),('location_id.id','in',ber_loc_ids)])
             sq_ids_atom = self.env['stock.quant'].sudo().search([('product_id','=',move.product_id.id),('location_id.id','in',atom_loc_ids)])
 
             # stock.quant(1,2,3...)
-            #print "sq_ids_beraud : ", sq_ids_beraud
-            #print "sq_ids_atom : ", sq_ids_atom
+            print "sq_ids_beraud : ", sq_ids_beraud
+            print "sq_ids_atom : ", sq_ids_atom
 
             qt = 0.0
             qr = 0.0
@@ -261,7 +263,30 @@ class StockMove(models.Model):
 
 
 class StockLocation(models.Model):
-    _inherit = "stock.location"
+    _inherit = 'stock.location'
 
     tech = fields.Many2one('res.users', string="Technicien")
+
+class StockQuants(models.Model):
+
+    _inherit = 'stock.quant'
+
+    def quants_get(self, cr, uid, qty, move, ops=False, domain=None, removal_strategy='fifo', context=None):
+        """
+        Use the removal strategies of product to search for the correct quants
+        If you inherit, put the super at the end of your method.
+
+        :location: browse record of the parent location where the quants have to be found
+        :product: browse record of the product to find
+        :qty in UoM of product
+        """
+        print ">>>>>>>>>>>>> our quants_get <<<<<<<<<<<<<<<<"
+        domain = domain or [('qty', '>', 0.0)]
+        domain = [d for d in domain if d[0] != 'company_id']
+        print "dom temp : ", domain
+        domain.append(('company_id', '=', move.location_id.company_id.id))
+        print "new dom : ", domain
+        # set company_id to move.location_id.company_id.
+        return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain, removal_strategy=removal_strategy, context=context)
+
 

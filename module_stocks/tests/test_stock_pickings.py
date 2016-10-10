@@ -277,7 +277,7 @@ class TestStockPicking(common.TestsCommon):
             ('location_id', '=', trn_loc.id),
             ])
 
-        print "quants in remaining location : ", quants
+        print "quants remaining in transit location : ", quants
 
         for i in quants : 
             print "quant id : ", i.id
@@ -399,7 +399,7 @@ class TestStockPicking(common.TestsCommon):
             ('location_id', '=', trn_loc.id),
             ])
 
-        print "quants in remaining location : ", quants
+        print "quants remaining in transit location : ", quants
 
         for i in quants : 
             print "quant id : ", i.id
@@ -408,6 +408,9 @@ class TestStockPicking(common.TestsCommon):
             print "quant location_id : ", i.location_id
             print "quant company_id : ", i.company_id
             print "quant qty : ", i.qty
+
+        print "assigning stock now that TSIS is done."
+        picking_out.action_assign()
 
         '''    
         quant_objs = self.env['stock.quant'].browse(quant_ids)        
