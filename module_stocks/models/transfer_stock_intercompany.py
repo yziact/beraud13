@@ -156,7 +156,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
         """
         move_obj = self.env['stock.move']
         company_env = self.env['res.company']
-
+        moves = [] 
 
         for wizard in self:
             location_trn = self.env['stock.location'].search([
@@ -220,6 +220,11 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                     raise UserError(_("The second movement could not be terminated!"))
 
                 print "MOVE 2 QUANT IDS : ",move2.sudo().quant_ids
+                moves.append((move1, move2))
+
+        # returning moves to easily fetch them from tests
+        return moves
+
 
     @api.onchange('company_src_id', 'company_dst_id')
     def onchange_company_src_dst_id(self):

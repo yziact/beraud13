@@ -226,7 +226,7 @@ class TestStockPicking(common.TestsCommon):
             print "quantity ok"
 
         print "perform_transfer() from wizard.transfer.stock.intercompany"
-        res = wiz_obj.perform_transfer()
+        moves_list = wiz_obj.perform_transfer()
         # We should have :
         # a quant of qty 1.0, company_id 1, in location Beraud
         # a quant of qty 2.0, company_id 1, in location Beraud
@@ -256,6 +256,36 @@ class TestStockPicking(common.TestsCommon):
         self.assertEqual(productA.qty_available, 9.0, 
                          'Wrong quantity available, %s found instead of 9.0)' % (productA.qty_available))
         print "Quants in Atom OK."
+
+        print "checking integrity of moves"
+        for tup in moves_list:
+            for move in tup:
+                print "move.id", move.id
+                print "move.name", move.name
+                print "move.product_uom", move.product_uom
+                print "move.product_uom_qty", move.product_uom_qty
+                print "move.picking_id", move.picking_id
+                print "move.location_id", move.location_id
+                print "move.location_dest_id", move.location_dest_id
+
+        trn_loc = moves_list[0][0].location_dest_id
+        print "checking for remaining quants in transit location"
+        print "transit location : ", trn_loc
+
+        quants = self.env['stock.quant'].search([
+            ('product_id', '=', productA.id),
+            ('location_id', '=', trn_loc.id),
+            ])
+
+        print "quants in remaining location : ", quants
+
+        for i in quants : 
+            print "quant id : ", i.id
+            print "quant name : ", i.name
+            print "quant product_id : ", i.product_id
+            print "quant location_id : ", i.location_id
+            print "quant company_id : ", i.company_id
+            print "quant qty : ", i.qty
 
     def test01_tsis_beraud_to_atom(self):
         """
@@ -318,7 +348,7 @@ class TestStockPicking(common.TestsCommon):
             print "quantity ok"
 
         print "perform_transfer() from wizard.transfer.stock.intercompany"
-        res = wiz_obj.perform_transfer()
+        moves_list = wiz_obj.perform_transfer()
         # We should have :
         # a quant of qty 10.0, company_id 1, in location Beraud
         # a quant of qty 5.0, company_id 3, in location Atom
@@ -331,9 +361,9 @@ class TestStockPicking(common.TestsCommon):
             ])
         total_qty = sum([quant.qty for quant in quants])
         self.assertEqual(total_qty, 10.0,
-                         "wrong qty of quants in beraud location, %s found instead of 10.0" % total_qty)
+                        "wrong qty of quants in beraud location, %s found instead of 10.0" % total_qty)
         self.assertEqual(productA.qty_available, 17.0, 
-                         'Wrong quantity available, %s found instead of 17.0)' % (productA.qty_available))
+                        'Wrong quantity available, %s found instead of 17.0)' % (productA.qty_available))
         print "Quants in Beraud OK."
 
         # check quants in Atom
@@ -344,12 +374,33 @@ class TestStockPicking(common.TestsCommon):
             ])
         total_qty = sum([quant.qty for quant in quants])
         self.assertEqual(total_qty, 7.0,
-                         "wrong qty of quants in atom location, %s found instead of 7.0" % total_qty)
+                        "wrong qty of quants in atom location, %s found instead of 7.0" % total_qty)
         self.assertEqual(productA.qty_available, 17.0, 
-                         'Wrong quantity available, %s found instead of 17.0)' % (productA.qty_available))
+                        'Wrong quantity available, %s found instead of 17.0)' % (productA.qty_available))
         print "Quants in Atom OK."
 
-        """
+        print "checking integrity of moves"
+        for tup in moves_list:
+            for move in tup:
+                print "move.id", move.id
+                print "move.name", move.name
+                print "move.product_uom", move.product_uom
+                print "move.product_uom_qty", move.product_uom_qty
+                print "move.picking_id", move.picking_id
+                print "move.location_id", move.location_id
+                print "move.location_dest_id", move.location_dest_id
+
+        trn_loc = moves_list[0][0].location_dest_id
+        print "checking for remaining quants in transit location"
+        print "transit location : ", trn_loc
+
+        quants = self.env['stock.quant'].search([
+            ('product_id', '=', productA.id),
+            ('location_id', '=', trn_loc.id),
+            ])
+
+        print "quants in remaining location : ", quants
+
         for i in quants : 
             print "quant id : ", i.id
             print "quant name : ", i.name
@@ -357,7 +408,6 @@ class TestStockPicking(common.TestsCommon):
             print "quant location_id : ", i.location_id
             print "quant company_id : ", i.company_id
             print "quant qty : ", i.qty
-        """
 
         '''    
         quant_objs = self.env['stock.quant'].browse(quant_ids)        
