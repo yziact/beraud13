@@ -15,12 +15,18 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 import logging 
 _logger = logging.getLogger(__name__)
 
+import pprint
+pp = pprint.PrettyPrinter(indent=2)
 
 class MrpRepairInh(models.Model):
     _inherit = 'mrp.repair'
 
     def _set_default_end_date(self):
         return (datetime.datetime.now()+datetime.timedelta(days=1)).strftime(DATETIME_FORMAT)
+
+    def _set_default_location(self):
+        ber_loc_id = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
+        return ber_loc_id
 
     # not visible to the model until created, but exists in db
     create_date = fields.Datetime('Create Date', readonly=True)
@@ -35,30 +41,18 @@ class MrpRepairInh(models.Model):
     clientsite = fields.Boolean(string="Réparation sur Site Client : ", default=False)
 
     tech = fields.Many2one('res.users', string="Technicien", domain=[('company_id','in',[1,3])], company_dependent=False) 
-    #tech2 = fields.Many2many('res.users', compute='_compute_techs', string='Les Techs', store=False)
 
-    #tasks_ids = fields.Many2many('project.task', compute='_compute_tasks_ids', string='Tasks associated to this sale')
-    #tech = fields.Many2one('res.users', string="Technicien", company_dependent=False) 
-
-    #operations = fields.one2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=True, states={'draft': [('readonly', False)]}, copy=True),
     operations = fields.One2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=False, copy=True)
 
-    #@api.onchange('tech2') 
-    #def tech2_changed(self):
-    #    self._compute_techs()
-        
-    @api.multi
-    def _compute_techs(self):
-        print "***in compute techs."
-        #superself = self.sudo()
-        #tech_ids = superself.env['res.users'].search([('name', 'ilike', 'Isabelle Graillat')])
-        #import pdb; pdb.set_trace();
-        #tech_ids = self.env['res.users'].sudo().search([('name', 'ilike', 'Isabelle Graillat')])
-        #tech_ids = self.env['res.users'].sudo().search([])
-        #print "tech_ids : %s" % tech_ids
+    location_id = fields.Many2one('stock.location', string='Current Location', 
+                                  select=True, required=True, readonly=True,
+                                  states={'draft': [('readonly', True)], 'confirmed': [('readonly', True)]},
+                                  default=_set_default_location)
 
-        #repair.tech2 = self.env['project.task'].search([('sale_line_id', 'in', order.order_line.ids)])
-        #self.tech2 = tech_ids
+    location_dest_id = fields.Many2one('stock.location', string='Delivery Location',
+                                       readonly=True, required=True,
+                                       states={'draft': [('readonly', True)], 'confirmed': [('readonly', True)]},
+                                       default=_set_default_location)
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
@@ -68,63 +62,163 @@ class MrpRepairInh(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(res, self)
 
+    @api.onchange('clientsite') 
+    def clientsite_change(self):
+        print "clientsite has changed !"
+        if not self.clientsite:
+            self.tech = None
+
     @api.onchange('tech') 
     def tech_change(self):
         print "tech has changed !"
         if not self.tech:
             return
         else:
-            self._set_dest_lines_to_tech()
+            self._set_dest_of_lines()
 
-    def _get_stock_loc_from_tech(self):
+    def _set_dest_of_lines(self, new_tech=None):
+        print "_set_dest_of_lines"
 
-        print "get stock loc from tech"
-        # get stock location corresponding to technician
-        # src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-        print self.tech.name
-        loc_obj = self.env['stock.location'].sudo()
-        tech_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
-        print tech_loc_id.id
+        loc_obj = self.env["stock.location"]
+        t_obj = self.env['res.users']
+        dest_loc_id = 0
+        print '[sdol]self.tech : ', self.tech
+        print '[sdol]new_tech : ', new_tech
 
-        all_locs_recs = loc_obj.search([]).sudo()
-        all_locs_objs = []
-        for r in all_locs_recs :
-            all_locs_objs.append(loc_obj.browse(r.id))
-            print r.tech.name
-
-        if not tech_loc_id:
-            raise UserError("Le Technicien spécifié n'a pas d'emplacement de stock assigné")
-
-        return tech_loc_id.id
-
-    def _set_dest_lines_to_tech(self):
-
-        mrp_repair_line_obj = self.env['mrp.repair.line']
-        loc_obj = self.env["stock.location"].sudo()
-        tech_loc_id = self._get_stock_loc_from_tech()
-
-        if not self.tech:
-            return
-
-        tech_loc = loc_obj.browse(tech_loc_id) 
+        if new_tech:
+            new_tech_name = t_obj.browse(new_tech).name
+            dest_loc_id = loc_obj.search([('tech', 'ilike', new_tech_name)])
+            print "--> new tech, dest_loc_id : ", dest_loc_id
+            if not dest_loc_id:
+                raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
+        #False means we changed from a tech to None, None means we didn't pass anything
+        elif self.tech and new_tech != False: 
+            dest_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
+            print "--> tech, dest_loc_id : ", dest_loc_id
+            if not dest_loc_id:
+                raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
+        else:
+            dest_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+            print "--> NO TECH, dest_loc_id : ", dest_loc_id
+            if not dest_loc_id:
+                raise UserError("[gslfr] Emplacement Virtuel de Production non trouvé.")
 
         for line in self.operations:
-            print "updating lines with location : %s" % tech_loc.name
-            line.write({ 'location_dest_id':tech_loc.id })
+            print "updating lines with location : %s" % dest_loc_id.name
+            line.write({ 'location_dest_id':dest_loc_id.id })
 
     @api.model
     def create(self, vals):
+        print "***mrp repair our create"
+
+        print "vals : "
+        pp.pprint(vals)
+
+        ### set location_id/dest_id of repair
+        if not vals['partner_id']:
+            print "partner_id empty in vals in create"
+            raise UserError("Il faut un partenaire pour sélectionner les emplacements source/destination")
+
+        partner_obj = self.env['res.partner']
+        p_obj = self.env['product.product']
+        t_obj = self.env['res.users']
+        l_obj = self.env['stock.location']
+
+        ber_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
+        atom_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])
+        customer_loc_id = l_obj.search([('complete_name','ilike','Partner Locations/Customers')])
+        production_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+
+        c_id = partner_obj.browse(vals['partner_id']).company_id.id
+        print "c_id : ", c_id
+
+        if c_id == 1:
+            vals['location_id'] = ber_loc_id.id
+        else:
+            vals['location_id'] = atom_loc_id.id
+        vals['location_dest_id'] = customer_loc_id.id
+
+        ### set location_id/dest_id of repair_lines
+        p_obj = self.env['product.product']
+        t_obj = self.env['res.users']
+        l_obj = self.env['stock.location']
+
+        if vals['operations']:
+            for v in vals['operations']:
+                o = v[2]
+                print "o was : ", o
+                l_id = p_obj.browse(o['product_id']).location_id
+                l_id = vals['location_id'] # product is taken from the stock set in the repair
+                ld_id = production_loc_id.id
+
+                # if there's a tech, change the dest location
+                if vals['tech']:
+                    print "there is a tech selected : ", vals['tech']
+                    t_name = t_obj.browse(vals['tech']).name
+                    t_loc = l_obj.search([('tech', 'ilike', t_name)])
+                    print "t_name : ", t_name
+                    print "t_loc : ", t_loc
+                    ld_id = t_loc.id
+
+                o.update({'location_id': l_id})
+                o.update({'location_dest_id': ld_id})
+                print "o is now: ", o
+
         rec = super(MrpRepairInh, self).create(vals)
-        if rec.clientsite:
-            rec._set_dest_lines_to_tech()
         return rec
 
     @api.multi
     def write(self, vals):
-        res = super(MrpRepairInh, self).write(vals)
-        if self.clientsite:
-            self._set_dest_lines_to_tech()
-        return res
+        print "*** mrp_repair our write"
+
+        p_obj = self.env['product.product']
+        t_obj = self.env['res.users']
+        l_obj = self.env['stock.location']
+        print "vals : "
+        pp.pprint(vals)
+
+        production_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+
+        print "self.location_id : ", self.location_id
+        print "self.location_dest_id : ", self.location_dest_id
+        print "self.tech : ", self.tech
+
+        # add locations to updates to operations
+        if vals.get('operations'): # operation lines and maybe also tech were changed
+            print "operations have changed"
+            for v in vals['operations']:
+                o = v[2]
+                if not o:
+                    continue
+                print "o was : ", o
+                #l_id = p_obj.browse(o['product_id']).location_id
+                l_id = self.location_id.id # product is taken from the stock set in the repair
+                ld_id = production_loc_id.id
+
+                # if there's a tech, change the dest location
+                if self.tech:
+                    print "there is a tech selected : ", self.tech.id
+                    t_name = t_obj.browse(self.tech.id).name
+                    t_loc = l_obj.search([('tech', 'ilike', t_name)])
+                    print "t_name : ", t_name
+                    print "t_loc : ", t_loc
+                    ld_id = t_loc.id
+
+                o.update({'location_id': l_id})
+                o.update({'location_dest_id': ld_id})
+                print "o is now: ", o
+
+        print "[write] vals.get('tech') : ", vals.get('tech')
+        print "[write] self.tech : ", self.tech
+        print "[write] self.clientsite : ", self.clientsite
+
+        print 'end vals : ', vals
+        # check that all lines destinations are correct,
+        # in function of if the tech was removed or is set.
+        self._set_dest_of_lines(vals.get('tech'))
+        
+        rec = super(MrpRepairInh, self).write(vals)
+        return rec
 
     def action_confirm(self, cr, uid, ids, context):
 
@@ -386,17 +480,6 @@ class MrpRepairInh(models.Model):
                 loc_client_obj = loc_obj.browse(cr, uid, loc_client_id[0])
                 print "Client Location name : %s" % loc_client_obj.complete_name
 
-                #move_id = move_obj.create(cr, uid, {
-                    #'origin': repair.name,
-                    #'name': line.name,
-                    #'product_uom': line.product_id.uom_id.id,
-                    #'product_id': line.product_id.id,
-                    #'product_uom_qty': abs(line.product_uom_qty),
-                    #'location_id': line.location_id.id, # line location
-                    #'location_dest_id': tech_loc.id, #line location
-                    #'restrict_lot_id': line.lot_id.id,
-                #})
-
                 # Unreserve moves and make them 'done'
                 move_info_list = []
                 for move_id in move_ids:
@@ -442,5 +525,6 @@ class MrpRepairInh(models.Model):
                     move_obj.action_done(cr, uid, move_id, context={})
                     
         return res
+
 
 

@@ -4,23 +4,50 @@
 
       <!-- INHERITED FORM VIEW -->
         <record model="ir.ui.view" id="view_repair_form_inherited">
-            <field name="name">Repair Form View Inherited</field>
-            <field name="model">mrp.repair</field>
-            <field name="inherit_id" ref="mrp_repair.view_repair_order_form" />
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='guarantee_limit']" position="after">
-                    <field name="date_start"/>
-                    <field name="end_date"/>
-                </xpath>
-                <xpath expr="//field[@name='address_id']" position="after">
-                  <field name="clientsite"
-                    attrs="{'readonly': [('state', '!=', 'draft')]}" />
-                    <field name="tech"
-                      attrs="{'invisible': [('clientsite', '=', False)],
-                      'required': [('clientsite', '=', True)],
-                      'readonly': [('state', '!=', 'draft')] }" />
-                </xpath>
-            </field>
+          <field name="name">Repair Form View Inherited</field>
+          <field name="model">mrp.repair</field>
+          <field name="inherit_id" ref="mrp_repair.view_repair_order_form" />
+          <field name="arch" type="xml">
+
+            <!--<xpath expr="//sheet//field[@name='name']" position="attributes">
+              <attribute name="readonly">True</attribute>
+            </xpath>-->
+
+            <xpath expr="//field[@name='name']" position="attributes">
+              <attribute name="attrs">{'readonly': True}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='guarantee_limit']" position="after">
+              <field name="date_start"/>
+              <field name="end_date"/>
+            </xpath>
+
+            <xpath expr="//field[@name='address_id']" position="after">
+              <field name="clientsite"
+                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+              <field name="tech"
+                attrs="{'invisible': [('clientsite', '=', False)],
+                'required': [('clientsite', '=', True)],
+                'readonly': [('state', '!=', 'draft')] }" />
+            </xpath>
+
+            <xpath expr="//field[@name='location_id']" position="attributes">
+              <attribute name="string">Emplacement Actuel (auto)</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='location_dest_id']" position="attributes">
+              <attribute name="string">Emplacement de Livraison (auto)</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='operations']/tree//field[@name='location_id']" position="attributes">
+              <attribute name="readonly">True</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='operations']/tree//field[@name='location_dest_id']" position="attributes">
+              <attribute name="readonly">True</attribute>
+            </xpath>
+
+          </field>
         </record>
 
         <!-- CALENDAR POPUP VIEW -->
