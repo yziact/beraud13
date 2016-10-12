@@ -203,6 +203,10 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 if move1.state != 'confirmed':
                     raise UserError(_("The first movement could not be confirmed!"))
 
+                #move1.action_assign()
+                #if move1.state != 'confirmed':
+                #    raise UserError(_("Vous ne pouvez pas réserver, car il n'y a pas assez de stock."))
+
                 move1.action_done()
                 if move1.state != 'done':
                     raise UserError(_("The first movement could not be terminated!"))

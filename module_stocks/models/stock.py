@@ -280,12 +280,11 @@ class StockQuants(models.Model):
         :product: browse record of the product to find
         :qty in UoM of product
         """
-        print ">>>>>>>>>>>>> our quants_get <<<<<<<<<<<<<<<<"
+        #print ">>>>>>>>>>>>> our quants_get <<<<<<<<<<<<<<<<"
         domain = domain or [('qty', '>', 0.0)]
         domain = [d for d in domain if d[0] != 'company_id']
-        print "dom temp : ", domain
         domain.append(('company_id', '=', move.location_id.company_id.id))
-        print "new dom : ", domain
+        #print "new dom : ", domain
         # set company_id to move.location_id.company_id.
         return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain, removal_strategy=removal_strategy, context=context)
 

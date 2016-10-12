@@ -142,3 +142,11 @@ class TestsCommon(common.TransactionCase):
         self.gB = self.ProductObj.create({'name': 'g-B', 'uom_id': self.uom_gm.id, 'uom_po_id': self.uom_gm.id})
 
 
+    def print_quant(self, q):
+        print "quant id : ", q.id
+        print "quant name : ", q.name
+        print "quant product_id : ", q.product_id
+        print "quant location_id : ", q.location_id
+        print "quant company_id : ", q.company_id
+        print "quant qty : ", q.qty
+
