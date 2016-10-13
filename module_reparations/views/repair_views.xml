@@ -9,9 +9,15 @@
           <field name="inherit_id" ref="mrp_repair.view_repair_order_form" />
           <field name="arch" type="xml">
 
-            <!--<xpath expr="//sheet//field[@name='name']" position="attributes">
-              <attribute name="readonly">True</attribute>
-            </xpath>-->
+            <xpath expr="//label[@for='name']" position="before">
+              <div class="oe_button_box" name="button_box">
+                <button name="open_task_line" type="object"
+                  string="Tâche Associée"
+                  class="oe_stat_button" icon="fa-list-alt"
+                  attrs="{'invisible': [('state', '=', 'draft')]}" >
+                </button>
+              </div>
+            </xpath>
 
             <xpath expr="//field[@name='name']" position="attributes">
               <attribute name="attrs">{'readonly': True}</attribute>
