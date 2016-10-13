@@ -103,9 +103,13 @@ class MrpRepairInh(models.Model):
             if not dest_loc_id:
                 raise UserError("[gslfr] Emplacement Virtuel de Production non trouvé.")
 
+        rebut_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Scrapped')])
         for line in self.operations:
             print "updating lines with location : %s" % dest_loc_id.name
-            line.write({ 'location_dest_id':dest_loc_id.id })
+            if line.type == 'add':
+                line.write({ 'location_dest_id':dest_loc_id.id })
+            else:
+                line.write({ 'location_dest_id':rebut_loc_id.id })
 
     @api.model
     def create(self, vals):
@@ -127,7 +131,9 @@ class MrpRepairInh(models.Model):
         ber_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
         atom_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])
         customer_loc_id = l_obj.search([('complete_name','ilike','Partner Locations/Customers')])
+
         production_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+        rebut_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Scrapped')])
 
         c_id = partner_obj.browse(vals['partner_id']).company_id.id
         print "c_id : ", c_id
@@ -149,7 +155,10 @@ class MrpRepairInh(models.Model):
                 print "o was : ", o
                 l_id = p_obj.browse(o['product_id']).location_id
                 l_id = vals['location_id'] # product is taken from the stock set in the repair
-                ld_id = production_loc_id.id
+                if o.get('type') == 'add':
+                    ld_id = production_loc_id.id
+                else :
+                    ld_id = rebut_loc_id.id
 
                 # if there's a tech, change the dest location
                 if vals['tech']:
@@ -178,6 +187,7 @@ class MrpRepairInh(models.Model):
         pp.pprint(vals)
 
         production_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+        rebut_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Scrapped')])
 
         print "self.location_id : ", self.location_id
         print "self.location_dest_id : ", self.location_dest_id
@@ -193,11 +203,15 @@ class MrpRepairInh(models.Model):
                 print "o was : ", o
                 #l_id = p_obj.browse(o['product_id']).location_id
                 l_id = self.location_id.id # product is taken from the stock set in the repair
-                ld_id = production_loc_id.id
+                if o.get('type') == 'add':
+                    ld_id = production_loc_id.id
+                else:
+                    ld_id = rebut_loc_id.id
 
                 # if there's a tech, change the dest location
-                if self.tech:
-                    print "there is a tech selected : ", self.tech.id
+                if self.tech or o.get('tech'):
+                    print "there's a tech already set (self.tech) : ", self.tech
+                    print "new_tech : ", self.tech
                     t_name = t_obj.browse(self.tech.id).name
                     t_loc = l_obj.search([('tech', 'ilike', t_name)])
                     print "t_name : ", t_name
@@ -210,14 +224,13 @@ class MrpRepairInh(models.Model):
 
         print "[write] vals.get('tech') : ", vals.get('tech')
         print "[write] self.tech : ", self.tech
-        print "[write] self.clientsite : ", self.clientsite
 
         print 'end vals : ', vals
         # check that all lines destinations are correct,
         # in function of if the tech was removed or is set.
-        self._set_dest_of_lines(vals.get('tech'))
         
         rec = super(MrpRepairInh, self).write(vals)
+        self._set_dest_of_lines(vals.get('tech'))
         return rec
 
     def action_confirm(self, cr, uid, ids, context):
