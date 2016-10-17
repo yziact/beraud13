@@ -2,63 +2,112 @@
 <openerp>
     <data>
 
+      <!-- WORKFLOW STUFF -->
+      <!-- activity -->
+      <!--
+      <record id="act_confirm" model="workflow.activity">
+        <field name="wkf_id" ref="wkf_repair"/>
+        <field name="name">confirm</field>
+        <field name="kind">function</field>
+        <field name="action">action_confirm()</field>
+        <field name="split_mode">OR</field>
+      </record> -->
+      <record id="act_valid" model="workflow.activity">
+        <field name="wkf_id" ref="mrp_repair.wkf_repair"/>
+        <field name="name">validate</field>
+        <field name="kind">function</field>
+        <field name="action">action_repair_validate()</field>
+        <field name="split_mode">OR</field>
+      </record> 
+      <!-- transition -->
+      <!--
+      <record id="trans_draft_confirm" model="workflow.transition">
+        <field name="act_from" ref="act_draft"/>
+        <field name="act_to" ref="act_confirm"/>
+        <field name="signal">repair_confirm</field>
+      </record> -->
+      <record id="trans_draft_valid" model="workflow.transition">
+        <field name="act_from" ref="mrp_repair.act_draft"/>
+        <field name="act_to" ref="module_reparations.act_valid"/>
+        <field name="signal">repair_validate</field>
+      </record>
+
+      <record id="trans_valid_confirm" model="workflow.transition">
+        <field name="act_from" ref="module_reparations.act_valid"/>
+        <field name="act_to" ref="mrp_repair.act_confirm"/>
+        <field name="signal">repair_confirm</field>
+      </record>
+
       <!-- INHERITED FORM VIEW -->
-        <record model="ir.ui.view" id="view_repair_form_inherited">
-          <field name="name">Repair Form View Inherited</field>
-          <field name="model">mrp.repair</field>
-          <field name="inherit_id" ref="mrp_repair.view_repair_order_form" />
-          <field name="arch" type="xml">
+      <record model="ir.ui.view" id="view_repair_form_inherited">
+        <field name="name">Repair Form View Inherited</field>
+        <field name="model">mrp.repair</field>
+        <field name="inherit_id" ref="mrp_repair.view_repair_order_form" />
+        <field name="arch" type="xml">
 
-            <xpath expr="//label[@for='name']" position="before">
-              <div class="oe_button_box" name="button_box">
-                <button name="open_task_line" type="object"
-                  string="Tâche Associée"
-                  class="oe_stat_button" icon="fa-list-alt"
-                  attrs="{'invisible': [('state', '=', 'draft')]}" >
-                </button>
-              </div>
-            </xpath>
+          <xpath expr="//header" position="inside">
+            <button name="repair_validate" states="draft" string="Valider la Réparation" class="oe_highlight"/>
+          </xpath>
 
-            <xpath expr="//field[@name='name']" position="attributes">
-              <attribute name="attrs">{'readonly': True}</attribute>
-            </xpath>
+          <xpath expr="//header//button[@name='repair_confirm']" position="replace">
+            <button name="repair_confirm" states="valid" string="Confirm Repair" class="oe_highlight"/>
+          </xpath>
 
-            <xpath expr="//field[@name='guarantee_limit']" position="after">
-              <field name="date_start"/>
-              <field name="end_date"/>
-            </xpath>
+          <xpath expr="//header//field[@name='state']" position="replace">
+            <field name="state" widget="statusbar" statusbar_visible="draft,valid,confirmed,done"/>
+          </xpath>
 
-            <xpath expr="//field[@name='address_id']" position="after">
-              <field name="clientsite"
-                attrs="{'readonly': [('state', '!=', 'draft')]}" />
-              <field name="tech"
-                attrs="{'invisible': [('clientsite', '=', False)],
-                'required': [('clientsite', '=', True)],
-                'readonly': [('state', '!=', 'draft')] }" />
-            </xpath>
+          <xpath expr="//label[@for='name']" position="before">
+            <div class="oe_button_box" name="button_box">
+              <button name="open_task_line" type="object"
+                string="Tâche Associée"
+                class="oe_stat_button" icon="fa-list-alt"
+                attrs="{'invisible': ['|', ('state', '=', 'draft'), ('state','=','valid') ]}" >
+              </button>
+            </div>
+          </xpath>
 
-            <xpath expr="//field[@name='location_id']" position="attributes">
-              <attribute name="string">Emplacement Actuel (auto)</attribute>
-            </xpath>
 
-            <xpath expr="//field[@name='location_dest_id']" position="attributes">
-              <attribute name="string">Emplacement de Livraison (auto)</attribute>
-            </xpath>
+          <xpath expr="//field[@name='name']" position="attributes">
+            <attribute name="attrs">{'readonly': True}</attribute>
+          </xpath>
 
-            <xpath expr="//field[@name='operations']/tree//field[@name='location_id']" position="attributes">
-              <attribute name="readonly">True</attribute>
-            </xpath>
+          <xpath expr="//field[@name='guarantee_limit']" position="after">
+            <field name="date_start"/>
+            <field name="end_date"/>
+          </xpath>
 
-            <xpath expr="//field[@name='operations']/tree//field[@name='location_dest_id']" position="attributes">
-              <attribute name="readonly">True</attribute>
-            </xpath>
+          <xpath expr="//field[@name='address_id']" position="after">
+            <field name="clientsite"
+              attrs="{'readonly': [('state', 'not in', ('draft', 'valid'))]}" />
+            <field name="tech"
+              attrs="{'invisible': [('clientsite', '=', False)],
+              'required': [('clientsite', '=', True), ('state', 'not in', ('draft', 'valid'))],
+              'readonly': [('state', 'not in', ('draft', 'valid'))]}" />
+          </xpath>
 
-          </field>
-        </record>
+          <xpath expr="//field[@name='location_id']" position="attributes">
+            <attribute name="string">Emplacement Actuel (auto)</attribute>
+          </xpath>
 
-        <!-- CALENDAR POPUP VIEW -->
-        <!-- important to set the priority to 2 so it doesn't override the view_repair_form_inherited -->
-        <!-- 
+          <xpath expr="//field[@name='location_dest_id']" position="attributes">
+            <attribute name="string">Emplacement de Livraison (auto)</attribute>
+          </xpath>
+
+          <xpath expr="//field[@name='operations']/tree//field[@name='location_id']" position="attributes">
+            <attribute name="readonly">True</attribute>
+          </xpath>
+
+          <xpath expr="//field[@name='operations']/tree//field[@name='location_dest_id']" position="attributes">
+            <attribute name="readonly">True</attribute>
+          </xpath>
+
+        </field>
+      </record>
+
+      <!-- CALENDAR POPUP VIEW -->
+      <!-- important to set the priority to 2 so it doesn't override the view_repair_form_inherited -->
+      <!-- 
                     <field name="tech" attrs="{'invisible': [('clientsite', '!=', False)]}" />
         <div name="button_box" position="inside">
         <button name="106" type="action" icon="fa-sitemap" class="oe_stat_button" attrs="{'invisible': [('product_variant_count', '&lt;=', 1)]}" groups="product.group_product_variant">
@@ -78,18 +127,18 @@
 
         <!-- CALENDAR VIEW -->
         <record model="ir.ui.view" id="view_repair_calendar_inherited">
-            <field name="name">Repair Calendar View Inherited</field>
-            <field name="model">mrp.repair</field>
-            <field name="arch" type="xml">
-                <calendar string="Calendrier des Reparations" color="state"
-                    date_start="date_start"
-                    date_stop="end_date"
-                    create="False"
-                    quick_add="False">
-                    <field name="name"/>
-                    <field name="date_start"/>
-                </calendar>
-            </field>
+          <field name="name">Repair Calendar View Inherited</field>
+          <field name="model">mrp.repair</field>
+          <field name="arch" type="xml">
+            <calendar string="Calendrier des Reparations" color="state"
+              date_start="date_start"
+              date_stop="end_date"
+              create="False"
+              quick_add="False">
+              <field name="name"/>
+              <field name="date_start"/>
+            </calendar>
+          </field>
         </record>
 
         <!-- TREE VIEW -->
@@ -109,12 +158,12 @@
         <!-- ACTION -->
         <!-- id format important to override mrp.repair original action.. -->
         <record id="mrp_repair.action_repair_order_tree" model="ir.actions.act_window">
-            <field name="name">Reparations</field>
-            <field name="res_model">mrp.repair</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar</field>
+          <field name="name">Reparations</field>
+          <field name="res_model">mrp.repair</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">tree,form,calendar</field>
         </record>
 
-    </data>
-</openerp>
+      </data>
+    </openerp>
 

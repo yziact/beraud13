@@ -31,6 +31,25 @@ class MrpRepairInh(models.Model):
     #def _task_domain(self):
     #    return [('name', 'ilike', self.name)]
 
+    # override workflow states
+    state = fields.Selection([
+        ('draft', 'Quotation'),
+        ('valid', u'Devis Validé'),
+        ('confirmed', 'Confirmed'),
+        ('under_repair', 'Under Repair'),
+        ('ready', 'Ready to Repair'),
+        ('2binvoiced', 'To be Invoiced'),
+        ('invoice_except', 'Invoice Exception'),
+        ('done', 'Repaired'),
+        ('cancel', 'Cancelled')
+    ], 'Status', readonly=True, track_visibility='onchange', copy=False, store=True, default='draft',
+        help=' * The \'Draft\' status is used when a user is encoding a new and unconfirmed repair order. \
+        \n* The \'Confirmed\' status is used when a user confirms the repair order. \
+        \n* The \'Ready to Repair\' status is used to start to repairing, user can start repairing only after repair order is confirmed. \
+        \n* The \'To be Invoiced\' status is used to generate the invoice before or after repairing done. \
+        \n* The \'Done\' status is set when repairing is completed.\
+        \n* The \'Cancelled\' status is used when user cancel repair order.')
+
     # not visible to the model until created, but exists in db
     create_date = fields.Datetime('Create Date', readonly=True)
 
@@ -57,11 +76,14 @@ class MrpRepairInh(models.Model):
                                        states={'draft': [('readonly', True)], 'confirmed': [('readonly', True)]},
                                        default=_set_default_location)
 
-    # task_id = fields.Many2one('project.task', string='Associated Task', domain=_task_domain)
-
+    # bl and br for beraud site repairs
     bl = fields.Many2one('stock.picking')
     br = fields.Many2one('stock.picking')
 
+    # internal bl, from stock to tech stock, for client site repairs
+    bl_internal = fields.Many2one('stock.picking')
+
+    # task associated to 
     task_id = fields.Many2one('project.task')
 
     def open_task_line(self, cr, uid, ids, context=None):
@@ -73,7 +95,6 @@ class MrpRepairInh(models.Model):
                 "type": "ir.actions.act_window",
                 "res_model": "project.task",
                 "views": [[False, "form"]],
-                #"res_id": a_product_id,
                 "res_id": repair.task_id.id,
                 #"target": "new",
                 "target": "current",
@@ -101,40 +122,52 @@ class MrpRepairInh(models.Model):
         else:
             self._set_dest_of_lines()
 
+    def action_repair_validate(self, cr, uid, ids, context=None):
+        print "mrp_repair our action_validate"
+        for repair in self.browse(cr, uid, ids, context=context):
+            self.write(cr, uid, [repair.id], {'state': 'valid'}, context=context)
+
     def _set_dest_of_lines(self, new_tech=None):
         print "_set_dest_of_lines"
 
         loc_obj = self.env["stock.location"]
         t_obj = self.env['res.users']
+        orig_loc_id = 0
         dest_loc_id = 0
         print '[sdol]self.tech : ', self.tech
         print '[sdol]new_tech : ', new_tech
 
-        if new_tech:
-            new_tech_name = t_obj.browse(new_tech).name
-            dest_loc_id = loc_obj.search([('tech', 'ilike', new_tech_name)])
-            print "--> new tech, dest_loc_id : ", dest_loc_id
-            if not dest_loc_id:
-                raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
-        #False means we changed from a tech to None, None means we didn't pass anything
-        elif self.tech and new_tech != False: 
-            dest_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
-            print "--> tech, dest_loc_id : ", dest_loc_id
-            if not dest_loc_id:
-                raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
-        else:
-            dest_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
-            print "--> NO TECH, dest_loc_id : ", dest_loc_id
-            if not dest_loc_id:
-                raise UserError("[gslfr] Emplacement Virtuel de Production non trouvé.")
+        customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
+        prod_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
 
-        rebut_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Scrapped')])
         for line in self.operations:
-            print "updating lines with location : %s" % dest_loc_id.name
-            if line.type == 'add':
-                line.write({ 'location_dest_id':dest_loc_id.id })
+            if new_tech:
+                new_tech_name = t_obj.browse(new_tech).name
+                orig_loc_id = self.location_id
+                dest_loc_id = loc_obj.search([('tech', 'ilike', new_tech_name)])
+                print "--> new tech, dest_loc_id : ", dest_loc_id
+                if not dest_loc_id:
+                    raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
+            #False means we changed from a tech to None, None means we didn't pass anything
+            elif self.tech and new_tech != False: 
+                orig_loc_id = self.location_id
+                dest_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
+                print "--> tech, dest_loc_id : ", dest_loc_id
+                if not dest_loc_id:
+                    raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
             else:
-                line.write({ 'location_dest_id':rebut_loc_id.id })
+                if line.type == 'add':
+                    orig_loc_id = self.location_id
+                    dest_loc_id = prod_loc_id
+                else :
+                    orig_loc_id = customer_loc_id
+                    dest_loc_id = self.location_id
+                print "--> NO TECH, dest_loc_id : ", dest_loc_id
+                if not dest_loc_id:
+                    raise UserError("[gslfr] Emplacement Virtuel de Production non trouvé.")
+
+            line.write({ 'location_id':orig_loc_id.id })
+            line.write({ 'location_dest_id':dest_loc_id.id })
 
     @api.model
     def create(self, vals):
@@ -158,15 +191,18 @@ class MrpRepairInh(models.Model):
         customer_loc_id = l_obj.search([('complete_name','ilike','Partner Locations/Customers')])
 
         production_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Production')])
-        rebut_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Scrapped')])
+        remove_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
 
         c_id = partner_obj.browse(vals['partner_id']).company_id.id
         print "c_id : ", c_id
 
-        if c_id == 1:
-            vals['location_id'] = ber_loc_id.id
-        else:
+        vals['location_id'] = ber_loc_id.id
+        remove_loc_id = ber_loc_id
+
+        if c_id == 3:
             vals['location_id'] = atom_loc_id.id
+            remove_loc_id = atom_loc_id
+
         vals['location_dest_id'] = customer_loc_id.id
 
         ### set location_id/dest_id of repair_lines
@@ -183,9 +219,12 @@ class MrpRepairInh(models.Model):
                 if o.get('type') == 'add':
                     ld_id = production_loc_id.id
                 else :
-                    ld_id = rebut_loc_id.id
+                    l_id = customer_loc_id.id
+                    ld_id = remove_loc_id.id
 
                 # if there's a tech, change the dest location
+                # even if the line is destined to be 'removed',
+                # cause the first move will be stock->tech even so.
                 if vals['tech']:
                     print "there is a tech selected : ", vals['tech']
                     t_name = t_obj.browse(vals['tech']).name
@@ -212,7 +251,8 @@ class MrpRepairInh(models.Model):
         pp.pprint(vals)
 
         production_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Production')])
-        rebut_loc_id = l_obj.search([('complete_name','ilike','Virtual Locations/Scrapped')])
+
+        remove_loc_id = self.location_id
 
         print "self.location_id : ", self.location_id
         print "self.location_dest_id : ", self.location_dest_id
@@ -231,7 +271,7 @@ class MrpRepairInh(models.Model):
                 if o.get('type') == 'add':
                     ld_id = production_loc_id.id
                 else:
-                    ld_id = rebut_loc_id.id
+                    ld_id = remove_loc_id.id
 
                 # if there's a tech, change the dest location
                 if self.tech or o.get('tech'):
@@ -277,11 +317,15 @@ class MrpRepairInh(models.Model):
         for repair in self.browse(cr, uid, ids, context={}) :
 
             # create the task in project 'SAV'
-            p_id = proj_obj.search(cr, uid, [('name', 'ilike', 'SAV')])
+            proj_name = 'REPARATIONS ATELIER'
+            if repair.clientsite : 
+                proj_name = 'SAV'
+
+            p_id = proj_obj.search(cr, uid, [('name', 'ilike', proj_name)])
             project_id = proj_obj.browse(cr, uid, p_id)
 
             if not project_id : 
-                raise UserError("Aucun projet 'SAV' trouvé.")
+                raise UserError("Aucun projet '%s' trouvé." % proj_name)
 
             task_id = task_obj.create(cr, uid, {
                 'project_id' : project_id.id,
@@ -292,12 +336,13 @@ class MrpRepairInh(models.Model):
             print "task créée, id : ", task_id
             repair.task_id = task_id
 
+            src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
+            wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
+
 ### BERAUD SITE REPAIR CONFIRM CASE ###
             if not repair.clientsite:
                 # the picking type is always incoming, but depends on the warehouse it comes from...
                 # this will determine the sequence of the generated stock picking
-                src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-                wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
                 print "SRC LOC : %s" % src_loc
                 print "WH : %s" % wh
 
@@ -316,7 +361,7 @@ class MrpRepairInh(models.Model):
 
                 ### CREATE BR
                 # create it in draft, then immediately set it to 'todo'
-                # confirm does that right ?
+                # confirm does that
 
                 picking_id = sp_obj.create(cr, uid, {
                     'origin':repair.name,
@@ -355,24 +400,6 @@ class MrpRepairInh(models.Model):
                 repair.br = picking_id
                 print "BR created : %s" % sp_obj.browse(cr, uid, picking_id, context={}).name
 
-                ### MOVES FOR LINES 
-                # make the moves but don't add them to the picking
-                # moves lines to the location they need to be for the repair
-                for line in repair.operations:
-                    print "creating move : %s" % line.name
-                    # add move lines to the picking
-                    move_id = move_obj.create(cr, uid, {
-                        'origin': repair.name,
-                        'name': line.name,
-                        'product_uom': line.product_id.uom_id.id,
-                        'product_id': line.product_id.id,
-                        'product_uom_qty': abs(line.product_uom_qty),
-                        'location_id': line.location_id.id, # line location
-                        'location_dest_id': line.location_dest_id.id, #line location
-                        'restrict_lot_id': line.lot_id.id,
-                    })
-                    # make them done
-                    move_obj.action_done(cr, uid, move_id)
 
                 ### Create picking BL
                 # we create in in draft mode (default)
@@ -381,7 +408,7 @@ class MrpRepairInh(models.Model):
 
                 picking_id = sp_obj.create(cr, uid, {
                     'origin':repair.name,
-                    'product_id': repair.product_id,
+                    'product_id': repair.product_id.id,
                     'partner_id': repair.partner_id.id, 
                     'picking_type_id': picking_type_out[0],
                     'location_id': repair.location_id.id, 
@@ -417,30 +444,29 @@ class MrpRepairInh(models.Model):
                     raise UserError("Technicien non-spécifié")
 
                 # get stock location corresponding to technician
-                src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-                print "tech_name : %s" % repair.tech.name
-                print "src_loc : %s" % src_loc
-                #tech_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
-                tech_loc_id = repair.env['stock.location'].search([('tech', 'ilike', repair.tech.name)])
-                print "tech_loc_id : %s" % tech_loc_id
-                print "tech_loc_id[0] : %s" % tech_loc_id[0]
-                #print "repair.tech_loc_id : %s" % repair.tech_loc_id
+                t_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
+                tech_loc_id = loc_obj.browse(cr, uid, t_loc_id)
 
                 if not tech_loc_id:
                     raise UserError("Le Technicien spécifié n'a pas d'emplacement de stock assigné")
 
-                tech_loc = repair.env['stock.location'].browse(tech_loc_id.id) 
-                print tech_loc.name
+                # confirm stage : create bl_internal from stock to tech location, in draft state
+                # add repair lines to this bl_internal
 
-                #repair._set_dest_lines_to_tech()
+                picking_type_internal = self.pool.get('stock.picking.type').search(
+                    cr, uid, [('code', '=', 'internal'), ('warehouse_id', '=', wh),
+                              ('name', '=', 'Transfert techniciens')])
+                print "picking type internal : %s" % picking_type_internal
 
-                ## create and reserve moves corresponding to the operation lines
-                # The machine to repair is already at the client site, no need to do a move for it
-                # We only need to move the items that will serve its repair
-                # These moves are not linked to a picking at all
-                # Pieces move from the stock to the techs stock location
-                # Reserved 
-                # The guy giving the product, will confirm the move himself.
+                picking_id = sp_obj.create(cr, uid, {
+                    'origin':repair.name,
+                    'product_id': repair.product_id.id,
+                    'partner_id': repair.partner_id.id, 
+                    'picking_type_id': picking_type_internal[0],
+                    'location_id': repair.location_id.id, 
+                    'location_dest_id': tech_loc_id.id,
+                })
+
                 for line in repair.operations:
                     print "creating move : %s" % line.name
                     # add move lines to the picking
@@ -450,14 +476,23 @@ class MrpRepairInh(models.Model):
                         'product_uom': line.product_id.uom_id.id,
                         'product_id': line.product_id.id,
                         'product_uom_qty': abs(line.product_uom_qty),
+                        'picking_id': picking_id,
+                        'picking_type_id': picking_type_internal[0],
                         'location_id': line.location_id.id, # line location
-                        'location_dest_id': tech_loc.id, #line location
+                        'location_dest_id': line.location_dest_id.id, #line location
                         'restrict_lot_id': line.lot_id.id,
                     })
-                    print "Action assign start"
-                    move_obj.action_assign(cr, uid, move_id)
-                    move_obj.force_assign(cr, uid, move_id)
-                    print "Action assign end"
+                    if not move_id:
+                        raise UserError("Problème survenu lors de la création du BL interne vers le technicien")
+                    m = move_obj.browse(cr, uid, move_id)
+                    print "Client site repair"
+                    print "Create moves and added to bl_internal picking (From stock location to tech location)"
+                    print "move_id : ", m.id
+                    print "quants of move : ", m.quant_ids
+
+                print "Created moves and added them to the BL_INTERNAL (From stock location to tech location)"
+                repair.bl_internal = picking_id
+                print "repair.bl_internal : ", repair.bl_internal
 
         return res
 
@@ -502,70 +537,66 @@ class MrpRepairInh(models.Model):
                 print "going to confirm BL : ", repair.bl
                 repair.bl.action_confirm()
 
+                # take lines in the OR and perform moves, to done.
+                for line in repair.operations:
+                    print "creating move : %s" % line.name
+                    # add move lines to the picking
+                    move_id = move_obj.create(cr, uid, {
+                        'origin': repair.name,
+                        'name': line.name,
+                        'product_uom': line.product_id.uom_id.id,
+                        'product_id': line.product_id.id,
+                        'product_uom_qty': abs(line.product_uom_qty),
+                        'location_id': line.location_id.id, # line location
+                        'location_dest_id': line.location_dest_id.id, #line location
+                        'restrict_lot_id': line.lot_id.id,
+                    })
+                    # make them done
+                    move_obj.action_done(cr, uid, move_id)
+
 ### CLIENT SITE REPAIR DONE CASE ###
             elif repair.clientsite:
 
-                # fetch all moves corresponding to our current repair
-                move_ids = move_obj.search(cr, uid, [('origin', 'ilike', repair.name)])
-                print "moves corresponding to the repair are : %s" % move_ids
-                # move_ids ex : [5811, 5812]
+                # go through lines of the OR, and do moves from tech loc to client loc for pieces to add,
+                # and from client loc to tech loc for pieces to remove.
+                
+                tech_loc_id = l_obj.search([('tech', 'ilike', self.tech.name)])
+                if not tech_loc_id : 
+                    raise UserError("Un problème est survenu lors de la recherche de l'emplacement associé au technicien")
 
-                # get the client stock location
-                loc_client_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Customers')])
+                customer_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Customers')])
                 print "loc_client_id : %s" % loc_client_id
+                
+                for op_line in repair.operations : 
+                    orig_loc_id = tech_loc_id
+                    dest_loc_id = customer_loc_id
+                    if op_line.type == 'remove':
+                        orig_loc_id = customer_loc_id
+                        dest_loc_id = self.location_id
+                    move_id = move_obj.create(cr, uid, {
+                        'origin': repair.name,
+                        'name': op_line.name,
+                        'product_uom': op_line.product_id.uom_id.id,
+                        'product_id': op_line.product_id.id,
+                        'product_uom_qty': abs(op_line.product_uom_qty),
 
-                if not loc_client_id:
-                    raise UserError("Something went wrong while getting the client location in stock")
+                        'location_id': op_orig_loc_id.id, # line location
+                        'location_dest_id': dest_loc_id.id, #line location
 
-                loc_client_obj = loc_obj.browse(cr, uid, loc_client_id[0])
-                print "Client Location name : %s" % loc_client_obj.complete_name
-
-                # Unreserve moves and make them 'done'
-                move_info_list = []
-                for move_id in move_ids:
-                    move = move_obj.browse(cr, uid, move_id)
-                    if move.state == 'assigned':
-                        print "setting move %s that was reserved to unreserved" % move_id
-                        #move_obj.write(cr, uid, move_id, {'state': 'done'})
-                        move_obj.do_unreserve(cr, uid, move_id, context={})
-                        print "setting move %s that was unreserved to done" % move_id
-                        move_obj.action_done(cr, uid, move_id, context={})
-                        print "moves %s restrict_lot_id : %s" % (move_id, move.restrict_lot_id)
-                        print "next move will have location id : %s" % move.location_dest_id
-                        print "move.restrict_lot_id : %s" % move.restrict_lot_id
-
-                        move_info_list.append({
-                            'origin':repair.name,
-                            'name':move.name,
-                            'product_id':move.product_id.id,
-                            'product_uom':move.product_id.uom_id.id,
-                            'product_uom_qty': move.product_uom_qty,
-                            'location_id':move.location_dest_id.id, # should be tech location
-                            'location_dest_id':loc_client_obj.id, # is client stock location
-                            'restrict_lot_id': move.restrict_lot_id.id,
-                        })
-                    else:
-                        print "move %s was already done before the end of this repair." % move_id
-
-                # once moves are done from the Stock to the Technician, we'll have to create new moves
-                # from the technician to the Client stock location
-                # make move with product_id AND restrict_lot_id
-                # and set them to done
-                move_list=[]
-                for mi in move_info_list:
-                    move_id = move_obj.create( cr, uid, {
-                        'origin': mi['origin'],
-                        'name': mi['name'],
-                        'product_uom': mi['product_uom'],
-                        'product_id': mi['product_id'],
-                        'product_uom_qty': mi['product_uom_qty'],
-                        'location_id': mi['location_id'],
-                        'location_dest_id': mi['location_dest_id'],
-                        'restrict_lot_id': mi['restrict_lot_id'],
+                        'restrict_lot_id': line.lot_id.id,
                     })
-                    move_obj.action_done(cr, uid, move_id, context={})
-                    
+                    # make them done
+                    move_obj.action_done(cr, uid, move_id)
+
         return res
 
+class StockQuants(models.Model):
+
+    _inherit = 'stock.quant'
+
+    # holds the stock location the quant came form initially
+    # useful only in the context of repairs, so we can trace where the piece came from,
+    # and check it against the company_id of the Customer it was used for.
+    origin = fields.Many2one('stock.location')
 
 
