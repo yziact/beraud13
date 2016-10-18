@@ -321,13 +321,13 @@ class MrpRepairInh(models.Model):
             if repair.clientsite : 
                 proj_name = 'SAV'
 
-            p_id = proj_obj.search(cr, 1, [('name', 'ilike', proj_name)])
-            project_id = proj_obj.browse(cr, 1, p_id)
+            p_id = proj_obj.search(cr, uid, [('name', 'ilike', proj_name)])
+            project_id = proj_obj.browse(cr, uid, p_id)
 
             if not project_id : 
                 raise UserError("Aucun projet '%s' trouvé." % proj_name)
 
-            task_id = task_obj.create(cr, 1, {
+            task_id = task_obj.create(cr, uid, {
                 'project_id' : project_id.id,
                 'name' : repair.name,
                 'partner_id' : repair.partner_id.id,
