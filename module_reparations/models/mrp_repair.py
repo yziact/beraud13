@@ -485,6 +485,9 @@ class MrpRepairInh(models.Model):
                     if not move_id:
                         raise UserError("Problème survenu lors de la création du BL interne vers le technicien")
                     m = move_obj.browse(cr, uid, move_id)
+
+                    # quants don't exist yet cause the moves (and the BL) are in draft state.
+                    # quants will be created only when the move gets confirmed
                     print "Client site repair"
                     print "Create moves and added to bl_internal picking (From stock location to tech location)"
                     print "move_id : ", m.id
@@ -524,6 +527,7 @@ class MrpRepairInh(models.Model):
         repair_line_obj = self.pool.get('mrp.repair.line')
         loc_obj = self.pool.get("stock.location")
         sp_obj = self.pool.get('stock.picking')
+        quants_obj = self.pool.get('stock.quant')
 
         for repair in self.browse(cr, uid, ids, context=context):
 ### BERAUD SITE REPAIR DONE CASE ###
@@ -556,23 +560,57 @@ class MrpRepairInh(models.Model):
 
 ### CLIENT SITE REPAIR DONE CASE ###
             elif repair.clientsite:
+                # if the internal BL to the tech is not yet "done", we can't finish the repair.
+                if repair.bl_internal.state != 'done' :
+                    raise UserError("""Le bon de livraison interne Stock -> Technicien n'est pas dans l'état 'fini',
+                                    impossible de terminer la réparation sans cela.""")
 
                 # go through lines of the OR, and do moves from tech loc to client loc for pieces to add,
                 # and from client loc to tech loc for pieces to remove.
                 
-                tech_loc_id = l_obj.search([('tech', 'ilike', self.tech.name)])
+                c_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Customers')])
+                customer_loc_id = loc_obj.browse(cr, uid, c_loc_id)
+                print "customer_loc_id : %s" % customer_loc_id
+
+                t_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
+                tech_loc_id = loc_obj.browse(cr, uid, t_loc_id)
                 if not tech_loc_id : 
                     raise UserError("Un problème est survenu lors de la recherche de l'emplacement associé au technicien")
-
-                customer_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Customers')])
-                print "loc_client_id : %s" % loc_client_id
                 
                 for op_line in repair.operations : 
                     orig_loc_id = tech_loc_id
                     dest_loc_id = customer_loc_id
                     if op_line.type == 'remove':
                         orig_loc_id = customer_loc_id
-                        dest_loc_id = self.location_id
+                        dest_loc_id = repair.location_id
+
+                    t_quants = quants_obj.search(cr, uid, [
+                        ('location_id.id', '=', tech_loc_id.id),
+                        ('product_id', '=', op_line.product_id.id)])
+                    tech_quants = quants_obj.browse(cr, uid, t_quants)
+                    qty_quants = sum([q.qty for q in tech_quants])
+                    print 'tech_quants : ', tech_quants
+                    print 'qty_quants : ', qty_quants
+
+                    # the move will be considered a sale if
+                    # the tech has the product in his stock
+                    # and the quant.origin of the move in the
+                    # stock moves of the BL_internal to his stock
+                    # were different than the customer he used the product for.
+
+                    quant_origin = 0
+                    for move in repair.bl_internal.move_lines :
+                        if move.product_id.id == op_line.product_id.id: 
+                            for quant in move.quant_ids :
+                                quant_origin = quant.origin
+                    print 'quant_origin : ', quant_origin
+
+                    isSale = False
+                    if op_line.type=='add' and qty_quants > 0 and\
+                       quant_origin.id != repair.partner_id.id :
+                        isSale = True
+                    
+                    print "*** isSale : "
                     move_id = move_obj.create(cr, uid, {
                         'origin': repair.name,
                         'name': op_line.name,
@@ -580,23 +618,57 @@ class MrpRepairInh(models.Model):
                         'product_id': op_line.product_id.id,
                         'product_uom_qty': abs(op_line.product_uom_qty),
 
-                        'location_id': op_orig_loc_id.id, # line location
+                        'location_id': orig_loc_id.id, # line location
                         'location_dest_id': dest_loc_id.id, #line location
 
-                        'restrict_lot_id': line.lot_id.id,
+                        'restrict_lot_id': op_line.lot_id.id,
+
+                        'isSale' : isSale,
                     })
+
                     # make them done
                     move_obj.action_done(cr, uid, move_id)
 
+                    print "move done, id : ", move_id
+                    m = move_obj.browse(cr, uid, move_id)
+                    print "m.quants : ", m.quant_ids
+
+                    #print "BL_INTERNAL MOVES WERE : "
+                    #for move in repair.bl_internal.move_lines : 
+                        #print "move.origin : ", move.origin
+                        #print "move.quant_ids : ", move.quant_ids
+                        #print "move.product_id : ", move.product_id
+                        #print "move.product_id.name : ", move.product_id.name
+
         return res
 
-class StockQuants(models.Model):
+class StockQuant(models.Model):
 
     _inherit = 'stock.quant'
 
     # holds the stock location the quant came form initially
     # useful only in the context of repairs, so we can trace where the piece came from,
     # and check it against the company_id of the Customer it was used for.
-    origin = fields.Many2one('stock.location')
+    #origin = fields.Many2one('stock.location')
+    #origin = fields.Char(string="Source Document")
+    origin = fields.Many2one('res.company')
 
+class StockMove(models.Model):
+
+    _inherit = 'stock.move'
+
+    # override action_done, and add origin to quants
+    def action_done(self, cr, uid, ids, context=None):
+        # call super
+        super(StockMove, self).action_done(cr, uid, ids, context=context)
+        print "STOCK_MOVE our action_done"
+        
+        # get all quants with our move_id, and set their origin to 
+        # the company_id of the stock_location they come from.
+        # It will be the company stock their belonged to "originally", 
+        # before they were used for a repair.
+        for move in self.browse(cr, uid, ids, context=context):
+            for quant in move.quant_ids : 
+                quant.sudo().origin = quant.sudo().company_id
+                print "*** quant origin in move id _%s_ set to _%s_ ***" % (move.id, move.origin)
 
