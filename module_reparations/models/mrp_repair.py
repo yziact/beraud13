@@ -321,13 +321,13 @@ class MrpRepairInh(models.Model):
             if repair.clientsite : 
                 proj_name = 'SAV'
 
-            p_id = proj_obj.search(cr, uid, [('name', 'ilike', proj_name)])
-            project_id = proj_obj.browse(cr, uid, p_id)
+            p_id = proj_obj.search(cr, 1, [('name', 'ilike', proj_name)])
+            project_id = proj_obj.browse(cr, 1, p_id)
 
             if not project_id : 
                 raise UserError("Aucun projet '%s' trouvé." % proj_name)
 
-            task_id = task_obj.create(cr, uid, {
+            task_id = task_obj.create(cr, 1, {
                 'project_id' : project_id.id,
                 'name' : repair.name,
                 'partner_id' : repair.partner_id.id,
@@ -641,6 +641,34 @@ class MrpRepairInh(models.Model):
                         #print "move.product_id.name : ", move.product_id.name
 
         return res
+
+    def action_invoice_create(self, cr, uid, ids, group=False, context=None):
+        print "module reparations our action_invoice_create"
+
+        res = super(MrpRepairInh, self).action_invoice_create(cr, uid, ids, group=group, context=context)
+
+        inv_obj = self.pool.get('account.invoice')
+        team_obj = self.pool.get('crm.team')
+
+        a_team_id = team_obj.search(cr, uid, [('code','ilike','ATOMSAV')])
+        b_team_id = team_obj.search(cr, uid, [('code','ilike','BERSAV')])
+
+        atom_team_id = team_obj.browse(cr, uid, a_team_id)
+        beraud_team_id = team_obj.browse(cr, uid, b_team_id)
+
+        for repair in self.browse(cr, uid, ids, context=context):
+            print "res is : "
+            i_id = res[repair.id]
+            inv_id = inv_obj.browse(cr, uid, i_id)
+            if repair.company_id.id == 1:
+                inv_id.sudo().team_id = beraud_team_id
+            else:
+                inv_id.sudo().team_id = atom_team_id
+            #print "inv_id is : ", inv_id
+            #print "inv_id.team_id is : ", inv_id.team_id
+            #print "inv_id.team_id.name is : ", inv_id.team_id.name
+            #print "inv_id.team_id.company_id is : ", inv_id.team_id.company_id
+            #print "inv_id.team_id.member_ids is : ", inv_id.team_id.member_ids
 
 class StockQuant(models.Model):
 
