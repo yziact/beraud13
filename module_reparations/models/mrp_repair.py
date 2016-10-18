@@ -34,7 +34,7 @@ class MrpRepairInh(models.Model):
     # override workflow states
     state = fields.Selection([
         ('draft', 'Quotation'),
-        ('valid', u'Devis Validé'),
+        ('valid', u'Bon de Commande'),
         ('confirmed', 'Confirmed'),
         ('under_repair', 'Under Repair'),
         ('ready', 'Ready to Repair'),
