@@ -642,6 +642,34 @@ class MrpRepairInh(models.Model):
 
         return res
 
+    def action_invoice_create(self, cr, uid, ids, group=False, context=None):
+        print "module reparations our action_invoice_create"
+
+        res = super(MrpRepairInh, self).action_invoice_create(cr, uid, ids, group=group, context=context)
+
+        inv_obj = self.pool.get('account.invoice')
+        team_obj = self.pool.get('crm.team')
+
+        a_team_id = team_obj.search(cr, uid, [('code','ilike','ATOMSAV')])
+        b_team_id = team_obj.search(cr, uid, [('code','ilike','BERSAV')])
+
+        atom_team_id = team_obj.browse(cr, uid, a_team_id)
+        beraud_team_id = team_obj.browse(cr, uid, b_team_id)
+
+        for repair in self.browse(cr, uid, ids, context=context):
+            print "res is : "
+            i_id = res[repair.id]
+            inv_id = inv_obj.browse(cr, uid, i_id)
+            if repair.company_id.id == 1:
+                inv_id.sudo().team_id = beraud_team_id
+            else:
+                inv_id.sudo().team_id = atom_team_id
+            #print "inv_id is : ", inv_id
+            #print "inv_id.team_id is : ", inv_id.team_id
+            #print "inv_id.team_id.name is : ", inv_id.team_id.name
+            #print "inv_id.team_id.company_id is : ", inv_id.team_id.company_id
+            #print "inv_id.team_id.member_ids is : ", inv_id.team_id.member_ids
+
 class StockQuant(models.Model):
 
     _inherit = 'stock.quant'
