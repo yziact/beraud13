@@ -30,51 +30,22 @@ class StockPicking(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(r, self)
 
-    def _open_tsis(self, cr, uid, ids, move, c_src_id, c_dst_id, context=None):
+    def _open_tsis(self, cr, uid, ids, c_src_id, c_dst_id, moves, context=None):
 
         loc_obj = self.pool.get('stock.location')
 
-        loc_src_rs = None
-        loc_dst_rs = None
-        src_qty = None
-        dest_qty = None
-        wanted_qty = move.product_uom_qty
+        loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
+        loc_dst_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
+        print "loc_src_id : ", loc_src_id
+        print "loc_dst_id : ", loc_dst_id
 
-        if c_dst_id == 1: # dest is Beraud 
-            # loc_rs : list of ids.
-            src_qty = move.stock_qty_atom_dispo
-            dst_qty = move.stock_qty_ber_dispo
-            loc_src_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
-            loc_dst_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
-        elif c_dst_id == 3:
-            src_qty = move.stock_qty_ber_dispo
-            dst_qty = move.stock_qty_atom_dispo
-            loc_src_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
-            loc_dst_rs = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
-        else:
-            raise UserError("Wrong Company ID was passed to _open_tsis.")
+        if c_dst_id == 3: # dest is Beraud 
+            loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
+            loc_dst_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
 
-        print "loc_src_rs : %s" % loc_src_rs
-        print "loc_dst_rs : %s" % loc_dst_rs
-
-        loc_src_obj = loc_obj.browse(cr, uid, loc_src_rs[0])
-        loc_dst_obj = loc_obj.browse(cr, uid, loc_dst_rs[0])
-        print "loc_src_obj : %s" % loc_src_obj
-        print "loc_dst_obj : %s" % loc_dst_obj
-
-        if (not loc_src_obj) or (not loc_dst_obj) :
-            raise UserError("Something went wrong while getting the source/destination location of the tsis")
-
-        # dst_qty : where we want the move to end up
-        # src_qty : where we're taking the products from
-        # src_qty can't be less than one (checked in function before)
-        qty = 0
-        if (src_qty + dst_qty) <= wanted_qty :
-            qty = src_qty
-        else:
-            qty = wanted_qty - dst_qty
-
-        move.availability = 10;
+        loc_src_obj = loc_obj.browse(cr, uid, loc_src_id)
+        loc_dst_obj = loc_obj.browse(cr, uid, loc_dst_id)
+        
         wizard_id = self.pool.get('wizard.transfer.stock.intercompany').create(cr, uid, {
             'company_src_id':c_src_id, # Beraud
             #'location_src_id':move.product_id.location_id.id, # is NULL...
@@ -85,13 +56,34 @@ class StockPicking(models.Model):
             'location_dst_id':loc_dst_obj.id,
         }, context)
 
-        wizard_line_id = self.pool.get('wizard.transfer.stock.intercompany.line').create(cr, uid, {
-            'wizard_id':wizard_id,
-            'restrict_lot_id':move.restrict_lot_id.id,
-            'quantity': qty,
-            'product_id':move.product_id.id, 
-        }, context)
+        print "wizard_id : ", wizard_id
+        print "moves : ", moves
 
+        for move in moves:
+
+            wanted_qty = move.product_uom_qty
+
+            src_qty = move.stock_qty_atom_dispo
+            dst_qty = move.stock_qty_ber_dispo
+
+            if c_dst_id == 3:
+                src_qty = move.stock_qty_ber_dispo
+                dst_qty = move.stock_qty_atom_dispo
+
+            qty = 0
+            if (src_qty + dst_qty) <= wanted_qty :
+                qty = src_qty
+            else:
+                qty = wanted_qty - dst_qty
+
+            wizard_line_id = self.pool.get('wizard.transfer.stock.intercompany.line').create(cr, uid, {
+                'wizard_id':wizard_id,
+                'restrict_lot_id':move.restrict_lot_id.id,
+                'quantity': qty,
+                'product_id':move.product_id.id, 
+            }, context)
+
+        print "returning"
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'wizard.transfer.stock.intercompany',
@@ -105,72 +97,81 @@ class StockPicking(models.Model):
             'context': context
         }
 
-    #@api.v7
+    def check_stocks_for_move(self, pick, move, src_comp, dst_comp):
+
+        #if client belongs to Beraud, the product will be taken from beraud stock
+        #so it needs to take from atom
+        moves = []
+        comp_rels = {1:'BERAUD', 3:'ATOM'}
+
+        stock_qty_dispo = move.stock_qty_ber_dispo
+        stock_qty_other_dispo = move.stock_qty_atom_dispo
+
+        if src_comp == 3:
+            stock_qty_dispo = move.stock_qty_atom_dispo
+            stock_qty_other_dispo = move.stock_qty_ber_dispo
+
+        if stock_qty_dispo == 0 and stock_qty_other_dispo == 0:
+            print "both at zero, returning"
+            return
+
+        if stock_qty_dispo + stock_qty_other_dispo <= 0:
+            print "both stocks not enough to make more than zero, returning"
+            return
+
+        if stock_qty_dispo < move.product_uom_qty:
+            if stock_qty_other_dispo > 0:
+                #open tsis src -> dest
+                print "client belongs to %s but their stock is too low and stocks from %s disponible, opening tsis" % (comp_rels[src_comp], comp_rels[dst_comp])
+                return move
+            elif stock_qty_other_dispo == 0:
+                #if other company doesnt have anymore stock, and we have 0 quantity, do nothing
+                # call the normal function, that will also do nothing
+                print "We (%s) don't have anymore stock, and the other company doesn't neither." % comp_rels[src_comp]
+            else:
+                #just reserve normally even if not enough
+                print "reserving normally for %s , even if not enough." % comp_rels[src_comp]
+        else:
+            print "client belongs to %s, stocks OK, not opening tsis" % comp_rels[src_comp]
+
+        return
+
+
     def action_assign(self, cr, uid, ids, context=None):
 
         move_obj = self.pool.get('stock.move')
         loc_obj = self.pool.get('stock.location')
 
-
         print "our action assign"
-        res = {}
+
         for pick in self.browse(cr, uid, ids, context=context):
+
+            r = []
+            src = 0
+            dst = 0
+            if pick.partner_id.company_id.id == 1 :
+                src = 1
+                dst = 3
+            else:
+                src = 3
+                dst = 1
 
             for move in pick.move_lines:
                 move._compute_stock_nums()
+                # src is our company, dst is the other
+                m = self.check_stocks_for_move(pick, move, src, dst)
+                if m :
+                    r.append(m)
 
-                if move.stock_qty_atom_dispo == 0 and move.stock_qty_ber_dispo == 0:
-                    print "both at zero, returning"
-                    continue
+            if r :
+                print "opening tsis"
+                return self._open_tsis(cr, uid, ids, dst, src, r)
+            else :
+                print "calling super.action_assign()"
+                super(StockPicking, self).action_assign(cr, uid, ids, context=context)
+                move._compute_stock_nums()
 
-                if move.stock_qty_atom_dispo + move.stock_qty_ber_dispo <= 0:
-                    print "both stocks not enough to make more than zero, returning"
-                    continue
-
-                #if client belongs to Beraud, the product will be taken from beraud stock
-                #so it needs to take from atom
-                if pick.partner_id.company_id.id == 1: 
-                    if move.stock_qty_ber_dispo < move.product_uom_qty:
-                        if move.stock_qty_atom_dispo > 0:
-                            #open tsis atom -> beraud
-                            print "client belongs to Beraud but beraud stock too low and stocks from Atom disponible, opening tsis"
-                            return self._open_tsis(cr, uid, ids, move, 3, 1, context)
-                        elif move.stock_qty_ber_dispo == 0:
-                            #if atom doesnt have anymore stock, and we have 0 quantity, do nothing
-                            # call the normal function, that will also do nothing
-                            print "doing nothing, nothing can be reserved. calling super"
-                            res = super(StockPicking, self).action_assign(cr, uid, ids, context)
-                        else:
-                            #just reserve normally even if not enough
-                            print "reserving normally, even if not enough. calling super"
-                            res = super(StockPicking, self).action_assign(cr, uid, ids, context)
-                    else:
-                        print "client belongs to Beraud, stocks OK, not opening tsis"
-                        res = super(StockPicking, self).action_assign(cr, uid, ids, context)
-
-                #if client belongs to Atom, the product will be taken from atom stock
-                #so it needs to take from beraud
-                if pick.partner_id.company_id.id == 3: 
-                    if move.stock_qty_atom_dispo < move.product_uom_qty:
-                        if move.stock_qty_ber_dispo > 0:
-                            #open tsis beraud -> atom
-                            print "client belongs to Atom but atom stock too low and stocks from Beraud disponible, opening tsis"
-                            return self._open_tsis(cr, uid, ids, move, 1, 3, context)
-                        elif move.stock_qty_atom_dispo == 0:
-                            #if beraud doesnt have anymore stock, and we have 0 quantity, do nothing
-                            # call the normal function, that will also do nothing
-                            print "doing nothing, nothing can be reserved, calling super"
-                            res = super(StockPicking, self).action_assign(cr, uid, ids, context)
-                        else:
-                            #just reserve normally even if not enough
-                            print "reserving normally, even if not enough. calling super"
-                            res = super(StockPicking, self).action_assign(cr, uid, ids, context)
-                    else:
-                        print "client belongs to Atom, stocks OK, not opening tsis"
-                        res = super(StockPicking, self).action_assign(cr, uid, ids, context)
-
-
-        return res
+        return {}
 
 import time
 
