@@ -339,6 +339,8 @@ class MrpRepairInh(models.Model):
             src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
             wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
 
+            v_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Partner Locations/Vendors')])
+            vendeur_loc_id = loc_obj.browse(cr, uid, v_loc_id)
 ### BERAUD SITE REPAIR CONFIRM CASE ###
             if not repair.clientsite:
                 # the picking type is always incoming, but depends on the warehouse it comes from...
@@ -368,7 +370,8 @@ class MrpRepairInh(models.Model):
                     'partner_id': repair.partner_id.id, 
                     'picking_type_id': picking_type_in[0],
                     'move_type': 'direct',
-                    'location_id': repair.location_dest_id.id, # comes from the client location
+                    #'location_id': repair.location_dest_id.id, # comes from the client location
+                    'location_id': vendeur_loc_id.id, # comes from the client location
                     'location_dest_id': repair.location_id.id, # to our location 
                 })
 
@@ -382,7 +385,8 @@ class MrpRepairInh(models.Model):
                     'picking_id': picking_id,
                     'picking_type_id': picking_type_in[0],
                     #'state': 'draft',
-                    'location_id': repair.location_dest_id.id, # client location to
+                    #'location_id': repair.location_dest_id.id, # client location to
+                    'location_id': vendeur_loc_id.id, # client location to
                     'location_dest_id': repair.location_id.id, # our location
                     'restrict_lot_id': repair.lot_id.id,
                 }, context={})
