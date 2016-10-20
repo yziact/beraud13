@@ -462,33 +462,35 @@ class MrpRepairInh(models.Model):
                               ('name', '=', 'Transfert techniciens')])
                 print "picking type internal : %s" % picking_type_internal
 
-                picking_id = sp_obj.create(cr, uid, {
-                    'origin':repair.name,
-                    'product_id': repair.product_id.id,
-                    'partner_id': repair.partner_id.id, 
-                    'picking_type_id': picking_type_internal[0],
-                    'location_id': repair.location_id.id, 
-                    'location_dest_id': tech_loc_id.id,
-                })
-
-                for line in repair.operations:
-                    print "creating move : %s" % line.name
-                    # add move lines to the picking
-                    move_id = move_obj.create(cr, uid, {
-                        'origin': repair.name,
-                        'name': line.name,
-                        'product_uom': line.product_id.uom_id.id,
-                        'product_id': line.product_id.id,
-                        'product_uom_qty': abs(line.product_uom_qty),
-                        'picking_id': picking_id,
+                # create BL Internal only if there are lines in the OR
+                if repair.operations :
+                    picking_id = sp_obj.create(cr, uid, {
+                        'origin':repair.name,
+                        'product_id': repair.product_id.id,
+                        'partner_id': repair.partner_id.id, 
                         'picking_type_id': picking_type_internal[0],
-                        'location_id': line.location_id.id, # line location
-                        'location_dest_id': line.location_dest_id.id, #line location
-                        'restrict_lot_id': line.lot_id.id,
+                        'location_id': repair.location_id.id, 
+                        'location_dest_id': tech_loc_id.id,
                     })
-                    if not move_id:
-                        raise UserError("Problème survenu lors de la création du BL interne vers le technicien")
-                    m = move_obj.browse(cr, uid, move_id)
+
+                    for line in repair.operations:
+                        print "creating move : %s" % line.name
+                        # add move lines to the picking
+                        move_id = move_obj.create(cr, uid, {
+                            'origin': repair.name,
+                            'name': line.name,
+                            'product_uom': line.product_id.uom_id.id,
+                            'product_id': line.product_id.id,
+                            'product_uom_qty': abs(line.product_uom_qty),
+                            'picking_id': picking_id,
+                            'picking_type_id': picking_type_internal[0],
+                            'location_id': line.location_id.id, # line location
+                            'location_dest_id': line.location_dest_id.id, #line location
+                            'restrict_lot_id': line.lot_id.id,
+                        })
+                        if not move_id:
+                            raise UserError("Problème survenu lors de la création du BL interne vers le technicien")
+                        m = move_obj.browse(cr, uid, move_id)
 
                     # quants don't exist yet cause the moves (and the BL) are in draft state.
                     # quants will be created only when the move gets confirmed
@@ -497,9 +499,9 @@ class MrpRepairInh(models.Model):
                     print "move_id : ", m.id
                     print "quants of move : ", m.quant_ids
 
-                print "Created moves and added them to the BL_INTERNAL (From stock location to tech location)"
-                repair.bl_internal = picking_id
-                print "repair.bl_internal : ", repair.bl_internal
+                    print "Created moves and added them to the BL_INTERNAL (From stock location to tech location)"
+                    repair.bl_internal = picking_id
+                    print "repair.bl_internal : ", repair.bl_internal
 
         return res
 
@@ -565,7 +567,7 @@ class MrpRepairInh(models.Model):
 ### CLIENT SITE REPAIR DONE CASE ###
             elif repair.clientsite:
                 # if the internal BL to the tech is not yet "done", we can't finish the repair.
-                if repair.bl_internal.state != 'done' :
+                if repair.bl_internal and repair.bl_internal.state != 'done' :
                     raise UserError("""Le bon de livraison interne Stock -> Technicien n'est pas dans l'état 'fini',
                                     impossible de terminer la réparation sans cela.""")
 
