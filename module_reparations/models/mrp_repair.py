@@ -878,7 +878,6 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     # override action_done, and add origin to quants
-    """
     def action_done(self, cr, uid, ids, context=None):
         # call super
         print "STOCK_MOVE our action_done"
@@ -892,5 +891,4 @@ class StockMove(models.Model):
             for quant in move.quant_ids : 
                 quant.sudo().origin = quant.sudo().company_id
                 print "*** quant origin in move id _%s_ set to _%s_ ***" % (move.id, move.origin)
-    """
 
