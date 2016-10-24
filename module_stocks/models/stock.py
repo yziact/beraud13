@@ -146,13 +146,17 @@ class StockPicking(models.Model):
 
         for pick in self.browse(cr, uid, ids, context=context):
 
+            print "pick.picking_type_id.name : ", pick.picking_type_id.name
+            if pick.picking_type_id.name == u'Réceptions' or\
+               pick.picking_type_id.name == u'Receipts':
+                print "[action_assign] calling super"
+                super(StockPicking, pick).action_assign()
+                continue
+            
             r = []
-            src = 0
-            dst = 0
-            if pick.partner_id.company_id.id == 1 :
-                src = 1
-                dst = 3
-            else:
+            src = 1
+            dst = 3
+            if pick.partner_id.company_id.id == 3 :
                 src = 3
                 dst = 1
 
@@ -168,7 +172,8 @@ class StockPicking(models.Model):
                 return self._open_tsis(cr, uid, ids, dst, src, r)
             else :
                 print "calling super.action_assign()"
-                super(StockPicking, self).action_assign(cr, uid, ids, context=context)
+                #super(StockPicking, pick).action_assign(cr, uid, ids, context=context)
+                super(StockPicking, pick).action_assign()
                 move._compute_stock_nums()
 
         return {}
@@ -284,8 +289,9 @@ class StockQuants(models.Model):
         #print ">>>>>>>>>>>>> our quants_get <<<<<<<<<<<<<<<<"
         domain = domain or [('qty', '>', 0.0)]
         domain = [d for d in domain if d[0] != 'company_id']
-        domain.append(('company_id', '=', move.location_id.company_id.id))
-        #print "new dom : ", domain
+        if move.location_id.company_id.id :
+            domain.append(('company_id', '=', move.location_id.company_id.id))
+        print "[our_quants_get] new domain : ", domain
         # set company_id to move.location_id.company_id.
         return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain, removal_strategy=removal_strategy, context=context)
 
