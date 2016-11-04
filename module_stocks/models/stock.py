@@ -142,21 +142,28 @@ class StockPicking(models.Model):
         move_obj = self.pool.get('stock.move')
         loc_obj = self.pool.get('stock.location')
 
-        print "our action assign"
+        print "[module_stock action_assign] our action assign"
 
         for pick in self.browse(cr, uid, ids, context=context):
 
-            print "pick.picking_type_id.name : ", pick.picking_type_id.name
+            #print "pick.picking_type_id.name : ", pick.picking_type_id.name
+            # if the picking is a reception, we don't do anything
             if pick.picking_type_id.name == u'Réceptions' or\
                pick.picking_type_id.name == u'Receipts':
                 print "[action_assign] calling super"
                 super(StockPicking, pick).action_assign()
                 continue
-            
+
             r = []
             src = 1
             dst = 3
-            if pick.partner_id.company_id.id == 3 :
+            #print "[module_stock action_assign] pick.partner_id : ", pick.partner_id
+            #print "[module_stock action_assign] pick.partner_id.company_id.id : ", pick.partner_id.company_id.id
+            if not pick.partner_id:
+                if pick.location_dest_id.company_id.id == 3:
+                    src = 3
+                    dst = 1
+            elif pick.partner_id.company_id.id == 3 :
                 src = 3
                 dst = 1
 
