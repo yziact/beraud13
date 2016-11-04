@@ -48,6 +48,8 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
             ret = super(SaleAdvancePaymentInvoice, self).create_invoices()
             return ret
 
+from openerp.exceptions import UserError
+
 class SaleOrderInherit(models.Model):
     _inherit = "sale.order"
 
@@ -65,6 +67,22 @@ class SaleOrderInherit(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(res, self)
 
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        print "[%s] our onchange" % __name__
+        if self.partner_id.blocked :
+            raise UserError("""Attention, le client que vous sélectionnez est marqué comme 'bloqué' par la direction.
+                            Merci de contacter la direction pour le faire débloquer""")
+
+class AccountInvoiceInherited(models.Model):
+    _inherit = "account.invoice"
+
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        print "[%s] our onchange" % __name__
+        if self.partner_id.blocked :
+            raise UserError("""Attention, le client que vous sélectionnez est marqué comme 'bloqué' par la direction.
+                            Merci de contacter la direction pour le faire débloquer""")
 
 class Reglement(models.Model):
     _name = 'reglement'
@@ -180,7 +198,6 @@ class ReportInherited(models.Model):
             # print "header : ", header
             # second_header.append(header)
 
-        #import pudb; pudb.set_trace()
         res = super(ReportInherited, self).get_pdf(cr, uid, ids, report_name, html, data, context)
         
         # if the report isn't the sale report, we don't need to further modify it.
@@ -225,7 +242,6 @@ class ReportInherited(models.Model):
         PdfWriter().write(out_file, reader)
 
         # open and return
-        #import pudb; pudb.set_trace()
         f = open(out_file)
         return f.read()
 
@@ -238,4 +254,9 @@ class ReportInherited(models.Model):
             #rl_page = makerl(canvas, page)
             #print "rl_page : ", rl_page
             #canvas.doForm(rl_page)
+
+class ResPartnerInherit(models.Model):
+    _inherit = "res.partner"
+
+    blocked = fields.Boolean(default=False, string=u'Bloqué')
 
