@@ -27,7 +27,7 @@
 
         'sale_reports.xml',
         'reports/report_sale.xml',
-        'reports/sale_stock.xml',
+       
     ],
 }
 

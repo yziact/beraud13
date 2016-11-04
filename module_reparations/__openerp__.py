@@ -28,6 +28,7 @@
         'views/reparations_reports.xml',
         'views/repair_views.xml',
         'views/partner_view.xml',
+	'views/res_partner.xml',
 
         'security/ir.model.access.csv',
         'security/repair_security.xml',

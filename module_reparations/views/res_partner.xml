@@ -1,0 +1,34 @@
+<odoo>
+    <record id="act_res_partner_2_repair_order" model="ir.actions.act_window">
+        <field name="name">Ordre de réparation</field>
+        <field name="res_model">mrp.repair</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_partner_id': active_id}</field>
+        <!--<field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>-->
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Create a Quotation, the first step of a new sale.
+            </p><p>
+            Your next actions should flow efficiently: confirm the Quotation to a Sale Order, then create the Invoice and collect the Payment.
+        </p><p>
+            Note that once a Quotation becomes a Sale Order, it will be moved from the Quotations list to the Sales Order list.
+        </p>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="partner_buttonbox_inherit">
+        <field name="name">partner_buttonbox_inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" type="action" name="%(act_res_partner_2_repair_order)d"
+                        attrs="{'invisible': [('customer', '=', False)]}"
+                        icon="fa-usd">
+                    <field string="Reparation" name="repair_order_count" widget="statinfo"/>
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>
