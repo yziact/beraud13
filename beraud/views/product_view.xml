@@ -3,25 +3,17 @@
 <openerp>
     <data>
 
-      <!--
-        <record id="product_template_inherit_form_view" model="ir.ui.view">
-            <field name="name">My Product Template Form View Inherited</field>
-            <field name="model">product.template</field>
-            <field name="inherit_id" ref="product.product_template_only_form_view"/>
-            <field name="priority" eval="90"/>
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='categ_id']" position="after">
-                    <field name="emplacement"/>
-                </xpath>
-                <xpath expr="//div[@name='volume']" position="after">
-                    <label for="nb_palette" string="Nombre de palettes"/>
-                    <div class="o_row">
-                        <field name="nb_palette"/>
-                    </div>
-                </xpath>
-            </field>
+        <record id="product_common_inherit" model="ir.ui.view">
+          <field name="name">Product Template My Form View Inherited</field>
+          <field name="model">product.template</field>
+          <field name="inherit_id" ref="product.product_template_form_view"/>
+          <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+              <field name="emplacement"/>
+              <field name="nb_palette"/>
+            </xpath>
+          </field>
         </record>
-        -->
 
     </data>
 </openerp>

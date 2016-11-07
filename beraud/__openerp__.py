@@ -40,7 +40,6 @@
     'data': [
         'views/res_partner.xml',
         'views/company_view.xml',
-        'views/product_view.xml',
         'views/analytic_line_task.xml',
         'views/analytic_line_issue.xml',
         'views/internal_invoice.xml',
@@ -49,6 +48,7 @@
         'views/export_sage.xml',
         'views/export_tier.xml',
         'views/payment_term.xml',
+        'views/product_view.xml',
 
         'security/ir.model.access.csv',
 
