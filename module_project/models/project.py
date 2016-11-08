@@ -15,3 +15,4 @@ class ProjectIssues(models.Model):
     _inherit = 'project.issue'
 
     description = fields.Html('Private Note')
+

@@ -18,6 +18,7 @@
     'depends': [
         'base',
         'project',
+        'project_issue',
     ],
 
     'data': [

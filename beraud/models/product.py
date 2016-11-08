@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from openerp import models, api, fields
+import openerp.addons.decimal_precision as dp
 import datetime
 
 class ProductTemplate(models.Model):
