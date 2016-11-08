@@ -18,17 +18,26 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'sale'],
+    'depends': ['base', 'web', 'sale'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/sale_order.xml',
         'views/res_partner.xml',
+        'views/wizards.xml',
 
         'sale_reports.xml',
         'reports/report_sale.xml',
 
     ],
+
+    'installable': True,
+    'auto_install': False,
+    'application': True,
+
+    'qweb': [
+        'static/src/xml/templates.xml',
+    ]
 }
 

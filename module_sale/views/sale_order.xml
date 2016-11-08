@@ -2,6 +2,12 @@
 <openerp>
     <data>
 
+      <template id="assets_backend" name="module sale assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+          <script type="text/javascript" src="/module_sale/static/src/js/my_sale.js"></script>
+        </xpath>
+      </template>
+
         <record id="my_view_order_form_beraud" model="ir.ui.view">
             <field name="name">Sale Order Form Beraud</field>
             <field name="model">sale.order</field>
