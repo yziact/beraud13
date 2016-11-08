@@ -9,3 +9,9 @@ class ProjectInherit(models.Model):
                                relation='product_project_tag_rel',
                                column1='tag_id',
                                column2='project_id')
+
+
+class ProjectIssues(models.Model):
+    _inherit = 'project.issue'
+
+    description = fields.Html('Private Note')

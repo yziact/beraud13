@@ -37,6 +37,23 @@
                 <xpath expr="//field[@name='partner_id']" position="replace">
                   <field name="partner_id" widget="form_sale_blocked_checker" />
                 </xpath>
+                <xpath expr="(//page)[1]" position="after">
+                    <page name="Ber info" string="Info">
+                        <group>
+                            <group>
+                                <!--<label for="tuto" string="Formation incluse"/>-->
+                                <field name="tuto" string="Formation incluse"/>
+                                <!--<label for="delay" string="Délai"/>-->
+                                <field name="delay" string="Délai"/>
+                            </group>
+                            <group>
+                                <!--<label for="install" string="Installation incluse"/>-->
+                                <field name="install" string="Installation incluse"/>
+                                <field name="reglement"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
             </field>
         </record>
 

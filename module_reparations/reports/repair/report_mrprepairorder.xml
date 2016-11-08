@@ -18,8 +18,8 @@
                 </div>
                 
                 <h3>
-                  <span t-if="o.state != 'draft'">Devis de Réparation # </span>
-                  <span t-if="o.state == 'draft'">Devis de Réparation # </span>
+                  <span t-if="o.state != 'draft'">Commande d'Intervention # </span>
+                  <span t-if="o.state == 'draft'">Devis d'Intervention # </span>
                   <span t-field="o.name" />
                 </h3>
 
@@ -40,9 +40,6 @@
                       </td>
                       <td>
                         <strong>Numéro de Lot :</strong>
-                      </td>
-                      <td>
-                        <strong>Limite de Garantie :</strong>
                       </td>
                       <td t-if="o.partner_id.user_id">
                         <span><span><strong>Commercial: </strong></span><span t-field="o.partner_id.user_id.name"/> / <span t-field="o.partner_id.user_id.email"/></span>
@@ -67,12 +64,8 @@
                         <span t-field="o.lot_id.name"/>
                       </td>
                       <td>
-                        <p t-field="o.guarantee_limit"/>
-                      </td>
-                      <td>
                         <table>
                           <tbody>
-
                             <tr t-if="o.partner_id.principal_contact">
                               <td>
                                 <strong>Contact: </strong>
@@ -174,7 +167,7 @@
                         </td>
                       </tr>
                       <tr>
-                        <td>Prestation(s)</td>
+                        <td>Taxes</td>
                         <td class="text-right">
                           <span t-field="o.amount_tax"
                             t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>

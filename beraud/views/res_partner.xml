@@ -22,7 +22,7 @@
                     <!--div class="fa fa-exclamation-triangle fa-2x" style="color:#ff4d00;"  attrs="{'invisible': True}" /-->
                 </xpath>
                 <xpath expr="//field[@name='user_id']" position="attributes">
-                    <attribute name="widget">many2many_tags</attribute>
+                    <attribute name="String">Vendeur</attribute>
                 </xpath>
 
                 <!-- deletion of attributes widget="email" and widget="phone" of these three fields, 
