@@ -1,35 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-    <record id="my_view_order_form_beraud" model="ir.ui.view">
-        <field name="name">Sale Order Form Beraud</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="(//button[@name='print_quotation'])[1]" position="attributes">
-              <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="(//button[@name='print_quotation'])[2]" position="attributes">
-              <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//button[@name='action_done']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='partner_shipping_id']" position="after">
-                <field name="contact" domain="[('parent_id', '=', partner_id)]"/>
-            </xpath>
-            <xpath expr="//field[@name='user_id']" position="after">
-                <field name="commercial"/>
-            </xpath>
-            <xpath expr="//field[@name='user_id']" position="attributes">
-                <attribute name="invisible">True</attribute>
-            </xpath>
-        </field>
-    </record>
 
-  </data>
+        <record id="my_view_order_form_beraud" model="ir.ui.view">
+            <field name="name">Sale Order Form Beraud</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="(//button[@name='print_quotation'])[1]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="(//button[@name='print_quotation'])[2]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_done']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                    <field name="contact" domain="[('parent_id', '=', partner_id)]"/>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="commercial"/>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="oder_filter_inherit_beraud" model="ir.ui.view">
+            <field name="name">Sale Order Form Beraud</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="attributes">
+                    <attribute name="invisible">0</attribute>
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
 </openerp>
 
