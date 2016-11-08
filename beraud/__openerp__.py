@@ -54,8 +54,7 @@
 
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
-        'report/invoice/report_invoice.xml',
-        'report/invoice/sale_stock.xml',
+
     ],
 }
 

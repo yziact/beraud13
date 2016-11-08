@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <template id="report_invoice_document">
+        <template id="account.report_invoice_document">
             <t t-call="report.external_layout">
                 <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
                 <div class="page" style="font-size:11px;">
                     <div class="row">
                         <div class="col-xs-6" t-if="o.type=='out_invoice'">
-                            <div t-if="o.type=='out_invoice' and o.partner_id">
-                                <span><strong>Delivery Address:</strong></span>
+                            <div t-if="o.type=='out_invoice' and o.partner_shipping_id">
+                                <span><strong>Adresse de Livraison:</strong></span>
                             </div>
-                            <div t-if="o.partner_id" name="partner_header">
-                                <div t-field="o.partner_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;fax&quot;], &quot;no_marker&quot;: true, &quot;phone_icons&quot;: true}"/>
+                            <div t-if="o.partner_shipping_id" name="partner_header">
+                                <div t-field="o.partner_shipping_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: true}"/>
                             </div>
                         </div>
                         <div class="col-xs-6">
+                             <span><strong>Adresse de Facturation:</strong></span>
                             <address t-field="o.partner_id"
                                      t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' />
                             <span t-if="o.partner_id.vat">TIN: <span t-field="o.partner_id.vat"/></span>
@@ -29,6 +30,7 @@
                         <span t-if="o.type == 'out_refund'">Refund: </span>
                         <span t-if="o.type == 'in_refund'">Vendor Refund: </span>
                         <span t-if="o.type == 'in_invoice'">Vendor Bill: </span>
+                        <span t-field="o.number"/>
                     </h2>
 
                     <table class="table table-condensed table-bordered">
@@ -40,14 +42,17 @@
                                 <td t-if="o.date_due and o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">
                                     <strong>Due Date:</strong>
                                 </td>
-                                <td>
+                                <!--td>
                                     <strong>Numero </strong>
-                                </td>
+                                </td-->
                                 <td>
                                     <strong>Code client</strong>
                                 </td>
                                 <td name="partner_ref_head">
                                     <strong>V/Ref.</strong>
+                                </td>
+                                <td t-if="o.incoterms_id">
+                                    <strong>Incoterms:</strong>
                                 </td>
                                 <td t-if="o.partner_id.user_id">
                                     <span><span>
@@ -64,14 +69,17 @@
                                 <td t-if="o.date_due and o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">
                                     <p t-field="o.date_due"/>
                                 </td>
-                                <td>
+                                <!--td>
                                     <span t-field="o.number"/>
-                                </td>
+                                </td-->
                                 <td>
                                     <span t-field="o.partner_id.ref"/>
                                 </td>
                                 <td name="partner_ref_data">
                                     <span t-field="o.name"/>
+                                </td>
+                                <td  t-if="o.incoterms_id">
+                                    <p t-field="o.incoterms_id.code"/>
                                 </td>
                                 <td>
                                     <table>
@@ -117,7 +125,7 @@
                         </thead>
                         <tbody class="invoice_tbody">
                             <tr t-foreach="o.invoice_line_ids" t-as="l">
-                                <td><span t-field="l.product_id"/></td>
+                                <td><span t-field="l.name"/></td>
                                 <td class="text-right">
                                     <span t-field="l.quantity"/>
                                     <span t-field="l.uom_id"  groups="product.group_uom"/>

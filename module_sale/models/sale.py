@@ -18,6 +18,22 @@ class SaleOrderLine(models.Model):
 
     name = fields.Html(string='Description', required=True, default_focus=True)
 
+    @api.multi
+    def _prepare_invoice_line(self, qty):
+        account_env = self.env['account.account']
+        partner_company_id = self.order_id.partner_id.company_id.id
+        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
+
+        account_code = account_env.sudo().browse(res['account_id']).code
+        account_id = account_env.search([('code', '=', account_code), ('company_id','=', partner_company_id)])
+
+        fpos = self.order_id.fiscal_position_id or self.order_id.partner_id.property_account_position_id
+        if fpos:
+            account_id = fpos.map_account(account_id)
+
+        res['account_id'] = account_id.id
+
+        return res
 
 class SaleAdvancePaymentInvoice(models.TransientModel):
     _inherit = 'sale.advance.payment.inv'

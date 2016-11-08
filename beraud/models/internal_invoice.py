@@ -29,7 +29,7 @@ class Internal_Invoice(models.Model):
         for item in list:
             price_unit = item_pricelist_env.search([("pricelist_id", "=", price_list_id), ("product_id", "=", item.product_id.id)]).fixed_price
             if not price_unit :
-                price_unit = item.product_id.list_price
+                price_unit = item.product_id.tarif
 
             line = invoice_line_env.create({'origin': 'internal',
                                             'create_date': datetime.date.today(),
@@ -67,7 +67,7 @@ class Internal_Invoice(models.Model):
                                             'company_id': company_id,
                                             'account_id': account_id,
                                             'invoice_id': invoice.id,
-                                            'price_unit': item['product'].product_tmpl_id.list_price,
+                                            'price_unit': item['product'].product_tmpl_id.tarif,
                                             'timesheet_id': item['timesheet_id'],
                                             'product_id': item['product'].id,
                                             'uom_id': item['product'].product_tmpl_id.uom_id.id,
@@ -101,7 +101,6 @@ class Internal_Invoice(models.Model):
         journal_env = self.env['account.journal']
         analytic_line_env = self.env['account.analytic.line']
         prod_env = self.env['product.product']
-        product_time = prod_env.search([('default_code', '=', 'TEAMO')])
 
         # List des mouvements
         list_ber = []
@@ -126,20 +125,29 @@ class Internal_Invoice(models.Model):
 
 
         for line in projet_line_task:
+            repair_env = self.env['mrp.repair']
+
             if line.user_id.company_id.id != line.task_id.company_id.id:
-                if line.user_id.company_id.id == 1:
-                    time_ber.append({'quantity':line.unit_amount,
-                                     'product': product_time,
-                                     'name':line.name,
-                                     'timesheet_id': line.id,
-                                     })
-                if line.user_id.company_id.id == 3:
-                    time_atom.append({'quantity':line.unit_amount,
-                                     'product': product_time,
-                                     'name':line.name,
-                                     'timesheet_id': line.id,
-                                     })
+                repair = repair_env.search([('task_id', '=', line.task_id.id)])
+                if repair:
+                    if repair.clientsite:
+                        product_time = prod_env.search([('default_code', '=', 'MOEX')])
+                else:
+                    product_time = prod_env.search([('default_code', '=', 'MO')])
+                    if line.user_id.company_id.id == 1:
+                        time_ber.append({'quantity':line.unit_amount,
+                                         'product': product_time,
+                                         'name':line.name,
+                                         'timesheet_id': line.id,
+                                         })
+                    if line.user_id.company_id.id == 3:
+                        time_atom.append({'quantity':line.unit_amount,
+                                         'product': product_time,
+                                         'name':line.name,
+                                         'timesheet_id': line.id,
+                                         })
         for line in projet_line_issue:
+            product_time = prod_env.search([('default_code', '=', 'MO')])
             if line.user_id.company_id.id != line.issue_id.company_id.id:
                 time_ber.append({'quantity': line.unit_amount,
                                  'product': product_time,
@@ -235,9 +243,10 @@ class Internal_Invoice(models.Model):
 
 class inherit_AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
-
     move_id  = fields.Many2one("stock.move", help='link between the stock move and the invoice line')
     timesheet_id = fields.Many2one("account.analytic.line", help='link between the time on a project move and the invoice line')
+
+
 class inherit_AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 

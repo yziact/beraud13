@@ -79,7 +79,11 @@ class Export_Journal(models.Model):
                 if line.date:
                     dateL = self.formatDate(line.date.encode("windows-1252"))
                 if line.account_id.code:
-                    nbcompte = line.account_id.code[:8].encode("windows-1252")
+                    nbcompte = line.account_id.code[:8]
+                    if 'CA' in nbcompte or 'CB' in nbcompte or 'F' in nbcompte:
+                        compte = collectif
+                    else:
+                        compte = nbcompte
                 if line.account_id.name:
                     nomcompte = line.account_id.name[:40].encode("windows-1252")
                 if line.invoice_id.number :
@@ -93,14 +97,14 @@ class Export_Journal(models.Model):
                 if line.invoice_id.date_due:
                     date_due = self.formatDate(line.invoice_id.date_due)
                 if line.tax_line_id :
-                    tax = line.tax_line_id.description
+                    tax = line.tax_line_id.description.encode("windows-1252")
                 if line.invoice_id.payment_term_id:
-                    term = line.invoice_id.payment_term_id.type_sage
+                    term = line.invoice_id.payment_term_id.type_sage.encode("windows-1252")
 
                 if not nbcompte in dict_sum_line:
                     dict_sum_line[nbcompte] = {'Code journal': code,
                                              'Date de piece': dateL ,
-                                             'No de compte general': collectif,
+                                             'No de compte general': compte,
                                              'Intitule compte general': nomcompte,
                                              'No de piece': nb_piece,
                                              'No de facture': nb_invoice,
@@ -266,6 +270,9 @@ class Export_Tiers(models.Model):
 
         list_row = []
         partner_env = self.env['res.partner']
+        sale_env = self.env['sale_order']
+        purchase_env = self.env['purchase_order']
+
         csvfile = StringIO.StringIO()
         fieldnames = [u'Numero compte', u'intitule', 'Type', u'N compte principal', u'Qualite',
                     'Classement', 'Contact', 'Adresse', u'Complement adresse', 'Code postal', 'Ville',
@@ -297,128 +304,132 @@ class Export_Tiers(models.Model):
             if partner.company_type == "company":
                 partner_fils = partner_env.search([('type', '=', 'invoice'), ('parent_id', '=', partner.id), ('is_principal', '=', True)], limit=1)
 
-                if partner_fils:
-                    contact = partner_fils.title + " " + partner_fils.name
-                    contact = contact[:35].encode("windows-1252")
-                if partner.customer:
-                    if partner.ref:
-                        ref = partner.ref.strip()[:17].encode("windows-1252")
-                    if partner.property_account_receivable_id:
-                        code = partner.property_account_receivable_id.code.encode("windows-1252")
-                    if partner.street:
-                        street2 = partner.street[:35].encode("windows-1252")
-                    if partner.street2:
-                        street = partner.street2[:35].encode("windows-1252")
-                    if partner.zip:
-                        zip = partner.zip[:9].encode("windows-1252")
-                    if partner.city:
-                        city = partner.city[:35].encode("windows-1252")
-                    if partner.country_id:
-                        country_id = partner.country_id.name[:35].encode("windows-1252")
-                    if partner.phone:
-                        phone = partner.phone[:21].encode("windows-1252")
-                    if partner.fax:
-                        fax = partner.fax[:21].encode("windows-1252")
-                    if partner.email:
-                        email = partner.email[:69].encode("windows-1252")
-                    if partner.comment:
-                        comment = partner.comment.encode("windows-1252")
+                sale = sale_env.search([('partner_id', '=', partner.id), ('state', 'in', ['sale', 'done'])])
+                purchase = purchase_env.search([('partner_id', '=', partner.id), ('state', 'in', ['sale', 'done'])])
 
-                    list_row.append({'Numero compte': code,
-                                     u'intitule': partner.name[:35].encode("windows-1252"),
-                                     'Type': 0,
-                                     u'N compte principal': '41100000',
-                                     u'Qualite': "",
-                                     'Classement': partner.name[:17].encode("windows-1252"),
-                                     'Contact': contact,
-                                     'Adresse': street,
-                                     u'Complement adresse': street2,
-                                     'Code postal': zip,
-                                     'Ville': city,
-                                     u'Region': "",
-                                     'Pays': country_id,
-                                     u'Telephone': phone,
-                                     u'Telecopie': fax,
-                                     'Adresse Email': email,
-                                     'Site': "",
-                                     'NAF (APE)': "",
-                                     u'N Identifiant': "",
-                                     u'N Siret': "",
-                                     u'Intitule banque': "",
-                                     'Structure banque': 0,
-                                     'Code banque': "",
-                                     'Guichet banque': "",
-                                     'Compte banque': "",
-                                     u'Cle banque': "",
-                                     'Code ISO devise banque': "",
-                                     'Adresse banque': "",
-                                     'Code postal banque': "",
-                                     'Ville banque': "",
-                                     'Pays banque': "",
-                                     'Code BIC banque': "",
-                                     'Code IBAN banque': "",
-                                     'Information libre 1': comment,
-                                     })
-                if partner.supplier:
-                    if partner.ref:
-                        ref = partner.ref.strip()[:17].encode("windows-1252")
-                    if partner.property_account_receivable_id:
-                        code = partner.property_account_payable_id.code.encode("windows-1252")
-                    if partner.street:
-                        street2 = partner.street[:35].encode("windows-1252")
-                    if partner.street2:
-                        street = partner.street2[:35].encode("windows-1252")
-                    if partner.zip:
-                        zip = partner.zip[:9].encode("windows-1252")
-                    if partner.city:
-                        city = partner.city[:35].encode("windows-1252")
-                    if partner.country_id:
-                        country_id = partner.country_id.name[:35].encode("windows-1252")
-                    if partner.phone:
-                        phone = partner.phone[:21].encode("windows-1252")
-                    if partner.fax:
-                        fax = partner.fax[:21].encode("windows-1252")
-                    if partner.email:
-                        email = partner.email[:69].encode("windows-1252")
-                    if partner.comment:
-                        comment = partner.comment.encode("windows-1252")
+                if sale or purchase :
 
-                    list_row.append({'Numero compte':code,
-                                     u'intitule': partner.name[:35].encode("windows-1252"),
-                                     'Type': 1,
-                                     u'N compte principal': '40100000',
-                                     u'Qualite': "",
-                                     'Classement': partner.name[:17].encode("windows-1252"),
-                                     'Contact': contact,
-                                     'Adresse': street,
-                                     u'Complement adresse': street2,
-                                     'Code postal': zip,
-                                     'Ville': city,
-                                     u'Region': "",
-                                     'Pays': country_id,
-                                     u'Telephone': phone,
-                                     u'Telecopie': fax,
-                                     'Adresse Email': email,
-                                     'Site': "",
-                                     'NAF (APE)': "",
-                                     u'N Identifiant': "",
-                                     u'N Siret': "",
-                                     u'Intitule banque': "",
-                                     'Structure banque': 0,
-                                     'Code banque': "",
-                                     'Guichet banque': "",
-                                     'Compte banque': "",
-                                     u'Cle banque': "",
-                                     'Code ISO devise banque': "",
-                                     'Adresse banque': "",
-                                     'Code postal banque': "",
-                                     'Ville banque': "",
-                                     'Pays banque': "",
-                                     'Code BIC banque': "",
-                                     'Code IBAN banque': "",
-                                     'Information libre 1': comment })
+                    if partner_fils:
+                        contact = partner_fils.title + " " + partner_fils.name
+                        contact = contact[:35].encode("windows-1252")
+                    if partner.customer:
+                        if partner.ref:
+                            ref = partner.ref.strip()[:17].encode("windows-1252")
+                        if partner.property_account_receivable_id:
+                            code = partner.property_account_receivable_id.code.encode("windows-1252")
+                        if partner.street:
+                            street2 = partner.street[:35].encode("windows-1252")
+                        if partner.street2:
+                            street = partner.street2[:35].encode("windows-1252")
+                        if partner.zip:
+                            zip = partner.zip[:9].encode("windows-1252")
+                        if partner.city:
+                            city = partner.city[:35].encode("windows-1252")
+                        if partner.country_id:
+                            country_id = partner.country_id.name[:35].encode("windows-1252")
+                        if partner.phone:
+                            phone = partner.phone[:21].encode("windows-1252")
+                        if partner.fax:
+                            fax = partner.fax[:21].encode("windows-1252")
+                        if partner.email:
+                            email = partner.email[:69].encode("windows-1252")
+                        if partner.comment:
+                            comment = partner.comment.encode("windows-1252")
 
-            partner.write({'exported': True})
+                        list_row.append({'Numero compte': code,
+                                         u'intitule': partner.name[:35].encode("windows-1252"),
+                                         'Type': 0,
+                                         u'N compte principal': '41100000',
+                                         u'Qualite': "",
+                                         'Classement': partner.name[:17].encode("windows-1252"),
+                                         'Contact': contact,
+                                         'Adresse': street,
+                                         u'Complement adresse': street2,
+                                         'Code postal': zip,
+                                         'Ville': city,
+                                         u'Region': "",
+                                         'Pays': country_id,
+                                         u'Telephone': phone,
+                                         u'Telecopie': fax,
+                                         'Adresse Email': email,
+                                         'Site': "",
+                                         'NAF (APE)': "",
+                                         u'N Identifiant': "",
+                                         u'N Siret': "",
+                                         u'Intitule banque': "",
+                                         'Structure banque': 0,
+                                         'Code banque': "",
+                                         'Guichet banque': "",
+                                         'Compte banque': "",
+                                         u'Cle banque': "",
+                                         'Code ISO devise banque': "",
+                                         'Adresse banque': "",
+                                         'Code postal banque': "",
+                                         'Ville banque': "",
+                                         'Pays banque': "",
+                                         'Code BIC banque': "",
+                                         'Code IBAN banque': "",
+                                         'Information libre 1': comment,
+                                         })
+                    if partner.supplier:
+                        if partner.ref:
+                            ref = partner.ref.strip()[:17].encode("windows-1252")
+                        if partner.property_account_receivable_id:
+                            code = partner.property_account_payable_id.code.encode("windows-1252")
+                        if partner.street:
+                            street2 = partner.street[:35].encode("windows-1252")
+                        if partner.street2:
+                            street = partner.street2[:35].encode("windows-1252")
+                        if partner.zip:
+                            zip = partner.zip[:9].encode("windows-1252")
+                        if partner.city:
+                            city = partner.city[:35].encode("windows-1252")
+                        if partner.country_id:
+                            country_id = partner.country_id.name[:35].encode("windows-1252")
+                        if partner.phone:
+                            phone = partner.phone[:21].encode("windows-1252")
+                        if partner.fax:
+                            fax = partner.fax[:21].encode("windows-1252")
+                        if partner.email:
+                            email = partner.email[:69].encode("windows-1252")
+                        if partner.comment:
+                            comment = partner.comment.encode("windows-1252")
+
+                        list_row.append({'Numero compte':code,
+                                         u'intitule': partner.name[:35].encode("windows-1252"),
+                                         'Type': 1,
+                                         u'N compte principal': '40100000',
+                                         u'Qualite': "",
+                                         'Classement': partner.name[:17].encode("windows-1252"),
+                                         'Contact': contact,
+                                         'Adresse': street,
+                                         u'Complement adresse': street2,
+                                         'Code postal': zip,
+                                         'Ville': city,
+                                         u'Region': "",
+                                         'Pays': country_id,
+                                         u'Telephone': phone,
+                                         u'Telecopie': fax,
+                                         'Adresse Email': email,
+                                         'Site': "",
+                                         'NAF (APE)': "",
+                                         u'N Identifiant': "",
+                                         u'N Siret': "",
+                                         u'Intitule banque': "",
+                                         'Structure banque': 0,
+                                         'Code banque': "",
+                                         'Guichet banque': "",
+                                         'Compte banque': "",
+                                         u'Cle banque': "",
+                                         'Code ISO devise banque': "",
+                                         'Adresse banque': "",
+                                         'Code postal banque': "",
+                                         'Ville banque': "",
+                                         'Pays banque': "",
+                                         'Code BIC banque': "",
+                                         'Code IBAN banque': "",
+                                         'Information libre 1': comment })
+                    partner.write({'exported': True})
         writer.writerows(list_row)
         fecvalue = csvfile.getvalue()
         self.write({
