@@ -25,19 +25,15 @@
         # 'security/ir.model.access.csv',
         'views/sale_order.xml',
         'views/res_partner.xml',
-        'views/wizards.xml',
+        #'views/wizards.xml',
 
         'sale_reports.xml',
         'reports/report_sale.xml',
 
     ],
 
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-
-    'qweb': [
-        'static/src/xml/templates.xml',
-    ]
+    # 'qweb': [
+    #     'static/src/xml/templates.xml',
+    # ]
 }
 

@@ -170,6 +170,8 @@ class SaleReport(models.AbstractModel):
         return res
 '''
 
+'''
+
 from reportlab.pdfgen.canvas import Canvas
 from pdfrw import PdfReader, PdfWriter, PageMerge
 from pdfrw.toreportlab import makerl
@@ -298,6 +300,7 @@ class ReportInherited(models.Model):
             #rl_page = makerl(canvas, page)
             #print "rl_page : ", rl_page
             #canvas.doForm(rl_page)
+'''
 
 class ResPartnerInherit(models.Model):
     _inherit = "res.partner"
