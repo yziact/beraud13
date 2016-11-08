@@ -34,6 +34,9 @@
                 <xpath expr="//field[@name='user_id']" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </xpath>
+                <xpath expr="//field[@name='partner_id']" position="replace">
+                  <field name="partner_id" widget="form_sale_blocked_checker" />
+                </xpath>
             </field>
         </record>
 
