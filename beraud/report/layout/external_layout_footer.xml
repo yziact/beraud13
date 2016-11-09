@@ -26,7 +26,25 @@
                     <t t-if="company.custom_footer">
                         <span t-raw="company.rml_footer"/>
                     </t>
-
+                    <ul class="list-inline">
+                        <t t-foreach="company.bank_journal_ids" t-as="journal">
+                            <t t-set="bank_acc" t-value="journal.bank_account_id"/>
+                            <li>
+                                <td>
+                                    <span t-field="bank_acc.bank_name"/>
+                                </td>
+                                <td>
+                                    <span t-field="bank_acc.bank_bic"/>
+                                </td>
+                                <td>
+                                    <span t-field="bank_acc.acc_number"/>
+                                </td>
+                                <td>
+                                    <span t-field="bank_acc.currency_id"/>
+                                </td>
+                            </li>
+                        </t>
+                    </ul>
                     <ul class="list-inline">
                         <li>Page:</li>
                         <li><span class="page"/></li>
