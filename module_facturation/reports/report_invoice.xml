@@ -6,8 +6,8 @@
                 <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
                 <div class="page" style="font-size:11px;">
                     <div class="row">
-                        <div class="col-xs-6" t-if="o.type=='out_invoice'">
-                            <div t-if="o.type=='out_invoice' and o.partner_shipping_id">
+                        <div class="col-xs-6">
+                            <div t-if="(o.type=='out_invoice' or o.type=='out_refund') and o.partner_shipping_id">
                                 <span><strong>Adresse de Livraison:</strong></span>
                             </div>
                             <div t-if="o.partner_shipping_id" name="partner_header">
