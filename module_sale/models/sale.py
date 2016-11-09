@@ -69,6 +69,9 @@ from openerp.exceptions import UserError
 class WizClientBlocked(models.TransientModel):
     _name = 'wiz_client_blocked'
 
+error_client_blocked = """Attention, le client que vous sélectionnez est marqué comme 'bloqué' par la direction.
+Merci de contacter la direction pour le faire débloquer. """
+
 class SaleOrderInherit(models.Model):
     _inherit = "sale.order"
 
@@ -86,11 +89,17 @@ class SaleOrderInherit(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(res, self)
 
-    """
     @api.onchange('partner_id')
     def onchange_partner_id_2(self):
         super(SaleOrderInherit, self).onchange_partner_id()
         print "[%s] our onchange" % __name__
+        if self.partner_id.blocked :
+            print "partner is blocked"
+            return {
+                'warning': {'title': 'Attention', 'message': error_client_blocked},
+            }
+
+    """
         if self.partner_id.blocked :
             print "blocked"
             wiz_view_id = self.env['ir.model.data'].xmlid_to_res_id('module_sale.wiz_client_blocked_view')
@@ -119,14 +128,15 @@ class SaleOrderInherit(models.Model):
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"
 
-    #@api.onchange('partner_id')
-    #def onchange_partner_id(self):
-        #print "[%s] our onchange" % __name__
-        #super(AccountInvoiceInherited, self)._onchange_partner_id()
-        #if self.partner_id.blocked :
-        #    raise UserError("""Attention, le client que vous sélectionnez est marqué comme 'bloqué' par la direction.
-        #                    Merci de contacter la direction pour le faire débloquer""")
-
+    @api.onchange('partner_id')
+    def onchange_partner_id_2(self):
+        super(AccountInvoiceInherited, self)._onchange_partner_id()
+        print "[%s] our onchange" % __name__
+        if self.partner_id.blocked :
+            print "partner is blocked"
+            return {
+                'warning': {'title': 'Attention', 'message': error_client_blocked},
+            }
 
 class Reglement(models.Model):
     _name = 'reglement'
