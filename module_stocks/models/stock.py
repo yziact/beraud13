@@ -25,7 +25,7 @@ class StockPicking(models.Model):
     @api.model
     def fields_view_get(self, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
 
-        mask = utilsmod.ReportMask(['module_stocks.report_my_picking', 'module_stocks.report_my_shipping2'])
+        mask = utilsmod.ReportMask(['module_stocks.report_my_picking'])
         r = super(StockPicking, self).fields_view_get(
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(r, self)
@@ -150,7 +150,7 @@ class StockPicking(models.Model):
             # if the picking is a reception, we don't do anything
             if pick.picking_type_id.name == u'Réceptions' or\
                pick.picking_type_id.name == u'Receipts':
-                print "[action_assign] calling super"
+                print "[action_assign] reception, calling super"
                 super(StockPicking, pick).action_assign()
                 continue
 
