@@ -13,6 +13,7 @@
       menu="True"
       />
 
+    <!--
     <report 
       id="act_report_my_shipping2" 
       model="stock.picking" 
@@ -22,7 +23,7 @@
       file="module_stocks.report_my_shipping2" 
       attachment_use="False"
       menu="True"
-      />
+      />-->
 
     <!--
     <report 
