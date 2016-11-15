@@ -18,13 +18,14 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'web', 'sale'],
+    'depends': ['base', 'web', 'sale', 'sales_team'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/sale_order.xml',
         'views/res_partner.xml',
+        'views/sale_order.xml',
+        'views/sale_order_line.xml',
 
         'sale_reports.xml',
         'reports/report_sale.xml',

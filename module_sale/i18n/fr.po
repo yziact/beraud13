@@ -1,0 +1,26 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * sale
+# 
+# Translators:
+# Nancy Bolognesi <nb@microcom.ca>, 2015
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo 9.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-09 09:17+0000\n"
+"PO-Revision-Date: 2016-07-26 10:33+0000\n"
+"Last-Translator: Gabriel Santos <gsantos@yziact.fr> \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: fr\n"
+"Plural-Forms: \n"
+
+#. module: sale
+#: model:ir.model.fields,field_description:module_sale.field_sale_order_line_discount_amount
+msgid "Discount Amount"
+msgstr "Remise Montant"
+
+
