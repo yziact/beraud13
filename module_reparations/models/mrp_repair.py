@@ -313,13 +313,18 @@ class MrpRepairInh(models.Model):
                 print "SRC LOC : %s" % src_loc
                 print "WH : %s" % wh
 
-                picking_type_in = self.pool.get('stock.picking.type').search(
-                    cr, uid, [('code', '=', 'incoming'), ('warehouse_id', '=', wh)])
-                print "picking type in : %s" % picking_type_in
+                picking_type_in_id = self.pool.get('stock.picking.type').search(
+                    cr, uid, [('code', '=', 'incoming'), ('warehouse_id', '=', wh), ('name','ilike','SAV')])
+                picking_type_in = self.pool.get('stock.picking.type').browse(cr, uid, [picking_type_in_id[0]])
 
-                picking_type_out = self.pool.get('stock.picking.type').search(
-                    cr, uid, [('code', '=', 'outgoing'), ('warehouse_id', '=', wh)])
-                print "picking type out : %s" % picking_type_out
+                picking_type_out_id = self.pool.get('stock.picking.type').search(
+                    cr, uid, [('code', '=', 'outgoing'), ('warehouse_id', '=', wh), ('name','ilike','SAV')])
+                picking_type_out = self.pool.get('stock.picking.type').browse(cr, uid, [picking_type_out_id[0]])
+
+                print "picking_type_in : %s" % picking_type_in
+                print "picking_type_in.name : %s" % picking_type_in.name
+                print "picking_type_out : %s" % picking_type_out
+                print "picking_type_out.name : %s" % picking_type_out.name
 
                 if not picking_type_in:
                     raise UserError("Something went wrong while selecting the picking type in.")
@@ -333,7 +338,7 @@ class MrpRepairInh(models.Model):
                 picking_id = sp_obj.create(cr, uid, {
                     'origin':repair.name,
                     'partner_id': repair.partner_id.id, 
-                    'picking_type_id': picking_type_in[0],
+                    'picking_type_id': picking_type_in.id,
                     'move_type': 'direct',
                     #'location_id': repair.location_dest_id.id, # comes from the client location
                     'location_id': vendeur_loc_id.id, # comes from the client location
@@ -348,7 +353,7 @@ class MrpRepairInh(models.Model):
                     'product_uom': repair.product_id.uom_id.id,
                     'product_uom_qty': repair.product_qty,
                     'picking_id': picking_id,
-                    'picking_type_id': picking_type_in[0],
+                    'picking_type_id': picking_type_in.id,
                     #'state': 'draft',
                     #'location_id': repair.location_dest_id.id, # client location to
                     'location_id': vendeur_loc_id.id, # client location to
@@ -379,7 +384,7 @@ class MrpRepairInh(models.Model):
                     'origin':repair.name,
                     'product_id': repair.product_id.id,
                     'partner_id': repair.partner_id.id, 
-                    'picking_type_id': picking_type_out[0],
+                    'picking_type_id': picking_type_out.id,
                     'location_id': repair.location_id.id, 
                     'location_dest_id': repair.location_dest_id.id,
                 })
@@ -395,7 +400,7 @@ class MrpRepairInh(models.Model):
                     'location_id': repair.location_id.id,
                     'location_dest_id': repair.location_dest_id.id,
                     'picking_id': picking_id,
-                    'picking_type_id': picking_type_out[0],
+                    'picking_type_id': picking_type_out.id,
                     'restrict_lot_id': repair.lot_id.id,
                 })
 
