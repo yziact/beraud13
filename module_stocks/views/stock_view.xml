@@ -26,7 +26,7 @@
     </record>
 
     <record id="my_stock_picking_view" model="ir.ui.view">
-      <field name="name">My Stock Move Picking Tree</field>
+      <field name="name">My Stock Move Tree</field>
       <field name="model">stock.move</field>
       <field name="inherit_id" ref="stock.view_move_picking_tree"/>
       <field name="arch" type="xml">
@@ -41,6 +41,19 @@
 
     <!-- make the menu not be in the group noone -->
     <menuitem id="stock.menu_stock_warehouse_mgmt" name="Operations" parent="stock.menu_stock_root" sequence="2" groups="base.group_user"/>
+
+    <!-- make notes field visible 
+    <record id="my_stock_picking_form_view" model="ir.ui.view">
+      <field name="name">My Stock Picking Form</field>
+      <field name="model">stock.picking</field>
+      <field name="inherit_id" ref="stock.view_picking_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='note']" position="replace">
+          <field name="note" placeholder="Add an internal note..." />
+        </xpath>
+      </field>
+    </record> -->
+
 
     <!-- works in point_of_sale_view
         <record id="product_template_tree_view" model="ir.ui.view">

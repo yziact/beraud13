@@ -191,6 +191,7 @@
                                 </table>
                             </div>
                         </div>
+                        <p t-if="doc.state in ['draft','sent']">Validité de l'offre : 30 jours</p>
                         <p t-field="doc.note" />
                          <p t-if="doc.payment_term_id.note">
                              <span t-field="doc.payment_term_id.note"/>

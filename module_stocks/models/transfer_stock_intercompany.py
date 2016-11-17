@@ -173,6 +173,16 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 raise UserError(_("No stock transit location could be found!"))
 
             for line in wizard.line_ids:
+                quants = self.env['stock.quant'].search([
+                    ('product_id', '=', line.product_id.id),
+                    ('lot_id', '=', line.restrict_lot_id.id),
+                    ('location_id', '=', wizard.location_src_id.id),
+                    ('company_id', '=', wizard.company_src_id.id),
+                ])
+                total_qty = sum([quant.qty for quant in quants])
+                print "[__TSIS__] quantity of product available : ", total_qty
+                print "[__TSIS__] going to transfer: ", line.quantity
+                
                 move_vals = {
                     'name': _('Intercompany transit %s - Source') % (line.product_id.name),
                     'origin': 'TSIS move',
@@ -202,14 +212,17 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 move1.action_confirm()
                 if move1.state != 'confirmed':
                     raise UserError(_("The first movement could not be confirmed!"))
+                print "[__TSIS__] move1 confirm OK"
 
-                #move1.action_assign()
-                #if move1.state != 'confirmed':
-                #    raise UserError(_("Vous ne pouvez pas réserver, car il n'y a pas assez de stock."))
+                move1.action_assign()
+                if move1.state != 'assigned':
+                    raise UserError(_("Vous ne pouvez pas réserver, car il n'y a pas assez de stock."))
+                print "[__TSIS__] move1 assign OK"
 
                 move1.action_done()
                 if move1.state != 'done':
                     raise UserError(_("The first movement could not be terminated!"))
+                print "[__TSIS__] move1 done OK"
 
                 print "MOVE 1 QUANT IDS : ",move1.sudo().quant_ids
                 # set owner of quant to company that received the move
@@ -218,12 +231,14 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 move2.action_confirm()
                 if move2.state != 'confirmed':
                     raise UserError(_("The second movement could not be confirmed!"))
+                print "[__TSIS__] move2 confirm OK"
 
                 move2.action_done()
                 if move2.state != 'done':
                     raise UserError(_("The second movement could not be terminated!"))
+                print "[__TSIS__] move2 done OK"
 
-                print "MOVE 2 QUANT IDS : ",move2.sudo().quant_ids
+                #print "MOVE 2 QUANT IDS : ",move2.sudo().quant_ids
                 moves.append((move1, move2))
 
         # returning moves to easily fetch them from tests

@@ -25,7 +25,7 @@ class StockPicking(models.Model):
     @api.model
     def fields_view_get(self, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
 
-        mask = utilsmod.ReportMask(['module_stocks.report_my_picking', 'module_stocks.report_my_shipping2'])
+        mask = utilsmod.ReportMask(['module_stocks.report_my_picking'])
         r = super(StockPicking, self).fields_view_get(
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(r, self)
@@ -150,7 +150,12 @@ class StockPicking(models.Model):
             # if the picking is a reception, we don't do anything
             if pick.picking_type_id.name == u'Réceptions' or\
                pick.picking_type_id.name == u'Receipts':
-                print "[action_assign] calling super"
+                print "[action_assign] reception, calling super"
+                super(StockPicking, pick).action_assign()
+                continue
+
+            if 'SAV' in pick.picking_type_id.name :
+                print "[action_assign] SAV, calling super"
                 super(StockPicking, pick).action_assign()
                 continue
 
@@ -207,24 +212,21 @@ class StockMove(models.Model):
         for move in self:
 
             print "product : %s" % move.product_id
-            ber_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
-            atom_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/Stock')])
+            #ber_loc_recs = self.env['stock.location'].search(['|', ('complete_name','ilike','Physical Locations/DC/Stock'),
+            #                                                 ('complete_name','ilike','Emplacements Physiques/DC/REP')
+            #                                                ])
+            #atom_loc_recs = self.env['stock.location'].search(['|', ('complete_name','ilike','Physical Locations/DAT/Stock'),
+            #                                                 ('complete_name','ilike','Emplacements Physiques/DAT/REP')
+            #                                                ])
+            ber_loc_recs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
+            atom_loc_recs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/Stock')])
 
-            #ber_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC')])
-            #atom_loc_rs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT')])
-
-            ber_loc_ids = []
-            for i in ber_loc_rs:
-                ber_loc_ids.append(i.id)
-
-            atom_loc_ids = []
-            for i in atom_loc_rs:
-                atom_loc_ids.append(i.id)
-
-            #print "ber_loc_ids : ", ber_loc_ids
-            #print "atom_loc_ids : ", atom_loc_ids
-            #prods_in_ber = [x for x in sq_objs if x.product_id == move.product_id and x.location_id.id in ber_loc_ids]
-            #prods_in_atom = [x for x in sq_objs if x.product_id == move.product_id and x.location_id.id in atom_loc_ids]
+            print "ber_loc_recs : ", ber_loc_recs
+            print "ber_loc_recs.ids : ", ber_loc_recs.ids
+            print "atom_loc_recs : ", atom_loc_recs
+            print "atom_loc_recs.ids : ", atom_loc_recs.ids
+            ber_loc_ids = ber_loc_recs.ids
+            atom_loc_ids = atom_loc_recs.ids
 
             print "[csn] move.product_id.name : ", move.product_id.name
             print "[csn] move.product_id.location_id : ", move.location_id

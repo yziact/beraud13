@@ -135,6 +135,10 @@
                           Vous n'avez aucun produit réservé pour cette livraison. Clickez sur le bouton 'Reserver'
                           pour vérifier la disponibilité des produits.
                         </p>
+                        <p t-if="o.note">
+                          <p> Informations : </p>
+                          <span t-field="o.note"/>
+                        </p>
                     </div>
                 </t>
             </t>
