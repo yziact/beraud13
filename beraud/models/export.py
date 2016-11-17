@@ -99,8 +99,8 @@ class Export_Journal(models.Model):
                         compte = nbcompte
                     if compte == '445201':
                         compte = '44520000'
-                    # if len(compte) < 8:
-                    #     raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas un compte comptable (%s) valide dans Sage : [Code err: 03]]" % (line.invoice_id.id, compte)))
+                    if len(compte) < 8:
+                        raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas un compte comptable (%s) valide dans Sage : [Code err: 03]]" % (line.invoice_id.id, compte)))
 
                 if line.account_id.name:
                     nomcompte = line.account_id.name[:40].encode("windows-1252")
@@ -114,8 +114,8 @@ class Export_Journal(models.Model):
                         label = "Facture " + line.invoice_id.partner_id.name.encode("windows-1252")
                     elif line.invoice_id.partner_id.display_name:
                         label = "Facture " + line.invoice_id.partner_id.display_name.encode("windows-1252")
-                    # else:
-                    #     raise UserError(_("Une erreur c'est produite lors de l'export veuillez contacter votre administrateur : [Code err : 01]"))
+                    else:
+                        raise UserError(_("Une erreur c'est produite lors de l'export veuillez contacter votre administrateur : [Code err : 01]"))
 
 
                 if line.invoice_id.date_due:
@@ -132,8 +132,8 @@ class Export_Journal(models.Model):
                 if line.invoice_id.payment_term_id:
                     if line.invoice_id.payment_term_id.type_sage :
                         term = line.invoice_id.payment_term_id.type_sage
-                    # else :
-                    #     raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas une condition de paiement valide dans Sage : [Code err: 02]]" %(line.invoice_id.id)))
+                    else :
+                        raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas une condition de paiement valide dans Sage : [Code err: 02]]" %(line.invoice_id.id)))
 
                 if not compte in dict_sum_line:
                     dict_sum_line[compte] = {'Code journal': code,
