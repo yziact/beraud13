@@ -8,13 +8,13 @@ class AccountInvoiceInherit(models.Model):
 
     @api.multi
     @api.onchange('partner_id')
-    def onchange_partner_id(self):
+    def _onchange_partner_id(self):
         """
         Update the following fields when the partner is changed:
         - Delivery address
         """
 
-        super(AccountInvoiceInherit, self).onchange_partner_id()
+        super(AccountInvoiceInherit, self)._onchange_partner_id()
 
         if not self.partner_id:
             self.update({

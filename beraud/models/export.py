@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from openerp import models, api, fields
+from openerp.tools.translate import _
 import csv
 import datetime
 import math
 import base64
 import StringIO
+from openerp.exceptions import UserError
 
 class Export_Journal(models.Model):
     _name = "export.ecriture_sage"
@@ -33,7 +35,7 @@ class Export_Journal(models.Model):
 
 
     @api.multi
-    def action_export(self, journal_id, value, date_debut, date_fin, filename, code, collectif):
+    def action_export(self, journal_id, value, date_debut, date_fin, filename, code, collectif, type):
         list_row = []
 
         account_move = self.env['account.move']
@@ -50,12 +52,13 @@ class Export_Journal(models.Model):
         writer.writeheader()
 
         for move in data_move:
-            data__line = account_move_env.search([('move_id', '=', move.id)])
+            data__line = account_move_env.search([('move_id', '=', move.id)], order='id desc')
             dict_sum_line = {}
+            tax = [x.tax_line_id.description for x in data__line if x.tax_line_id]
 
             for line in data__line:
+                print 'move_line_id: ', line.id
                 montant = str(math.fabs(line.amount_residual))
-                tax = ""
                 sens = ""
                 note = ""
                 origine = ""
@@ -68,8 +71,11 @@ class Export_Journal(models.Model):
                 label = ""
                 date_due = ""
                 term = ""
+                compte = ""
+                tax_code = ""
+
                 if line.invoice_id.origin:
-                    origine = line.invoice_id.origin.encode("windows-1252")
+                    origine = line.invoice_id.origin[:17].encode("windows-1252")
                 if line.internal_note:
                     note = line.internal_note.encode("windows-1252")
                 if line.debit == 0:
@@ -77,33 +83,61 @@ class Export_Journal(models.Model):
                 else:
                     sens = "D"
                 if line.date:
-                    dateL = self.formatDate(line.date.encode("windows-1252"))
+                    dateL = self.formatDate(line.date)
                 if line.account_id.code:
                     nbcompte = line.account_id.code[:8]
                     if 'CA' in nbcompte or 'CB' in nbcompte or 'F' in nbcompte:
                         compte = collectif
+
+                        if line.partner_id:
+                            if type == "vente":
+                                tier = line.partner_id.property_account_receivable_id.code[:20]
+                            if type == "achat":
+                                tier = line.partner_id.property_account_payable_id.code[:20]
+
                     else:
                         compte = nbcompte
+                    if compte == '445201':
+                        compte = '44520000'
+                    # if len(compte) < 8:
+                    #     raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas un compte comptable (%s) valide dans Sage : [Code err: 03]]" % (line.invoice_id.id, compte)))
+
                 if line.account_id.name:
                     nomcompte = line.account_id.name[:40].encode("windows-1252")
-                if line.invoice_id.number :
+                if line.invoice_id.number:
                     nb_piece = str(line.invoice_id.number)[:13]
                 if line.invoice_id.number:
                     nb_invoice = str(line.invoice_id.number)[:10]
-                if line.partner_id.ref:
-                    tier = line.partner_id.ref[:20].encode("windows-1252")
+
                 if line.invoice_id:
-                    label = "Facture " + line.invoice_id.partner_id.name.encode("windows-1252")
+                    if line.invoice_id.partner_id.name:
+                        label = "Facture " + line.invoice_id.partner_id.name.encode("windows-1252")
+                    elif line.invoice_id.partner_id.display_name:
+                        label = "Facture " + line.invoice_id.partner_id.display_name.encode("windows-1252")
+                    # else:
+                    #     raise UserError(_("Une erreur c'est produite lors de l'export veuillez contacter votre administrateur : [Code err : 01]"))
+
+
                 if line.invoice_id.date_due:
                     date_due = self.formatDate(line.invoice_id.date_due)
-                if line.tax_line_id :
-                    tax = line.tax_line_id.description.encode("windows-1252")
-                if line.invoice_id.payment_term_id:
-                    term = line.invoice_id.payment_term_id.type_sage.encode("windows-1252")
 
-                if not nbcompte in dict_sum_line:
-                    dict_sum_line[nbcompte] = {'Code journal': code,
-                                             'Date de piece': dateL ,
+                if compte[0] not in ['7', '6']:
+                    tax_code = ""
+                elif 'ACEE' in tax:
+                    tax_code = 'ACEE'
+                else:
+                    if tax:
+                        tax_code = tax[0]
+
+                if line.invoice_id.payment_term_id:
+                    if line.invoice_id.payment_term_id.type_sage :
+                        term = line.invoice_id.payment_term_id.type_sage
+                    # else :
+                    #     raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas une condition de paiement valide dans Sage : [Code err: 02]]" %(line.invoice_id.id)))
+
+                if not compte in dict_sum_line:
+                    dict_sum_line[compte] = {'Code journal': code,
+                                             'Date de piece': dateL,
                                              'No de compte general': compte,
                                              'Intitule compte general': nomcompte,
                                              'No de piece': nb_piece,
@@ -111,19 +145,19 @@ class Export_Journal(models.Model):
                                              'Reference': origine,
                                              'Reference rapprochement': "",
                                              'No compte tiers': tier,
-                                             'Code taxe': tax,
+                                             'Code taxe': tax_code.encode("windows-1252"),
                                              'Provenance': "A",
                                              'Libelle ecriture': label,
-                                             'Mode de reglement': term,
+                                             'Mode de reglement': term.encode("windows-1252"),
                                              'Date d echeance': date_due,
                                              'Code ISO devise': "",
                                              'Montant de la devise': "",
                                              'Type de norme': "D",
                                              'Sens': sens,
                                              'Montant': montant[:12],
-                                             'Montant signe': str(line.amount_residual).replace('.', ',')[:13],
-                                             'Montant debit': str(line.debit).replace('.', ',')[:12],
-                                             'Montant credit': str(line.credit).replace('.', ',')[:12],
+                                             'Montant signe': str(line.amount_residual).replace('.', ',')[:13].encode("windows-1252") ,
+                                             'Montant debit': str(line.debit).replace('.', ',')[:12].encode("windows-1252") ,
+                                             'Montant credit': str(line.credit).replace('.', ',')[:12].encode("windows-1252"),
                                              'Type d ecriture':"G",
                                              'No de plan analytique':"0",
                                              'No de section':"",
@@ -134,8 +168,9 @@ class Export_Journal(models.Model):
                     dict_sum_line[nbcompte]['Montant signe'] = str(float(dict_sum_line[nbcompte]['Montant signe'].replace(',', '.')) + line.amount_residual)[:13]
                     dict_sum_line[nbcompte]['Montant debit'] = str(float(dict_sum_line[nbcompte]['Montant debit'].replace(',', '.')) + line.debit)[:12]
                     dict_sum_line[nbcompte]['Montant credit'] = str(float(dict_sum_line[nbcompte]['Montant credit'].replace(',', '.')) + line.credit)[:12]
-
-            for dict in dict_sum_line:
+            print sorted(dict_sum_line, reverse=True)
+            for dict in sorted(dict_sum_line, reverse=True):
+                print dict
                 list_row.append(dict_sum_line[dict])
             move.exported = True
         writer.writerows(list_row)
@@ -160,7 +195,7 @@ class Export_Journal(models.Model):
         name = "Export Beraud Vente %s" %date
         nb_compte_collectif = '41100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif, 'vente')
 
         action = {
             'name': 'ecriture_sage',
@@ -185,7 +220,7 @@ class Export_Journal(models.Model):
         name = "Export Beraud Achat %s" % date
         nb_compte_collectif = '40100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif, 'achat')
 
         action = {
             'name': 'ecriture_sage',
@@ -210,7 +245,7 @@ class Export_Journal(models.Model):
         name = "Export Atom Vente %s" % date
         nb_compte_collectif = '41100000'
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif, 'vente')
 
         action = {
             'name': 'ecriture_sage',
@@ -236,7 +271,7 @@ class Export_Journal(models.Model):
         nb_compte_collectif = '40100000'
 
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif)
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif, 'achat')
 
         action = {
             'name': 'ecriture_sage',
@@ -270,8 +305,8 @@ class Export_Tiers(models.Model):
 
         list_row = []
         partner_env = self.env['res.partner']
-        sale_env = self.env['sale_order']
-        purchase_env = self.env['purchase_order']
+        sale_env = self.env['sale.order']
+        purchase_env = self.env['purchase.order']
 
         csvfile = StringIO.StringIO()
         fieldnames = [u'Numero compte', u'intitule', 'Type', u'N compte principal', u'Qualite',
