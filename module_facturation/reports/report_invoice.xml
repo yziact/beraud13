@@ -73,7 +73,7 @@
                                     <span t-field="o.number"/>
                                 </td-->
                                 <td>
-                                    <span t-field="o.partner_id.ref"/>
+                                    <span t-field="o.account_id.code"/>
                                 </td>
                                 <td name="partner_ref_data">
                                     <span t-field="o.name"/>
