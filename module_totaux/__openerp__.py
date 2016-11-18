@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Module des Ventes",
+    'name': "Module Totaux",
 
     'summary': """
-    Module des Ventes pour Beraud.""",
+    Module pour afficher les Totaux.""",
 
     'description': """
-    Module de la gestion des Ventes pour Béraud.""",
+    Module pour afficher les Totaux sur les vues tree de Account Invoices,
+    Sale Orders et Purchases """,
 
-    'author': "Yziact",
+    'author': "Gabriel Santos - Yziact",
     'website': "http://www.yziact.fr",
 
     # Categories can be used to filter modules in modules listing
@@ -18,18 +19,12 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'web', 'sale', 'sales_team'],
+    'depends': ['base', 'web', 'sale', 'purchase', 'account'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/res_partner.xml',
-        'views/sale_order.xml',
-        'views/sale_order_line.xml',
-
-        'sale_reports.xml',
-        'reports/report_sale.xml',
-
+        'views/totals.xml',
     ],
 }
 

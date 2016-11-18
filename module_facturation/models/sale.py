@@ -6,11 +6,15 @@ class SaleInherit(models.Model):
 
     @api.multi
     def _prepare_invoice(self):
+        print "[%s] our _prepare_invoice" % __name__
 
         res = super(SaleInherit, self)._prepare_invoice()
 
         res['partner_shipping_id'] = self.partner_shipping_id.id
+        res['date_invoice'] = self.last_picking_id_date_done
+        res['last_bl_from_bc'] = self.last_picking_id.id
 
         print res
 
         return res
+

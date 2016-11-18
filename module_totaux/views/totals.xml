@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<openerp>
+  <data>
+ 
+    <!-- ACCOUNT INVOICES -->
+    <!-- Supplier Invoices -->
+    <record id="view_account_invoice_vendor_tree" model="ir.ui.view">
+        <field name="name">Account Invoice Vendor Total Tree</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_total_signed" position="before">
+              <field name="amount_untaxed_signed" sum="Total HT"/>
+            </field>
+            <field name="amount_total_signed" position="attributes">
+                <attribute name="sum">Total TTC</attribute>
+            </field>
+        </field> 
+    </record>
+
+
+    <!-- Customer Invoices -->
+    <record id="view_account_invoice_customer_tree" model="ir.ui.view">
+        <field name="name">Account Invoice Customer Total Tree</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_total_signed" position="before">
+              <field name="amount_untaxed_signed" sum="Total HT"/>
+            </field>
+            <field name="amount_total_signed" position="attributes">
+                <attribute name="sum">Total TTC</attribute>
+            </field>
+        </field>
+    </record>
+
+    <!-- SALE ORDERS -->
+    <!-- Quotations -->
+    <record id="view_sale_order_quotations_tree" model="ir.ui.view">
+        <field name="name">Sale Order Quotations Total Tree</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_total" position="before">
+              <field name="amount_untaxed" sum="Total HT"/>
+            </field>
+            <field name="amount_total" position="attributes">
+                <attribute name="sum">Total TTC</attribute>
+            </field>
+        </field>
+    </record>
+
+    <!-- Orders -->
+    <record id="view_sale_order_orders_tree" model="ir.ui.view">
+        <field name="name">Sale Order Orders Total Tree</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_total" position="before">
+              <field name="amount_untaxed" sum="Total HT"/>
+            </field>
+            <field name="amount_total" position="attributes">
+                <attribute name="sum">Total TTC</attribute>
+            </field>
+        </field>
+    </record>
+
+    <!-- PURCHASE ORDERS -->
+    <!-- Quotations -->
+    <record id="view_purchase_order_quotations_tree" model="ir.ui.view">
+        <field name="name">Purchase Order Quotations Total Tree</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_untaxed" position="attributes">
+                <attribute name="sum">Total HT</attribute>
+                <attribute name="string">Untaxed Amount</attribute>
+            </field>
+            <field name="amount_total" position="attributes">
+                <attribute name="sum">Total TTC</attribute>
+                <attribute name="string">Total</attribute>
+            </field>
+        </field>
+    </record>
+
+  </data>
+</openerp>
+
+ 
