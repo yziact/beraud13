@@ -31,8 +31,6 @@ class CrmTeam(models.Model):
       OWNER TO odoo;
       """
 
-
-    #@api.v7
     def _get_default_team_id(self, cr, uid, context=None, user_id=None):
         print context
         if context is None:
