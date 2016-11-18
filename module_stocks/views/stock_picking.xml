@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+  <data>
+    
+    <!-- stock picking tree view -->
+    <record model="ir.ui.view" id="my_stock_picking_tree_view_inherited">
+      <field name="name">My Stock Picking Tree View Inherited</field>
+      <field name="model">stock.picking</field>
+      <field name="inherit_id" ref="stock.vpicktree"/>
+      <field name="arch" type="xml">
+        <field name="state" position="after">
+          <field name="date_done"/>
+        </field>
+      </field>
+    </record>
+
+    <!-- stock picking form view -->
+    <record model="ir.ui.view" id="my_stock_picking_form_view_inherited">
+      <field name="name">My Stock Picking Form View Inherited</field>
+      <field name="model">stock.picking</field>
+      <field name="inherit_id" ref="stock.view_picking_form"/>
+      <field name="arch" type="xml">
+        <field name="origin" position="after">
+          <field name="date_done"/>
+        </field>
+      </field>
+    </record>
+
+    <!-- sale order form view -->
+    <record model="ir.ui.view" id="my_sale_order_form_view_date_done_inherited">
+      <field name="name">My Stock Picking Form View Inherited</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id"
+        ref="sale_order_dates.view_order_form_inherit_sale_stock_inherit_sale_order_dates"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='commitment_date']" position="after">
+          <field name="picking_ids"/>
+          <field name="last_picking_id"/>
+          <field name="last_picking_id_date_done"/>
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</openerp>
+
