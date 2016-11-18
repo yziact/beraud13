@@ -6,6 +6,9 @@ class AccountInvoiceInherit(models.Model):
 
     partner_shipping_id = fields.Many2one('res.partner', string='Adresse de Livraison', readonly=True, states={'draft': [('readonly', False)]}, help="Delivery address for current sales order.")
 
+    last_bl_from_bc = fields.Many2one('stock.picking', string='Last Validated BL linked to BC', readonly=True,
+                                     store=True)
+
     @api.multi
     @api.onchange('partner_id')
     def _onchange_partner_id(self):

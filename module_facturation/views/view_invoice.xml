@@ -9,4 +9,17 @@
             </xpath>
         </field>
     </record>
+
+    <record id="account_invoice_form_add_bl_inherited" model="ir.ui.view">
+        <field name="name">Account Invoice Form Add BL</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+              <field name="last_bl_from_bc" />
+            </xpath>
+        </field>
+    </record>
+
+
 </odoo>
