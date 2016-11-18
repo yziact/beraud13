@@ -18,8 +18,6 @@ code_loc = '[module_sale my_sales_remises]'
 class my_sales_remises(models.Model):
     _inherit = 'sale.order.line'
 
-    make_da = fields.Boolean(default=False, string='Make Discount Amount')
-
     discount_amount = fields.Float(string="Discount Amount", digits=(16, 2), default=0.0)
 
     @api.onchange('product_uom_qty', 'price_unit')
