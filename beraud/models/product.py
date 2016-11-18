@@ -57,6 +57,8 @@ class ProductCategory(models.Model):
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
+    default_code = fields.Char('Internal Reference', select=True, required=True)
+
     _sql_constraints = [
         ('unique_code',
          'UNIQUE(default_code)',
