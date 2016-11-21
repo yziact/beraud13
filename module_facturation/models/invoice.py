@@ -12,6 +12,8 @@ class AccountInvoiceInherit(models.Model):
     @api.multi
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
+        print "[%s] account.invoice our _onchange_partner_id" % __name__
+
         """
         Update the following fields when the partner is changed:
         - Delivery address
@@ -34,6 +36,8 @@ class AccountInvoiceInherit(models.Model):
     @api.multi
     @api.returns('self')
     def refund(self, date_invoice=None, date=None, description=None, journal_id=None):
+        print "[%s] account.invoice our refund" % __name__
+
         res = super(AccountInvoiceInherit, self).refund(date_invoice, date, description, journal_id)
 
         if self.type in ['out_invoice', 'out_refund']:
