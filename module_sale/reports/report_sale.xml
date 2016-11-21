@@ -243,7 +243,6 @@
             </t>
         </template>
 
-
         <template id="report_saleorder_inherit" inherit_id="sale.report_saleorder_document">
             <xpath expr="//div[@class='page']" position="replace">
                 <div class="page" style="font-size:12px;">
@@ -303,11 +302,6 @@
                                 <td>
                                     <span t-field="doc.name"/>
                                 </td>
-                                <!--
-                                <td>
-                                    <span t-field="doc.partner_id.ref"/>
-                                </td>
-                                -->
                                 <td name="ref_client_data" t-if="doc.client_order_ref">
                                     <p t-field="doc.client_order_ref"/>
                                 </td>
@@ -332,7 +326,6 @@
                             </tr>
                         </tbody>
                     </table>
-                    <!-- Is there a discount on at least one line? -->
                     <t t-set="display_discount" t-value="any([l.discount for l in doc.order_line])"/>
                     <table class="table table-condensed" style="page-break-inside:auto">
                         <thead>
@@ -410,9 +403,6 @@
                     <p t-if="doc.payment_term_id.note">
                         <span t-field="doc.payment_term_id.note"/>
                     </p>
-                    <!--<p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
-                        <span t-field="doc.partner_id.property_payment_term_id.note"/>
-                    </p>-->
                     <p id="fiscal_position_remark" t-if="doc.fiscal_position_id and doc.fiscal_position_id.note">
                         <strong>Position fiscale</strong>
                         <span t-field="doc.fiscal_position_id.note"/>
@@ -454,7 +444,7 @@
                     </div>
                 </div>
             </xpath>
-        </template>
+          </template>
 
     </data>
 </openerp>
