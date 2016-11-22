@@ -7,14 +7,14 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='allday']" position="after">
                 <!-- Add your fields or attributes here -->
-                <field name="no_email" invisible="True"/>
+                <field name="no_email" invisible="False"/>
             </xpath>
-            <page groups="base.group_no_one"  position="attributes">
+            <xpath expr="(\\page[@groups='base.group_no_one')[0]"  position="attributes">
                     <attribute name="groups">base.group_user</attribute>
-            </page>
-            <page groups="base.group_no_one"  position="attributes">
+            </xpath>
+            <xpath expr="(\\page[@groups='base.group_no_one')[1]"  position="attributes">
                     <attribute name="groups">base.group_user</attribute>
-            </page>
+            </xpath>
         </field>
     </record>
 </odoo>
