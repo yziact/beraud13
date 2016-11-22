@@ -668,6 +668,22 @@ class MrpRepairInh(models.Model):
             #print "inv_id.team_id.company_id is : ", inv_id.team_id.company_id
             #print "inv_id.team_id.member_ids is : ", inv_id.team_id.member_ids
 
+
+            #### get the right account for each line #####
+
+            for line in inv_id.invoice_line_ids:
+                account_env = self.pool.get('account.account')
+                partner_company_id = repair.partner_id.company_id.id
+
+                account_code = account_env.search_read(cr, 1, [('id', '=', line.account_id.id)])
+                account_id = account_env.search(cr, 1, [('code', '=', account_code[0]['code']), ('company_id', '=', partner_company_id)])
+                fpos = repair.partner_id.property_account_position_id
+                if fpos:
+                    account_id = fpos.map_account(account_id[0])
+
+                line.account_id = account_id[0]
+
+
 class MrpRepairLine(models.Model):
 
     _inherit = 'mrp.repair.line'
