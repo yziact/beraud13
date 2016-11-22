@@ -22,6 +22,11 @@ msgstr ""
 msgid "Date of Transfer"
 msgstr "Date de Validation"
 
+#. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_picking_date
+msgid "Creation Date"
+msgstr "Date d'engagement"
+
 #. module: sale
 #: model:ir.model.fields,field_description:module_stocks.field_sale_order_last_picking_id
 msgid "Last validated Delivery Order"
@@ -31,4 +36,5 @@ msgstr "Dernier BL validé"
 #: model:ir.model.fields,field_description:module_stocks.field_sale_order_last_picking_id_date_done
 msgid "Date of Last Delivery Order"
 msgstr "Date du dernier BL validé"
+
 
