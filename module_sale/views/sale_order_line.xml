@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record id="my_view_sale_order_line" model="ir.ui.view">
+      <field name="name">Sale Order Line Form Beraud</field>
+      <field name="model">sale.order</field>
+      <field name="priority">90</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="arch" type="xml">
+
+        <!-- add discount_amount to tree view -->
+        <xpath expr="//field[@name='order_line']/tree/field[@name='discount']"
+          position="after">
+          <field name="discount_amount"/>
+        </xpath>
+
+        <!-- add discount_amount to form view --> 
+        <xpath expr="//field[@name='order_line']/form/group/group/div[@name='discount']"
+          position="after">
+          <field name="discount_amount"/> 
+        </xpath>
+
+      </field>
+    </record>
+
+  </data>
+</openerp>
+

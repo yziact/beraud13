@@ -29,6 +29,9 @@ class ProductTemplate(models.Model):
                                                   domain=[('deprecated', '=', False)],
                                                   help="This account will be used for invoices instead of the default one to value expenses for the current product.")
 
+    # remove 'translate=True' from product template name
+    name = fields.Char('Name', required=True, select=True)
+
     def create(self, cr, uid, vals, context=None):
         tax_env = self.pool.get('account.tax')
 
@@ -53,6 +56,8 @@ class ProductCategory(models.Model):
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
+
+    default_code = fields.Char('Internal Reference', select=True, required=True)
 
     _sql_constraints = [
         ('unique_code',
