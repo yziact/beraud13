@@ -23,3 +23,13 @@ class PurchaseOrder(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(res, self)
 
+    READONLY_STATES = {
+        'purchase': [('readonly', False)],
+        'done': [('readonly', True)],
+        'cancel': [('readonly', True)],
+    }
+
+    date_order = fields.Datetime('Order Date', required=True, states=READONLY_STATES, index=True, copy=False, default=fields.Datetime.now,\
+        help="Depicts the date where the Quotation should be validated and converted into a purchase order.")
+
+
