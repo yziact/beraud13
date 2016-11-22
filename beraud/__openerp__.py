@@ -52,7 +52,7 @@
 
         'security/ir.model.access.csv',
 
-	'report/inventory/report_inventory.xml',
+        'report/inventory/report_inventory.xml',
         'report/layout/external_layout_header.xml',
         'report/layout/external_layout_footer.xml',
 
