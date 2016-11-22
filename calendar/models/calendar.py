@@ -5,7 +5,7 @@ from openerp import models, fields, api
 class CalendarInherit(models.Model):
     _inherit = 'calendar.event'
 
-    no_emial = fields.Boolean(default=True)
+    no_email = fields.Boolean(default=True)
 
     @api.model
     def create(self, vals, context):
@@ -13,4 +13,4 @@ class CalendarInherit(models.Model):
         print context
         res = super(CalendarInherit, self).create(vals, context)
 
-        return res
+        # return res
