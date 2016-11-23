@@ -17,17 +17,17 @@
     <template id="assets_common" inherit_id="web.assets_common"
               name="Theme CSS" priority="1">
         <xpath expr="//link[@href='/web/static/src/less/variables.less']" position="after">
-            <link rel="stylesheet" href="http://192.168.100.236:8070/beraud/static/src/less/variables.less"/>
+            <link rel="stylesheet" href="http://192.26.1.240:8069/beraud/static/src/less/variables.less"/>
         </xpath>
     </template>
 
     <template id="assets_backend" inherit_id="web.assets_backend"
               name="Theme CSS" priority="1">
         <xpath expr="//link[@href='/web/static/src/less/variables.less']" position="after">
-            <link rel="stylesheet" href="http://192.168.100.236:8070/beraud/static/src/less/variables.less"/>
+            <link rel="stylesheet" href="http://192.26.1.240:8069/beraud/static/src/less/variables.less"/>
         </xpath>
         <xpath expr="." position="inside">
-            <link rel="stylesheet" href="http://192.168.100.236:8070/beraud/dynamic_backend.css"/>
+            <link rel="stylesheet" href="http://192.26.1.240:8069/beraud/dynamic_backend.css"/>
         </xpath>
     </template>
 
