@@ -38,12 +38,12 @@ class ProductTemplate(models.Model):
         if 'supplier_taxes_id' in vals:
             tax_code = tax_env.search_read(cr, uid, [('id', '=', vals['supplier_taxes_id'][0][2][0])])[0]
             tax_supp = tax_env.search(cr, 1, [('description', '=', tax_code['description'])])
-            vals['supplier_taxes_id'] = [[6, False, [tax_supp[0]]], [6, False, [tax_supp[1]]]]
+            vals['supplier_taxes_id'] = [[6, False, [tax_supp[0], tax_supp[1]]]]
 
         if 'taxes_id' in vals:
             tax_code = tax_env.search_read(cr, uid, [('id', '=', vals['taxes_id'][0][2][0])])[0]
             tax_supp = tax_env.search(cr, 1, [('description', '=', tax_code['description'])])
-            vals['taxes_id'] = [[6, False, [tax_supp[0]]], [6, False, [tax_supp[1]]]]
+            vals['taxes_id'] = [[6, False, [tax_supp[0], tax_supp[1]]]]
 
         res = super(ProductTemplate, self).create(cr, uid, vals, context)
 
