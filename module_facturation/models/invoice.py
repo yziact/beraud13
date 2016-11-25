@@ -19,7 +19,7 @@ class AccountInvoiceInherit(models.Model):
         - Delivery address
         """
         super(AccountInvoiceInherit, self)._onchange_partner_id()
-        
+
         if self.type in ['out_invoice', 'out_refund']:
             if not self.partner_id:
                 self.update({
