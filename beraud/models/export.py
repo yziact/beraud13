@@ -343,7 +343,6 @@ class Export_Tiers(models.Model):
                 purchase = purchase_env.search([('partner_id', '=', partner.id), ('state', 'in', ['sale', 'done'])])
 
                 if sale or purchase :
-
                     if partner_fils:
                         contact = partner_fils.title + " " + partner_fils.name
                         contact = contact[:35].encode("windows-1252")

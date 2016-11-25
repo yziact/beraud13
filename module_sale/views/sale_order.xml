@@ -62,8 +62,8 @@
             </field>
         </record>
 
-        <record id="oder_filter_inherit_beraud" model="ir.ui.view">
-            <field name="name">Sale Order Form Beraud</field>
+        <record id="order_filter_inherit_beraud" model="ir.ui.view">
+            <field name="name">Sale Order Tree Beraud</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_tree"/>
             <field name="arch" type="xml">
