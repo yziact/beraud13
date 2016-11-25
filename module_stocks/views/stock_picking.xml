@@ -36,7 +36,7 @@
         <xpath expr="//field[@name='commitment_date']" position="after">
           <field name="picking_ids"/>
           <field name="last_picking_id"/>
-          <field name="last_picking_id_date_done"/>
+          <field name="last_picking_id_date_done" widget="date"/>
         </xpath>
       </field>
     </record>
