@@ -37,4 +37,3 @@ msgstr "Dernier BL validé"
 msgid "Date of Last Delivery Order"
 msgstr "Date du dernier BL validé"
 
-
