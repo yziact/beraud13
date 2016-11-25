@@ -12,17 +12,45 @@
         <!-- add discount_amount to tree view -->
         <xpath expr="//field[@name='order_line']/tree/field[@name='discount']"
           position="after">
-          <field name="discount_amount"/>
+          <field name="discount_amount" />
         </xpath>
 
         <!-- add discount_amount to form view --> 
-        <xpath expr="//field[@name='order_line']/form/group/group/div[@name='discount']"
+        <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']"
           position="after">
-          <field name="discount_amount"/> 
+          <field name="discount_amount" 
+            attrs="{'invisible': [('is_da', '=', False)]}" />
+        </xpath>
+
+        <!-- add is_da to form view. Added after discount_amount so it show before it -->
+        <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']"
+          position="after">
+          <field name="is_da" />
+        </xpath>
+
+        <!-- make discount invisible if is_da is checked -->
+        <xpath expr="//field[@name='order_line']/form/group/group/div[@name='discount']"
+          position="attributes">
+            <attribute name="attrs">{'invisible': [('is_da','=', True)]}</attribute>
+        </xpath>
+
+        <!-- make labal of discount invisible if is_da is checked -->
+        <xpath expr="//field[@name='order_line']/form/group/group/label[@for='discount']"
+          position="attributes">
+            <attribute name="attrs">{'invisible': [('is_da','=', True)]}</attribute>
         </xpath>
 
       </field>
     </record>
+
+        <!-- elements concerning the remise montant 
+        <record id="my_view_order_form_beraud" model="ir.ui.view">
+          <field name="name">Our Sale Order Form</field>
+          <field name="model">sale.order</field>
+          <field name="inherit_id" ref="sale.view_order_form"/>
+          <field name="arch" type="xml">
+          </field>
+        </record> -->
 
   </data>
 </openerp>

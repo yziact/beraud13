@@ -17,6 +17,7 @@
 
     'depends': [
         'stock',
+        'sale',
         'sale_stock',
         'sale_order_dates',
         'mrp',
@@ -29,6 +30,7 @@
         'views/stock_view.xml',
         'views/transfer_stock_intercompany_view.xml',
         'views/stock_picking.xml',
+        'views/sale_order.xml',
 
         'reports/stock_reports.xml',
         'reports/report_picking.xml',
