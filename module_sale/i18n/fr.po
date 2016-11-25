@@ -20,7 +20,11 @@ msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:module_sale.field_sale_order_line_discount_amount
-msgid "Discount Amount"
+msgid "Amount Discount"
 msgstr "Remise Montant"
 
+#. module: sale
+#: model:ir.model.fields,field_description:module_sale.field_sale_order_line_is_da
+msgid "Make Amount Discount"
+msgstr "Faire une Remise par Montant"
 
