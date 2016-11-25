@@ -901,14 +901,18 @@ class StockMove(models.Model):
     # override action_done, and add origin to quants
     def action_done(self, cr, uid, ids, context=None):
         # call super
-        print "STOCK_MOVE our action_done"
-        
-        # get all quants with our move_id, and set their origin to 
+        # get all quants with our move_id, and set their origin to
         # the company_id of the stock_location they come from.
         # It will be the company stock their belonged to "originally", 
         # before they were used for a repair.
+
+        print "STOCK_MOVE our action_done"
+        print 'stock_move_ids : ', ids
+
+        super(StockMove, self).action_done(cr, uid, ids, context)
+
         for move in self.browse(cr, uid, ids, context=context):
-            super(StockMove, move).action_done()
+
             for quant in move.quant_ids : 
                 quant.sudo().origin = quant.sudo().company_id
                 print "*** quant origin in move id _%s_ set to _%s_ ***" % (move.id, move.origin)
