@@ -93,7 +93,7 @@ class SaleOrderInherit(models.Model):
     def onchange_partner_id_2(self):
         super(SaleOrderInherit, self).onchange_partner_id()
         print "[%s] our onchange" % __name__
-        if self.partner_id.blocked :
+        if self.partner_id.blocked:
             print "partner is blocked"
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},

@@ -4,7 +4,7 @@
     <report 
       id="action_report_module_purchase_my_purchase_order"
       model="purchase.order" 
-      string="Demande de Prix / Bon de Commande"
+      string="Demande_de_Prix_Bon_de_Commande"
       report_type="qweb-pdf"
       name="module_purchase.report_mypurchaseorder" 
       file="module_purchase.report_mypurchaseorder" 
