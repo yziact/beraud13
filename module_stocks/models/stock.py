@@ -159,6 +159,10 @@ class StockPicking(models.Model):
                 super(StockPicking, pick).action_assign()
                 continue
 
+            if pick.location_id.tech :
+                super(StockPicking, pick).action_assign()
+                continue
+
             r = []
             src = 1
             dst = 3
