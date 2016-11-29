@@ -30,6 +30,11 @@ class MrpRepairInh(models.Model):
         loc_id = self.env['stock.location'].search([('complete_name','ilike','Partner Locations/Customers')])
         return loc_id
 
+
+    # add contact
+    contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)]})
+
+
     # override workflow states
     state = fields.Selection([
         ('draft', 'Quotation'),
