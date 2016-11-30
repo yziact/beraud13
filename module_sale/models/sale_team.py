@@ -33,19 +33,20 @@ class CrmTeam(models.Model):
 
     def _get_default_team_id(self, cr, uid, context=None, user_id=None):
         print context
+
         if context is None:
             context = {}
-        if 'default_team_id' in context:
-            print 'context', context['default_team_id']
-            return context['default_team_id']
+        # if 'default_team_id' in context:
+        #     print 'context', context['default_team_id']
+        #     return context['default_team_id']
         if user_id is None:
             user_id = uid
-        team_ids = self.search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)])
+        team_ids = self.search(cr, user_id, ['|', ('member_ids', '=', user_id), ('user_id', '=', user_id)])
         print 'team_ids', team_ids
         team_id = team_ids[0] if team_ids else False
         if not team_id and context.get('default_team_id'):
             team_id = context['default_team_id']
         if not team_id:
-            team_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, 'sales_team.team_sales_department')
+            team_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, user_id, 'sales_team.team_sales_department')
             print 'team', team_id
         return team_id
