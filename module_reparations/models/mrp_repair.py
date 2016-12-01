@@ -117,7 +117,7 @@ class MrpRepairInh(models.Model):
             return {
                 "type": "ir.actions.act_window",
                 "res_model": "stock.picking",
-                "views": [[False, "tree"]],
+                "views": [[False, "tree"], [False, "form"]],
                 "domain": [['repair_id', '=', repair.id]],
                 #"target": "new",
                 "target": "current",
