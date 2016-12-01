@@ -23,21 +23,18 @@
         <field name="origin" position="after">
           <field name="date_done"/>
         </field>
-      </field>
-    </record>
 
-    <!-- sale order form view -->
-    <record model="ir.ui.view" id="my_sale_order_form_view_date_done_inherited">
-      <field name="name">My Stock Picking Form View Inherited</field>
-      <field name="model">sale.order</field>
-      <field name="inherit_id"
-        ref="sale_order_dates.view_order_form_inherit_sale_stock_inherit_sale_order_dates"/>
-      <field name="arch" type="xml">
-        <xpath expr="//field[@name='commitment_date']" position="after">
-          <field name="picking_ids"/>
-          <field name="last_picking_id"/>
-          <field name="last_picking_id_date_done" widget="date"/>
+
+        <xpath expr="//field[@name='location_id']" position="attributes">
+          <attribute name="attrs">{'invisible': 0, 'readonly':[('picking_type_code', '=', 'incoming')]}</attribute>
         </xpath>
+        <xpath expr="//field[@name='location_dest_id']" position="attributes">
+          <attribute name="attrs">{'invisible':0, 'readonly': [('picking_type_code', '=', 'outgoing')]}</attribute>
+        </xpath>
+        <xpath expr="//field[@name='move_lines']" position="attributes">
+          <attribute name="attrs">{'invisible': [('state', 'not in', ('draft', 'confirmed', 'waiting','done'))]}</attribute>
+        </xpath>
+
       </field>
     </record>
 

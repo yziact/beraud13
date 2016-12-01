@@ -64,6 +64,12 @@
                 class="oe_stat_button" icon="fa-list-alt"
                 attrs="{'invisible': ['|', ('state', '=', 'draft'), ('state','=','valid') ]}" >
               </button>
+
+              <button name="open_bl" type="object"
+                string="Transferts Associés"
+                class="oe_stat_button" icon="fa-list-alt"
+                attrs="{'invisible': [('state', 'in', ['draft', 'valid'])]}" >
+              </button>
             </div>
           </xpath>
 
