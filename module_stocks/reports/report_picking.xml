@@ -57,16 +57,16 @@
                         <div id="contact" t-if="o.picking_type_id.code=='outgoing'">
                             <t t-if="o.sale_id">
                                 <t t-if="o.sale_id.contact">
-                                    <p><strong>Contact : </strong><strong>A l'attention de : </strong> <span t-field="o.sale_id.contact.title.shortcut"/><span
-                                            t-field="o.sale_id.contact.name"/>
-                                        / <span t-field="o.sale_id.email"/></p>
+                                    <p><strong>A l'attention de : </strong> <span t-field="o.sale_id.contact.title.shortcut"/><span
+                                            t-field="o.sale_id.contact.name"/><span t-if="o.sale_id.contact.email">
+                                        / </span><span t-field="o.sale_id.contact.email"/></p>
                                 </t>
                             </t>
                             <t t-if="o.repair_id">
                                 <t t-if="o.repair_id.contact">
                                     <p><strong>Contact : </strong><strong>A l'attention de : </strong> <span t-field="o.repair_id.contact.title.shortcut"/><span
-                                            t-field="o.repair_id.contact.name"/>
-                                        / <span t-field="o.repair_id.contact.email"/></p>
+                                            t-field="o.repair_id.contact.name"/><span t-if="o.repair_id.contact.email">
+                                        / </span><span t-field="o.repair_id.contact.email"/></p>
                                 </t>
                             </t>
                         </div>
