@@ -28,13 +28,11 @@
         'views/reparations_reports.xml',
         'views/repair_views.xml',
         'views/partner_view.xml',
-	'views/res_partner.xml',
+        'views/res_partner.xml',
 
         'security/ir.model.access.csv',
         'security/repair_security.xml',
 
-        'reports/layout/external_layout_header.xml',
-        'reports/layout/external_layout_footer.xml',
         'reports/repair/report_mrprepairorder.xml',
         'reports/repair/report_mrprepairorder_no_prices.xml',
     ],

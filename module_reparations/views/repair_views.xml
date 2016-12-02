@@ -64,6 +64,12 @@
                 class="oe_stat_button" icon="fa-list-alt"
                 attrs="{'invisible': ['|', ('state', '=', 'draft'), ('state','=','valid') ]}" >
               </button>
+
+              <button name="open_bl" type="object"
+                string="Transferts Associés"
+                class="oe_stat_button" icon="fa-list-alt"
+                attrs="{'invisible': [('state', 'in', ['draft', 'valid'])]}" >
+              </button>
             </div>
           </xpath>
 
@@ -100,6 +106,10 @@
 
           <xpath expr="//field[@name='operations']/tree//field[@name='location_dest_id']" position="attributes">
             <attribute name="readonly">True</attribute>
+          </xpath>
+
+          <xpath expr="//field[@name='address_id']" position="after">
+                    <field name="contact" domain="[('parent_id', '=', partner_id)]"/>
           </xpath>
 
         </field>

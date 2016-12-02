@@ -18,8 +18,8 @@ _logger = logging.getLogger(__name__)
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    repair_id = fields.Many2one('mrp.repair', 'Reparation')
     incoterm_id = fields.Many2one('stock.incoterms', 'Incoterms')
-
     create_date = fields.Datetime("Date")
 
     @api.model
@@ -156,6 +156,10 @@ class StockPicking(models.Model):
 
             if 'SAV' in pick.picking_type_id.name :
                 print "[action_assign] SAV, calling super"
+                super(StockPicking, pick).action_assign()
+                continue
+
+            if pick.location_id.tech :
                 super(StockPicking, pick).action_assign()
                 continue
 
