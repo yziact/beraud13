@@ -18,8 +18,8 @@ _logger = logging.getLogger(__name__)
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    repair_id = fields.Many2one('mrp.repair', 'Reparation')
     incoterm_id = fields.Many2one('stock.incoterms', 'Incoterms')
-
     create_date = fields.Datetime("Date")
 
     @api.model

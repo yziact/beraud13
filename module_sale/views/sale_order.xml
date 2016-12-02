@@ -59,6 +59,35 @@
                         </group>
                     </page>
                 </xpath>
+
+
+                <!-- affichage suivi activite part 1 -->
+                <xpath expr="//group[@name='technical']" position="attributes">
+                    <attribute name="groups">mybase.group_commerce</attribute>
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="attributes">
+                    <attribute name="groups">mybase.group_commerce</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+
+        <!--affichage suivi activite part 2 -->
+        <record id="crm_team_inherit" model="ir.ui.view">
+            <field name="name">crm_team_inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_crm.sale_view_inherit123"/>
+            <field name="arch" type="xml">
+
+                 <xpath expr="//field[@name='source_id']" position="attributes">
+                    <attribute name="groups">mybase.group_commerce</attribute>
+                </xpath>
+                <xpath expr="//field[@name='opportunity_id']" position="attributes">
+                    <attribute name="groups">mybase.group_commerce</attribute>
+                    <attribute name="domain">([('user_id', '=', user_id)])</attribute>
+                </xpath>
+
             </field>
         </record>
 

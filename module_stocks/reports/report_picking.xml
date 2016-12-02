@@ -3,32 +3,37 @@
         <t t-call="report.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-call="report.external_layout">
-                    <div class="page" style="font-size:11px;">
+                    <div class="page" style="font-size:12px;">
                         <br/>
                         <div class="row">
-                            <div class="col-xs-6">
-                                <div t-if="o.picking_type_id.id in [2, 13]">
+                            <div class="col-xs-3" t-if="o.picking_type_id.code=='outgoing'">
+                                <div t-if="o.sale_id">
                                     <span><strong>Adresse de Facturation :</strong></span>
                                     <div t-field="o.sale_id.partner_invoice_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;fax&quot;], &quot;no_marker&quot;: true, &quot;phone_icons&quot;: true}"/>
                                     <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat" /></p>
                                 </div>
+                                <div t-if="o.repair_id">
+                                    <span><strong>Adresse de Facturation :</strong></span>
+                                    <div t-field="o.repair_id.partner_invoice_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;fax&quot;], &quot;no_marker&quot;: true, &quot;phone_icons&quot;: true}"/>
+                                    <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat" /></p>
+                                </div>
                             </div>
-                            <div class="col-xs-6" t-if="o.picking_type_id.id in [2, 13, 23, 24]">
-                                <div t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
+                            <div class="col-xs-3 col-xs-offset-3" t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
+                                <div>
                                     <span><strong>Adresse de Livraison :</strong></span>
                                 </div>
                                 <div t-if="o.partner_id" name="partner_header">
                                     <div t-field="o.partner_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;fax&quot;], &quot;no_marker&quot;: true, &quot;phone_icons&quot;: true}"/>
                                 </div>
                             </div>
-                            <div class="col-xs-6 " t-if="o.picking_type_id.id in [1, 12, 22, 25]">
+                            <div class="col-xs-3" t-if="o.picking_type_id.code=='incoming'">
                                 <span><strong>Fournisseur :</strong></span>
                                 <div t-if="o.partner_id" name="partner_header">
                                     <div t-field="o.partner_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;fax&quot;], &quot;no_marker&quot;: true, &quot;phone_icons&quot;: true}"/>
                                     <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat"/></p>
                                 </div>
                             </div>
-                            <div class="col-xs-6 " t-if="o.picking_type_id.id in [1, 12, 22, 25]">
+                            <div class="col-xs-3 col-xs-offset-3" t-if="o.picking_type_id.code=='incoming'">
                                 <div t-if="o.picking_type_id.code != 'internal' and (not o.move_lines or not o.move_lines[0].partner_id) and o.picking_type_id.warehouse_id.partner_id">
                                     <span><strong>Adresse de Livraison :</strong></span>
                                     <div t-field="o.picking_type_id.warehouse_id.partner_id" t-field-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;, &quot;fax&quot;], &quot;no_marker&quot;: true, &quot;phone_icons&quot;: true}"/>
@@ -36,26 +41,37 @@
                             </div>
                         </div>
                         <h3>
-                            <t t-if="o.picking_type_id.id in [2, 13, 23, 24]">
+                            <t t-if="o.picking_type_id.code=='outgoing'">
                                 <span>Bon de Livraison N°</span><span t-field="o.name"/>
                             </t>
-                            <t t-if="o.picking_type_id.id in [1, 12, 22, 25]">
+                            <t t-if="o.picking_type_id.code=='incoming'">
                                 <span>Bon de Reception N°</span><span t-field="o.name"/>
                             </t>
                         </h3>
-                        <div class="row" id="contact" t-if="o.sale_id.partner_id.user_id">
+                        <div id="contact" t-if="o.sale_id.partner_id.user_id">
                             <!-- Ajout des coordonnées du contact qui a créé le document -->
                             <p><strong>Commercial : </strong><span
                                     t-field="o.sale_id.partner_id.user_id.name"/>
                                 / <span t-field="o.sale_id.partner_id.user_id.email"/></p>
                         </div>
-                        <div class="row" id="contact" t-if="o.sale_id.partner_id.principal_contact">
-                            <!-- Ajout des coordonnées du contact qui a créé le document -->
-                            <p><strong>Contact : </strong><span
-                                    t-field="o.sale_id.partner_id.principal_contact.name"/>
-                                / <span t-field="o.sale_id.partner_id.principal_contact.email"/></p>
+                        <div id="contact" t-if="o.picking_type_id.code=='outgoing'">
+                            <t t-if="o.sale_id">
+                                <t t-if="o.sale_id.contact">
+                                    <p><strong>A l'attention de : </strong> <span t-field="o.sale_id.contact.title.shortcut"/><span
+                                            t-field="o.sale_id.contact.name"/><span t-if="o.sale_id.contact.email">
+                                        / </span><span t-field="o.sale_id.contact.email"/></p>
+                                </t>
+                            </t>
+                            <t t-if="o.repair_id">
+                                <t t-if="o.repair_id.contact">
+                                    <p><strong>Contact : </strong><strong>A l'attention de : </strong> <span t-field="o.repair_id.contact.title.shortcut"/><span
+                                            t-field="o.repair_id.contact.name"/><span t-if="o.repair_id.contact.email">
+                                        / </span><span t-field="o.repair_id.contact.email"/></p>
+                                </t>
+                            </t>
                         </div>
-                        <div class="row" id="contact" t-if="not o.picking_type_id.id in [1, 12, 22, 25]">
+
+                        <div id="contact" t-if="o.picking_type_id.code=='outgoing'">
                             <!-- Ajout des coordonnées du contact administratif -->
                             <p><strong>V/Contact : </strong><span
                                     t-field="o.create_uid.partner_id.name"/> /  <span t-field="o.create_uid.email"/></p>
@@ -71,10 +87,10 @@
                             <tbody>
                                 <tr>
                                     <td>
-                                        <span t-field="o.date"/>
+                                        <span t-field="o.date" t-field-options='{"format":"dd/MM/y"}'/>
                                     </td>
                                     <td name="td_sched_date">
-                                        <span t-field="o.min_date"/>
+                                        <span t-field="o.min_date" t-field-options='{"format":"dd/MM/y"}'/>
                                     </td>
                                 </tr>
                             </tbody>
@@ -101,6 +117,13 @@
                                         <span t-field="pack_operation.package_id"/>
                                     </td>
                                     </t>
+                                    <t t-if="o.picking_type_id.code != 'outgoing'">
+                                        <td>
+                                            <span t-field="pack_operation.location_dest_id"/>
+                                            <span t-if="pack_operation.result_package_id">:</span>
+                                            <span t-field="pack_operation.result_package_id"/>
+                                        </td>
+                                    </t>
                                     <td>
                                         <table class="table table-condensed" t-if="pack_operation.pack_lot_ids">
                                             <thead>
@@ -119,21 +142,20 @@
                                             </tr>
                                         </table>
                                     </td>
-                                    <t t-if="o.picking_type_id.code != 'outgoing'"><td><span t-field="pack_operation.location_dest_id"/>
-                                        <span t-if="pack_operation.result_package_id">:</span>
-                                        <span t-field="pack_operation.result_package_id"/>
-                                    </td></t>
                                 </tr>
                             </tbody>
                         </table>
+                        <p t-if="o.note" t-field="o.note">
+
+                        </p>
                         <!--
                         <p t-if="not o.pack_operation_ids">
                             You do not have any products reserved for this picking.  Please click the 'Reserve' button
                             to check if products are available.
                         </p> -->
                         <p t-if="not o.pack_operation_ids">
-                          Vous n'avez aucun produit réservé pour cette livraison. Clickez sur le bouton 'Reserver'
-                          pour vérifier la disponibilité des produits.
+                            Vous n'avez aucun produit réservé pour cette livraison. Clickez sur le bouton 'Reserver'
+                            pour vérifier la disponibilité des produits.
                         </p>
                     </div>
                 </t>
@@ -147,5 +169,5 @@
             report_type="qweb-pdf"
             name="stock.report_picking"
             file="stock.report_picking_operations"
-        />
+    />
 </odoo>
