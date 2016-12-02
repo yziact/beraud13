@@ -705,7 +705,7 @@ class MrpRepairInh(models.Model):
                     account_id = account_id[0]
                 fpos = repair.partner_id.property_account_position_id
                 if fpos:
-                    account_id = fpos.map_account(account_id[0])
+                    account_id = fpos.map_account(account_id)
 
                 line.account_id = account_id
 
