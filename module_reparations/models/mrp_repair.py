@@ -30,6 +30,10 @@ class MrpRepairInh(models.Model):
         loc_id = self.env['stock.location'].search([('complete_name','ilike','Partner Locations/Customers')])
         return loc_id
 
+    # add contact
+    contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)]})
+
+
     # override workflow states
     state = fields.Selection([
         ('draft', 'Quotation'),
@@ -98,6 +102,23 @@ class MrpRepairInh(models.Model):
                 "res_model": "project.task",
                 "views": [[False, "form"]],
                 "res_id": repair.task_id.id,
+                #"target": "new",
+                "target": "current",
+            }
+
+    def open_bl(self, cr, uid, ids, context=None):
+        print "open_picking button clicked"
+
+        for repair in self.browse(cr, uid, ids, context={}) :
+            print "br_id : ", repair.br
+            print "bl_id : ", repair.bl
+            print "repair_id", repair.id
+
+            return {
+                "type": "ir.actions.act_window",
+                "res_model": "stock.picking",
+                "views": [[False, "tree"], [False, "form"]],
+                "domain": [['repair_id', '=', repair.id]],
                 #"target": "new",
                 "target": "current",
             }
@@ -280,6 +301,7 @@ class MrpRepairInh(models.Model):
         move_list = []
 
         for repair in self.browse(cr, uid, ids, context={}) :
+            print repair.id
 
             # create the task in project 'SAV'
             proj_name = 'REPARATIONS ATELIER'
@@ -342,7 +364,8 @@ class MrpRepairInh(models.Model):
                     'move_type': 'direct',
                     #'location_id': repair.location_dest_id.id, # comes from the client location
                     'location_id': vendeur_loc_id.id, # comes from the client location
-                    'location_dest_id': repair.location_id.id, # to our location 
+                    'location_dest_id': repair.location_id.id, # to our location
+                    'repair_id': repair.id,
                 })
 
                 # add article to repair to the picking (we'll receive it to repair it)
@@ -387,6 +410,7 @@ class MrpRepairInh(models.Model):
                     'picking_type_id': picking_type_out.id,
                     'location_id': repair.location_id.id, 
                     'location_dest_id': repair.location_dest_id.id,
+                    'repair_id': repair.id,
                 })
 
                 # adding repaired product to BL
@@ -677,11 +701,13 @@ class MrpRepairInh(models.Model):
 
                 account_code = account_env.search_read(cr, 1, [('id', '=', line.account_id.id)])
                 account_id = account_env.search(cr, 1, [('code', '=', account_code[0]['code']), ('company_id', '=', partner_company_id)])
+                if account_id:
+                    account_id = account_id[0]
                 fpos = repair.partner_id.property_account_position_id
                 if fpos:
-                    account_id = fpos.map_account(account_id[0])
+                    account_id = fpos.map_account(account_id)
 
-                line.account_id = account_id[0]
+                line.account_id = account_id
 
 
 class MrpRepairLine(models.Model):
