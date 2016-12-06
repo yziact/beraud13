@@ -13,6 +13,8 @@ class AccountInvoice(models.Model):
 
     @api.v8
     def get_invoice_line_account(self, type, product, fpos, company):
+        print "[%s] account.invoice.line our get_invoice_line_account" % __name__
+
         account_env = self.env['account.account']
         partner_company_id = company.id
         accounts = product.product_tmpl_id.sudo().get_product_accounts(fpos)
