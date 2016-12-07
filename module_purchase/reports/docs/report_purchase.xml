@@ -23,7 +23,7 @@
                                     </div>
                                 </div>
                                 <div class="col-xs-5 col-xs-offset-1">
-                                    <strong>Adresse de Facturation</strong>
+                                    <!--<strong>Adresse de Facturation</strong>-->
                                     <div t-field="o.partner_id"
                                         t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true, "phone_icons": true}'/>
                                     <p t-if="o.partner_id.vat">TVA<span t-field="o.partner_id.vat"/></p>

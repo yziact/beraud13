@@ -8,6 +8,8 @@ class AccountInvoiceInherit(models.Model):
 
     last_bl_from_bc = fields.Many2one('stock.picking', string='Last Validated BL linked to BC', readonly=True,
                                      store=True)
+    contact = fields.Many2one('res.partner', readonly=True,
+                              states={'draft': [('readonly', False)], 'proforma2': [('readonly', False)]})
 
     @api.multi
     @api.onchange('partner_id')
