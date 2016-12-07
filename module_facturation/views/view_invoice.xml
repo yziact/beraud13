@@ -7,6 +7,9 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="partner_shipping_id"  attrs="{'invisible':[('type', 'in', ['in_invoice', 'in_refund'])]}"/>
             </xpath>
+            <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                <field name="contact"/>
+            </xpath>
         </field>
     </record>
 
@@ -16,7 +19,7 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='origin']" position="after">
-              <field name="last_bl_from_bc" />
+                <field name="last_bl_from_bc" />
             </xpath>
         </field>
     </record>
