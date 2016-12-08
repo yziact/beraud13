@@ -6,6 +6,7 @@
                 <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
                 <div class="page" style="font-size:11px;">
                     <div class="row">
+                        <br/>
                         <div class="col-xs-6">
                             <div t-if="(o.type=='out_invoice' or o.type=='out_refund') and o.partner_shipping_id">
                                 <span><strong>Adresse de Livraison:</strong></span>
@@ -84,7 +85,7 @@
                         <thead>
                             <tr>
                                 <td>
-                                    <strong>Date </strong>
+                                    <strong>Date</strong>
                                 </td>
                                 <td t-if="o.date_due and o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">
                                     <strong>Due Date</strong>
@@ -241,12 +242,15 @@
                         <strong>Comment:</strong>
                         <span t-field="o.comment"/>
                     </p>
-                    <p t-if="o.payment_term_id">
-                        <span t-field="o.payment_term_id.note"/>
-                    </p>
-                    <p t-if="o.fiscal_position_id.note">
-                        <strong>Fiscal Position Remark:</strong>
-                        <span t-field="o.fiscal_position_id.note"/>
+                    <p>
+                        <div t-if="o.payment_term_id">
+                            <strong>Conditions de réglement</strong>
+                            <span t-field="o.payment_term_id.note"/>
+                        </div>
+                        <div t-if="o.fiscal_position_id.note">
+                            <strong>Fiscal Position Remark:</strong>
+                            <span t-field="o.fiscal_position_id.note"/>
+                        </div>
                     </p>
                 </div>
             </t>
