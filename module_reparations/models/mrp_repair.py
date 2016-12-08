@@ -679,35 +679,32 @@ class MrpRepairInh(models.Model):
         beraud_team_id = team_obj.browse(cr, uid, b_team_id)
 
         for repair in self.browse(cr, uid, ids, context=context):
-            print "res is : "
             i_id = res[repair.id]
             inv_id = inv_obj.browse(cr, uid, i_id)
-            if repair.company_id.id == 1:
-                inv_id.sudo().team_id = beraud_team_id
-            else:
-                inv_id.sudo().team_id = atom_team_id
-            #print "inv_id is : ", inv_id
-            #print "inv_id.team_id is : ", inv_id.team_id
-            #print "inv_id.team_id.name is : ", inv_id.team_id.name
-            #print "inv_id.team_id.company_id is : ", inv_id.team_id.company_id
-            #print "inv_id.team_id.member_ids is : ", inv_id.team_id.member_ids
 
+            if inv_id:
+                if repair.company_id.id == 1:
+                    inv_id.sudo().team_id = beraud_team_id
+                else:
+                    inv_id.sudo().team_id = atom_team_id.id
 
-            #### get the right account for each line #####
+                #### get the right account for each line #####
 
-            for line in inv_id.invoice_line_ids:
-                account_env = self.pool.get('account.account')
-                partner_company_id = repair.partner_id.company_id.id
+                for line in inv_id.invoice_line_ids:
+                    account_env = self.pool.get('account.account')
+                    partner_company_id = repair.partner_id.company_id.id
 
-                account_code = account_env.search_read(cr, 1, [('id', '=', line.account_id.id)])
-                account_id = account_env.search(cr, 1, [('code', '=', account_code[0]['code']), ('company_id', '=', partner_company_id)])
-                if account_id:
-                    account_id = account_id[0]
-                fpos = repair.partner_id.property_account_position_id
-                if fpos:
-                    account_id = fpos.map_account(account_id)
+                    account_code = account_env.search_read(cr, 1, [('id', '=', line.account_id.id)])
+                    account_id = account_env.search(cr, 1, [('code', '=', account_code[0]['code']), ('company_id', '=', partner_company_id)])
+                    if account_id:
+                        account_id = account_id[0]
+                    fpos = repair.partner_id.property_account_position_id
+                    if fpos:
+                        account_id = fpos.map_account(account_id)
 
-                line.account_id = account_id
+                    line.account_id = account_id
+
+        return res
 
 
 class MrpRepairLine(models.Model):
