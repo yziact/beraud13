@@ -7,10 +7,10 @@ class AccountInvoiceInherit(models.Model):
     def _default_commercial(self):
         print "OUR DEFAULT COMMERCIAL"
         print self.env.context
-        print self.env.uid
+        print self.env.user
 
         if not self.contact_affaire:
-            return self.env.uid
+            return self.env.user
 
     contact_affaire = fields.Many2one('res.users', string='V/Contact affaire', default=_default_commercial)
     partner_shipping_id = fields.Many2one('res.partner', string='Adresse de Livraison', readonly=True, states={'draft': [('readonly', False)]}, help="Delivery address for current sales order.")
