@@ -18,7 +18,7 @@ class my_sales_remises(models.Model):
 
     is_da = fields.Boolean(string="Make Amount Discount", default=False, store=True)
     discount_amount = fields.Float(string="Amount Discount", digits=(16, 2), default=0.0)
-    discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
+    discount = fields.Float(string='Discount (%)', digits=(16, 8), default=0.00000000)
 
     @api.onchange('discount_amount')
     def onchange_discount_amount(self):
