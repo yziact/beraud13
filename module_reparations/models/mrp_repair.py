@@ -696,12 +696,12 @@ class MrpRepairInh(models.Model):
 
                     account_code = account_env.search_read(cr, 1, [('id', '=', line.account_id.id)])
                     account_id = account_env.search(cr, 1, [('code', '=', account_code[0]['code']), ('company_id', '=', partner_company_id)])
+                    print 'account_id    :   ', account_id
                     if account_id:
                         account_id = account_id[0]
                     fpos = repair.partner_id.property_account_position_id
                     if fpos:
-                        account_id = fpos.map_account(account_id)
-
+                        account_id = fpos.map_account(account_env.browse(cr, uid, account_id, context))
                     line.account_id = account_id
 
         return res
