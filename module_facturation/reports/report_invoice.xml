@@ -45,7 +45,7 @@
                                 <span t-field="o.contact.email"/>
                             </span>
                         </div>
-                        <div>
+                       <!-- <div>
                             <span id="vcontact">
                                 <strong>V/Contact: </strong>
                                 <span t-field="o.create_uid.name"/>
@@ -53,7 +53,7 @@
                                 <span t-field="o.create_uid.email"/>
                             </span>
 
-                        </div>
+                        </div>-->
                         <div>
                             <span id="Code_client"><strong>Ref. Client : </strong></span><span t-field="o.account_id.code"/>
                         </div>
@@ -98,13 +98,26 @@
                                 </td>
                                 <td>
                                     <span>
-                                        <strong>Commercial : </strong>
-                                        <t t-if="o.partner_id.user_id">
+                                        <t t-if="o.company_id == 3">
+                                            <strong>Commercial : </strong>
+                                        </t>
+                                        <t t-if="o.team_id.id == 1">
+                                            <strong>Commercial Machine : </strong>
+                                        </t>
+                                        <t t-if="o.team_id.id in [2,10,9]">
+                                            <strong>Commercial Pièces : </strong>
+                                        </t>
+                                        <t t-if="o.user_id">
+                                            <span t-field="o.user_id.name"/>
+                                            /
+                                            <span t-field="o.user_id.email"/>
+                                        </t>
+                                        <t t-if="(not o.user_id) and o.partner_id.user_id">
                                             <span t-field="o.partner_id.user_id.name"/>
                                             /
                                             <span t-field="o.partner_id.user_id.email"/>
                                         </t>
-                                        <t t-if="not o.partner_id.user_id">
+                                        <t t-if="not (o.user_id and o.partner_id.user_id)">
                                             <span t-field="o.partner_id.parent_id.user_id.name"/>
                                             /
                                             <span t-field="o.partner_id.parent_id.user_id.email"/>
@@ -130,10 +143,10 @@
                                 <td>
                                     <span>
                                         <strong>V/contact affaire : </strong>
-                                        <t t-if="o.user_id">
-                                            <span t-field="o.user_id.name"/>
+                                        <t t-if="o.contact_affaire">
+                                            <span t-field="o.contact_affaire.name"/>
                                             /
-                                            <span t-field="o.user_id.email"/>
+                                            <span t-field="o.contact_affaire.email"/>
                                         </t>
                                     </span>
                                 </td>
