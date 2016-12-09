@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from openerp import models, api, fields
+from openerp import models, api, fields, _
 from lxml import etree
 import datetime
-
 import sys
+from utilsmod import utilsmod
+import time
+import logging
+_logger = logging.getLogger(__name__)
+
+
 sys.path.insert(0, '..')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
-from utilsmod import utilsmod
 
-import logging
-_logger = logging.getLogger(__name__)
+
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -20,6 +24,8 @@ class SaleOrderLine(models.Model):
 
     @api.multi
     def _prepare_invoice_line(self, qty):
+        print "[%s] sale.order.line our _prepare_invoice_line" % __name__
+
         account_env = self.env['account.account']
         partner_company_id = self.order_id.partner_id.company_id.id
         res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
@@ -42,7 +48,8 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
     @api.multi
     def create_invoices(self):
-        #print "*** our create invoices"
+        print "[%s] sale.advance.payment.inv our create_invoices" % __name__
+
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
         ret = {}
 
@@ -63,6 +70,24 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         else:
             ret = super(SaleAdvancePaymentInvoice, self).create_invoices()
             return ret
+
+    @api.multi
+    def _create_invoice(self, order, so_line, amount):
+        print "[%s] sale.advance.payment.inv our _create_invoices" % __name__
+
+        fpos = order.fiscal_position_id or order.partner_id.property_account_position_id
+        account_env = self.env['account.account']
+        partner_company_id = order.partner_id.company_id.id
+        product_acct = self.product_id.sudo().property_account_income_id
+        account_id = account_env.search([('code', '=', product_acct.code), ('company_id', '=', partner_company_id)])
+
+        if fpos:
+            account_id = fpos.map_account(account_id)
+
+        res = super(SaleAdvancePaymentInvoice, self)._create_invoice(order, so_line, amount)
+        res["invoice_line_ids"].account_id = account_id
+        return res
+
 
 from openerp.exceptions import UserError
 
@@ -99,31 +124,6 @@ class SaleOrderInherit(models.Model):
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
 
-    """
-        if self.partner_id.blocked :
-            print "blocked"
-            wiz_view_id = self.env['ir.model.data'].xmlid_to_res_id('module_sale.wiz_client_blocked_view')
-            print "wiz_view_id : ", wiz_view_id
-            return {
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'wiz_client_blocked',
-                    'view_id': wiz_view_id,
-                    #'nodestroy': True,
-                    'target': 'current',
-                    }
-    """
-
-    """
-    @api.model
-    def create(self, vals):
-        res = super(SaleOrderInherit, self).create(vals)
-        print "[%s] our sale.order create"
-        print "res : ", res
-        import pudb; pudb.set_trace()
-        return res
-    """
 
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"
@@ -137,6 +137,7 @@ class AccountInvoiceInherited(models.Model):
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
+
 
 class Reglement(models.Model):
     _name = 'reglement'

@@ -9,6 +9,12 @@
       <field name="inherit_id" ref="sale.view_order_form"/>
       <field name="arch" type="xml">
 
+        <!-- modify discount display in tree view -->
+        <xpath expr="//field[@name='order_line']/tree/field[@name='discount']"
+          position="replace">
+          <field digits="(16, 2)" name="discount" />
+        </xpath>
+
         <!-- add discount_amount to tree view -->
         <xpath expr="//field[@name='order_line']/tree/field[@name='discount']"
           position="after">

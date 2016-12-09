@@ -48,12 +48,6 @@
                                 <span>Bon de Reception N°</span><span t-field="o.name"/>
                             </t>
                         </h3>
-                        <div id="contact" t-if="o.sale_id.partner_id.user_id">
-                            <!-- Ajout des coordonnées du contact qui a créé le document -->
-                            <p><strong>Commercial : </strong><span
-                                    t-field="o.sale_id.partner_id.user_id.name"/>
-                                / <span t-field="o.sale_id.partner_id.user_id.email"/></p>
-                        </div>
                         <div id="contact" t-if="o.picking_type_id.code=='outgoing'">
                             <t t-if="o.sale_id">
                                 <t t-if="o.sale_id.contact">
@@ -70,11 +64,19 @@
                                 </t>
                             </t>
                         </div>
-
+                        <div id="contact" t-if="o.sale_id.partner_id.user_id">
+                            <!-- Ajout des coordonnées du contact qui a créé le document -->
+                            <p><strong>Commercial : </strong><span
+                                    t-field="o.sale_id.partner_id.user_id.name"/>
+                                / <span t-field="o.sale_id.partner_id.user_id.email"/></p>
+                        </div>
                         <div id="contact" t-if="o.picking_type_id.code=='outgoing'">
                             <!-- Ajout des coordonnées du contact administratif -->
                             <p><strong>V/Contact : </strong><span
                                     t-field="o.create_uid.partner_id.name"/> /  <span t-field="o.create_uid.email"/></p>
+                        </div>
+                        <div  t-if="o.picking_type_id.code=='incoming'">
+                            <span><strong>Origine : </strong><span t-field="o.origin"/></span>
                         </div>
                         <br/>
                         <table class="table table-condensed table-bordered">
