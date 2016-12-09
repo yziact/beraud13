@@ -125,20 +125,19 @@ class SaleOrderInherit(models.Model):
             }
 
 
-
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"
 
     @api.onchange('partner_id')
     def onchange_partner_id_2(self):
-        res = super(AccountInvoiceInherited, self)._onchange_partner_id()
+        super(AccountInvoiceInherited, self)._onchange_partner_id()
         print "[%s] our onchange" % __name__
         if self.partner_id.blocked :
             print "partner is blocked"
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
-        return res
+
 
 class Reglement(models.Model):
     _name = 'reglement'

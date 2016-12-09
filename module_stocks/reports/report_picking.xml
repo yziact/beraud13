@@ -75,6 +75,9 @@
                             <p><strong>V/Contact : </strong><span
                                     t-field="o.create_uid.partner_id.name"/> /  <span t-field="o.create_uid.email"/></p>
                         </div>
+                        <div  t-if="o.picking_type_id.code=='incoming'">
+                            <span><strong>Origine : </strong><span t-field="o.origin"/></span>
+                        </div>
                         <br/>
                         <table class="table table-condensed table-bordered">
                             <thead>

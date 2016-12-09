@@ -6,6 +6,7 @@
                 <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
                 <div class="page" style="font-size:11px;">
                     <div class="row">
+                        <br/>
                         <div class="col-xs-6">
                             <div t-if="(o.type=='out_invoice' or o.type=='out_refund') and o.partner_shipping_id">
                                 <span><strong>Adresse de Livraison:</strong></span>
@@ -44,7 +45,7 @@
                                 <span t-field="o.contact.email"/>
                             </span>
                         </div>
-                        <div>
+                       <!-- <div>
                             <span id="vcontact">
                                 <strong>V/Contact: </strong>
                                 <span t-field="o.create_uid.name"/>
@@ -52,7 +53,7 @@
                                 <span t-field="o.create_uid.email"/>
                             </span>
 
-                        </div>
+                        </div>-->
                         <div>
                             <span id="Code_client"><strong>Ref. Client : </strong></span><span t-field="o.account_id.code"/>
                         </div>
@@ -84,7 +85,7 @@
                         <thead>
                             <tr>
                                 <td>
-                                    <strong>Date </strong>
+                                    <strong>Date</strong>
                                 </td>
                                 <td t-if="o.date_due and o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">
                                     <strong>Due Date</strong>
@@ -97,13 +98,26 @@
                                 </td>
                                 <td>
                                     <span>
-                                        <strong>Commercial : </strong>
-                                        <t t-if="o.partner_id.user_id">
+                                        <t t-if="o.company_id == 3">
+                                            <strong>Commercial : </strong>
+                                        </t>
+                                        <t t-if="o.team_id.id == 1">
+                                            <strong>Commercial Machine : </strong>
+                                        </t>
+                                        <t t-if="o.team_id.id in [2,10,9]">
+                                            <strong>Commercial Pièces : </strong>
+                                        </t>
+                                        <t t-if="o.user_id">
+                                            <span t-field="o.user_id.name"/>
+                                            /
+                                            <span t-field="o.user_id.email"/>
+                                        </t>
+                                        <t t-if="(not o.user_id) and o.partner_id.user_id">
                                             <span t-field="o.partner_id.user_id.name"/>
                                             /
                                             <span t-field="o.partner_id.user_id.email"/>
                                         </t>
-                                        <t t-if="not o.partner_id.user_id">
+                                        <t t-if="not (o.user_id and o.partner_id.user_id)">
                                             <span t-field="o.partner_id.parent_id.user_id.name"/>
                                             /
                                             <span t-field="o.partner_id.parent_id.user_id.email"/>
@@ -129,10 +143,10 @@
                                 <td>
                                     <span>
                                         <strong>V/contact affaire : </strong>
-                                        <t t-if="o.user_id">
-                                            <span t-field="o.user_id.name"/>
+                                        <t t-if="o.contact_affaire">
+                                            <span t-field="o.contact_affaire.name"/>
                                             /
-                                            <span t-field="o.user_id.email"/>
+                                            <span t-field="o.contact_affaire.email"/>
                                         </t>
                                     </span>
                                 </td>
@@ -241,12 +255,15 @@
                         <strong>Comment:</strong>
                         <span t-field="o.comment"/>
                     </p>
-                    <p t-if="o.payment_term_id">
-                        <span t-field="o.payment_term_id.note"/>
-                    </p>
-                    <p t-if="o.fiscal_position_id.note">
-                        <strong>Fiscal Position Remark:</strong>
-                        <span t-field="o.fiscal_position_id.note"/>
+                    <p>
+                        <div t-if="o.payment_term_id">
+                            <strong>Conditions de réglement</strong>
+                            <span t-field="o.payment_term_id.note"/>
+                        </div>
+                        <div t-if="o.fiscal_position_id.note">
+                            <strong>Fiscal Position Remark:</strong>
+                            <span t-field="o.fiscal_position_id.note"/>
+                        </div>
                     </p>
                 </div>
             </t>

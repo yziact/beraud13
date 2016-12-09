@@ -17,19 +17,19 @@ class Internal_Invoice(models.Model):
                                            'account_id': account_id,
                                            'journal_id': journal_id,
                                            })
+        sale_invoice._onchange_partner_id()
         return sale_invoice
 
     @api.model
     def create_line_ids_for_goods(self, list, price_list_id, partner_id, company_id,invoice, account_id, type, journal_id):
-        item_pricelist_env = self.env['product.pricelist.item']
         invoice_line_env = self.env['account.invoice.line']
-        journal = self.env['account.journal'].browse(journal_id)
+        account_env = self.env['account.account']
+
+        fpos = invoice.partner_id.property_account_position_id.id
         list_line_ids = []
 
         for item in list:
-            price_unit = item_pricelist_env.search([("pricelist_id", "=", price_list_id), ("product_id", "=", item.product_id.id)]).fixed_price
-            if not price_unit :
-                price_unit = item.product_id.tarif
+            price_unit = item.product_id.tarif
 
             line = invoice_line_env.create({'origin': 'internal',
                                             'create_date': datetime.date.today(),
@@ -46,11 +46,17 @@ class Internal_Invoice(models.Model):
                                             })
             line._set_taxes()
             line._onchange_product_id()
-            if type == 'out_invoice':
-                line.write({'account_id': journal.with_context(force_company=company_id).default_credit_account_id.id})
-            else:
-                line.write({'account_id': journal.with_context(force_company=company_id).default_debit_account_id.id})
-
+            line['price_unit'] = price_unit
+            line. get_invoice_line_account(type, item.product_id, fpos, invoice.company_id)
+            # if type == 'out_invoice':
+            #     account_id = account_env.search([('code', '=', line.product_id.property_account_income_id.id), ('company_id', '=', partner_id.company_id)])
+            #     if account_id:
+            #         line.write({'account_id': account_id.id})
+            # else:
+            #     account_id = account_env.search([('code', 'like', line.product_id.property_account_expense_id.id),
+            #                                      ('company_id', '=', partner_id.company_id)])
+            #     if account_id:
+            #         line.write({'account_id': account_id.id})
             list_line_ids.append(line)
         return list_line_ids
 
@@ -82,12 +88,6 @@ class Internal_Invoice(models.Model):
             else:
                 line.write({'account_id': journal.with_context(force_company=company_id).default_debit_account_id.id})
 
-            print line.account_id.company_id.id
-            print line.company_id.id
-            # print line.journal_id.company_id.id
-            print line.invoice_id.company_id.id
-            print invoice.company_id.id
-            print invoice.journal_id.company_id.id
 
             list_line_ids.append(line)
 

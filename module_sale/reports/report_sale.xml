@@ -150,7 +150,8 @@
                                             <span t-field="l.price_unit"/>
                                         </td>
                                         <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
-                                            <span t-field="l.discount"/>
+                                            <!--<span t-field="l.discount"/>-->
+                                            <span t-esc="'%.2f'%(l.discount)+' '"/>
                                         </td>
                                         <td class="text-right">
                                             <span t-field="l.price_subtotal"
