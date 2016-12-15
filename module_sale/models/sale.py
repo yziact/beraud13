@@ -10,6 +10,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+
 sys.path.insert(0, '..')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
@@ -72,7 +73,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
             return ret
 
     @api.multi
-    def _create_invoice(self, order, so_line, amount):
+    def create_invoice(self, order, so_line, amount):
         print "[%s] sale.advance.payment.inv our _create_invoices" % __name__
 
         fpos = order.fiscal_position_id or order.partner_id.property_account_position_id
@@ -86,6 +87,13 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
         res = super(SaleAdvancePaymentInvoice, self)._create_invoice(order, so_line, amount)
         res["invoice_line_ids"].account_id = account_id
+        print so_line
+        for line in res.invoice_line_ids:
+            print 'Line    ', line.invoice_line_tax_ids
+            ids = fpos.map_tax(order.so_line.taxes_id).ids
+            print 'IDS    ', ids
+            line.invoice_line_tax_ids = ids
+            line._set_taxes()
         return res
 
 
@@ -100,10 +108,21 @@ Merci de contacter la direction pour le faire débloquer. """
 class SaleOrderInherit(models.Model):
     _inherit = "sale.order"
 
+    def _default_commercial(self):
+        print "OUR DEFAULT COMMERCIAL"
+        print self.env.context
+        print self.env.user
+
+        if not self.contact_affaire:
+            return self.env.user
+
+    contact_affaire = fields.Many2one('res.users', string='V/Contact affaire', default=_default_commercial)
+
     contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
-    commercial = fields.Many2one('res.users', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
+
     tuto = fields.Boolean(string="Formation incluse")
     install = fields.Boolean(string="Installation incluse")
+    installation = fields.Selection(string="Installation incluse", selection=[(1, 'Non Incluse'), (2, 'Incluse'), (3, 'Sans Objet')])
     delay = fields.Char(string="Délai")
     reglement = fields.Many2one('reglement')
 

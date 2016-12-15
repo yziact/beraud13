@@ -34,8 +34,7 @@
                             <span t-field="doc.partner_id.ref"/>
                         </h6>
 
-                        <!--<table class="table table-condensed table-bordered">-->
-                        <!--<table class="table table-condensed">-->
+
                         <table id="cart">
                             <!-- putting the style inside the table so its easier fetched from the
                                  code that duplicates the cart to other pages -->
@@ -66,53 +65,70 @@
                                     <th t-if="doc.date_order">
                                         <strong>Date</strong>
                                     </th>
-                                    <th>
-                                        <strong>Numero</strong>
-                                    </th>
                                     <th name="ref_client_head" t-if="doc.client_order_ref" class="col-xs-3">
                                         <strong>V/Ref.</strong>
                                     </th>
-                                    <th t-if="doc.incoterm">
+                                    <th >
                                         <strong>Incoterms:</strong>
                                     </th>
-                                    <th t-if="doc.partner_id.user_id">
-                                        <span><span><strong>Resp. commercial : </strong></span><span t-field="doc.partner_id.user_id.name"/> / <span t-field="doc.partner_id.user_id.email"/></span>
+                                    <th>
+                                        <span t-if="doc.partner_id.user_id">
+                                            <t t-if="doc.company_id.id == 3">
+                                                <strong>Commercial : </strong>
+                                            </t>
+                                            <t t-if="doc.team_id.id == 1">
+                                                <strong>Commercial Machine : </strong>
+                                            </t>
+                                            <t t-if="doc.team_id.id in [2,10,9]">
+                                                <strong>Commercial Pièces : </strong>
+                                            </t>
+                                            <t t-if="doc.user_id">
+                                                <span t-field="doc.user_id.name"/>
+                                                /
+                                                <span t-field="doc.user_id.email"/>
+                                            </t>
+                                            <t t-if="(not doc.user_id) and doc.partner_id.user_id">
+                                                <span t-field="doc.partner_id.user_id.name"/>
+                                                /
+                                                <span t-field="doc.partner_id.user_id.email"/>
+                                            </t>
+                                            <t t-if="not (doc.user_id and doc.partner_id.user_id)">
+                                                <span t-field="doc.partner_id.parent_id.user_id.name"/>
+                                                /
+                                                <span t-field="doc.partner_id.parent_id.user_id.email"/>
+                                            </t>
+                                        </span>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td t-if="doc.date_order">
-                                        <p t-field="doc.date_order"  t-field-options='{"format":"dd/MM/y"}'/>
-                                    </td>
                                     <td>
-                                        <span t-field="doc.name"/>
+                                        <p t-if="doc.date_order" t-field="doc.date_order"  t-field-options='{"format":"dd/MM/y"}'/>
                                     </td>
+                                    <!--<td>-->
+                                        <!--<span t-field="doc.name"/>-->
+                                    <!--</td>-->
                                     <!--
                                     <td>
                                         <span t-field="doc.partner_id.ref"/>
                                     </td>
                                     -->
-                                    <td name="ref_client_data" t-if="doc.client_order_ref">
-                                        <p t-field="doc.client_order_ref"/>
-                                    </td>
-                                    <td  t-if="doc.incoterm">
-                                        <p t-field="doc.incoterm.code"/>
+                                    <td name="ref_client_data" >
+                                        <p t-if="doc.client_order_ref" t-field="doc.client_order_ref"/>
                                     </td>
                                     <td>
-                                        <table>
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <strong>Votre contact : </strong>
-                                                    </td>
-                                                    <td>
-                                                        <span t-field="doc.commercial.name"/>
-                                                        <span t-field="doc.commercial.email"/>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                        <p  t-if="doc.incoterm" t-field="doc.incoterm.code"/>
+                                    </td>
+                                    <td>
+                                        <span>
+                                            <strong>V/contact affaire : </strong>
+                                            <t t-if="doc.contact_affaire">
+                                                <span t-field="doc.contact_affaire.name"/>
+                                                /
+                                                <span t-field="doc.contact_affaire.email"/>
+                                            </t>
+                                        </span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -126,9 +142,9 @@
                                     <th>Description</th>
                                     <th class="text-right">Qté</th>
                                     <th class="text-right">PU HT</th>
-                                    <th t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">Rem.</th>
-                                    <th class="text-right">Montant</th>
+                                    <th t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">Rem(M/%)</th>
                                     <th class="text-right">TVA</th>
+                                    <th class="text-right">Prix</th>
                                 </tr>
                             </thead>
                             <tbody class="sale_tbody" style="page-break-inside:auto; font-size:13px;">
@@ -150,15 +166,16 @@
                                             <span t-field="l.price_unit"/>
                                         </td>
                                         <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
-                                            <!--<span t-field="l.discount"/>-->
-                                            <span t-esc="'%.2f'%(l.discount)+' '"/>
-                                        </td>
-                                        <td class="text-right">
-                                            <span t-field="l.price_subtotal"
-                                                  t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/>
+                                            <t t-if="l.is_da"><span t-field="l.discount_amount" t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/></t>
+                                            <t t-if="not l.is_da"><span t-field="l.discount"/> %</t>
+                                            <!--<span t-esc="'%.2f'%(l.discount)+' '"/>-->
                                         </td>
                                         <td class="text-right">
                                             <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.tax_id))"/>
+                                        </td>
+                                         <td class="text-right">
+                                            <span t-field="l.price_subtotal"
+                                                  t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/>
                                         </td>
                                     </tr>
                                 </t>
@@ -194,12 +211,12 @@
                         </div>
                         <p t-if="doc.state in ['draft','sent']">Validité de l'offre : 30 jours</p>
                         <p t-field="doc.note" />
-                         <p t-if="doc.payment_term_id.note">
-                             <span t-field="doc.payment_term_id.note"/>
-                         </p>
-                         <!--<p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
-                             <span t-field="doc.partner_id.property_payment_term_id.note"/>
-                         </p>-->
+                        <p t-if="doc.payment_term_id.note">
+                            <span t-field="doc.payment_term_id.note"/>
+                        </p>
+                        <!--<p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
+                            <span t-field="doc.partner_id.property_payment_term_id.note"/>
+                        </p>-->
                         <p id="fiscal_position_remark" t-if="doc.fiscal_position_id and doc.fiscal_position_id.note">
                             <strong>Position fiscale</strong>
                             <span t-field="doc.fiscal_position_id.note"/>
@@ -212,7 +229,7 @@
                                         <span>Délai</span>
                                     </th>
                                     <th>
-                                        <strong>Numero</strong>
+                                        <strong>Installation</strong>
                                     </th>
                                     <th>
                                         <span>Formation</span>
@@ -226,8 +243,9 @@
                                         <span t-field="doc.delay"/>
                                     </td>
                                     <td>
-                                        <span t-if="doc.install">Installation incluse</span>
-                                        <span t-if="not doc.install">Installation non incluse</span>
+                                        <!--<span t-if="doc.install">Installation incluse</span>-->
+                                        <!--<span t-if="not doc.install">Installation non incluse</span>-->
+                                        <span t-field="doc.installation"/>
                                     </td>
                                     <td>
                                         <span t-if="doc.tuto">Formation incluse</span>
@@ -445,7 +463,7 @@
                     </div>
                 </div>
             </xpath>
-          </template>
+        </template>
 
     </data>
 </openerp>
