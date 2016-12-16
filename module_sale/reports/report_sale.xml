@@ -63,17 +63,17 @@
                             </style>
                             <thead>
                                 <tr>
-                                    <th t-if="doc.date_order">
+                                    <th>
                                         <strong>Date</strong>
                                     </th>
-                                    <th name="ref_client_head" t-if="doc.client_order_ref" class="col-xs-3">
+                                    <th name="ref_client_head" class="col-xs-3">
                                         <strong>V/Ref.</strong>
                                     </th>
-                                    <th >
+                                    <th>
                                         <strong>Incoterms:</strong>
                                     </th>
                                     <th>
-                                        <span t-if="doc.partner_id.user_id">
+                                        <span>
                                             <t t-if="doc.company_id.id == 3">
                                                 <strong>Commercial : </strong>
                                             </t>
@@ -325,17 +325,17 @@
                             </style>
                             <thead>
                                 <tr>
-                                    <th t-if="doc.date_order">
+                                    <th>
                                         <strong>Date</strong>
                                     </th>
-                                    <th name="ref_client_head" t-if="doc.client_order_ref" class="col-xs-3">
+                                    <th name="ref_client_head" class="col-xs-3">
                                         <strong>V/Ref.</strong>
                                     </th>
-                                    <th >
+                                    <th>
                                         <strong>Incoterms:</strong>
                                     </th>
                                     <th>
-                                        <span t-if="doc.partner_id.user_id">
+                                        <span>
                                             <t t-if="doc.company_id.id == 3">
                                                 <strong>Commercial : </strong>
                                             </t>

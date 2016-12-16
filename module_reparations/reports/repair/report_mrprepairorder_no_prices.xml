@@ -95,7 +95,7 @@
                   <tbody>
                     <tr>
                       <td>
-                        <p t-esc="time.strftime('%Y-%m-%d')"/>
+                        <p t-esc="time.strftime('%d/%M/%Y')"/>
                       </td>
                       <!--<td>
                           <span t-field="o.name"/>
@@ -103,11 +103,8 @@
                       <td t-if="o.partner_id.ref">
                           <span t-field="o.partner_id.ref"/>
                       </td>-->
-                      <td t-if="o.product_id.name">
-                        <p t-field="o.product_id.name"/>
-                      </td>
                       <td>
-                        <span t-field="o.lot_id.name"/>
+                        <span t-field="o.client_order_ref"/>
                       </td>
                       <td>
                         <span>
@@ -122,6 +119,14 @@
                     </tr>
                   </tbody>
                 </table>
+                <br/>
+                <span>
+                  <strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/>
+                </span>
+                <span>
+                  <strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/>
+                </span>
+                <br/>
 
                 <table class="table table-condensed">
                   <thead>

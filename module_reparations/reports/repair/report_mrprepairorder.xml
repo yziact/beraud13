@@ -93,7 +93,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <p t-esc="time.strftime('%dd/%MM/%y')"/>
+                                                <p t-esc="time.strftime('%d/%M/%Y')"/>
                                             </td>
                                             <!--<td>
                                                 <span t-field="o.name"/>
@@ -102,7 +102,7 @@
                                                 <span t-field="o.partner_id.ref"/>
                                             </td>-->
                                             <td>
-                                                <span t-field="O.client_order_ref"/>
+                                                <span t-field="o.client_order_ref"/>
                                             </td>
                                             <td>
                                                 <span>
@@ -118,7 +118,13 @@
                                     </tbody>
                                 </table>
                                 <br/>
-                                <span><strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/><strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/></span>
+                                <span>
+                                    <strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/>
+                                </span>    
+                                <span>
+                                    <strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/>
+                                </span>
+                                <br/>
                                 <table class="table table-condensed">
                                     <thead>
                                         <tr>
