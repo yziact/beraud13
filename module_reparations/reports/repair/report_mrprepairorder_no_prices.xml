@@ -6,7 +6,7 @@
         <t t-call="report.html_container">
           <t t-foreach="docs" t-as="o">
             <t t-call="report.external_layout">
-              <div class="page" style="font-size:11px;position:relative;">
+              <div class="page" style="font-size:11px;">
                 <div class="oe_structure"/>
                 <div class="row">
                   <div class="col-xs-6 col-xs-offset-6">
@@ -22,82 +22,111 @@
                   <span t-if="o.state == 'draft'">Ordre d'Intervention # </span>
                   <span t-field="o.name" />
                 </h3>
+                <h6>
+                  <div>
+                    <span t-if="o.contact"><strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/> / <span t-field="o.contact.email"/> </span>
+                  </div>
+                  <strong>Ref. Client : </strong>
+                  <span t-field="o.partner_id.ref"/>
+                </h6>
 
-                <table class="table table-condensed table-bordered">
+                <table id="cart" class="table table-condensed table-bordered">
+                  <style>
+                    #cart {
+                    border:1px solid black;
+                    border-spacing: 0.5rem;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                    //background-color: red;
+                    }
+                    #cart td {
+                    border:1px solid black;
+                    padding-top: 5px;
+                    padding-right: 5px;
+                    padding-left: 5px;
+                    }
+                    #cart th {
+                    padding: 5px;
+                    border:1px solid black;
+                    background-color: #bebebe;
+                    }
+                    #cart table th { border: none; }
+                    #cart table td { border: none; }
+                  </style>
                   <thead>
                     <tr>
-                      <td>
-                        <strong>Date:</strong>
-                      </td>
-                      <td>
+                      <th>
+                        <strong>Date</strong>
+                      </th>
+                      <!--<th>
                         <strong>Numéro</strong>
-                      </td>
-                      <td t-if="o.partner_id.ref">
-                        <strong>Client:</strong>
-                      </td>
-                      <td>
-                        <strong>Produit à Réparer :</strong>
-                      </td>
-                      <td>
-                        <strong>Numéro de Lot :</strong>
-                      </td>
-                      <td>
-                        <strong>Limite de Garantie :</strong>
-                      </td>
-                      <td t-if="o.partner_id.user_id">
-                        <span><span><strong>Commercial: </strong></span><span t-field="o.partner_id.user_id.name"/> / <span t-field="o.partner_id.user_id.email"/></span>
-                      </td>
+                      </th>-->
+                      <!--<th t-if="o.partner_id.ref">-->
+                      <!--<strong>Client:</strong>-->
+                      <!--</th>-->
+                      <th>
+                        <strong>Produit à Réparer </strong>
+                      </th>
+                      <th>
+                        <strong>Numéro de Série </strong>
+                      </th>
+                      <th>
+                        <span>
+                          <strong>Commercial : </strong>
+                          <t t-if="o.user_id">
+                            <span t-field="o.user_id.name"/>
+                            /
+                            <span t-field="o.user_id.email"/>
+                          </t>
+                          <t t-if="(not o.user_id) and o.partner_id.user_id">
+                            <span t-field="o.partner_id.user_id.name"/>
+                            /
+                            <span t-field="o.partner_id.user_id.email"/>
+                          </t>
+                          <t t-if="not (o.user_id and o.partner_id.user_id)">
+                            <span t-field="o.partner_id.parent_id.user_id.name"/>
+                            /
+                            <span t-field="o.partner_id.parent_id.user_id.email"/>
+                          </t>
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td>
-                        <p t-esc="time.strftime('%Y-%m-%d')"/>
+                        <p t-esc="time.strftime('%d/%M/%Y')"/>
                       </td>
-                      <td>
-                        <span t-field="o.name"/>
+                      <!--<td>
+                          <span t-field="o.name"/>
                       </td>
                       <td t-if="o.partner_id.ref">
-                        <span t-field="o.partner_id.ref"/>
-                      </td>
-                      <td t-if="o.product_id.name">
-                        <p t-field="o.product_id.name"/>
-                      </td>
-                      <td t-if="o.lot_id">
-                        <span t-field="o.lot_id.name"/>
+                          <span t-field="o.partner_id.ref"/>
+                      </td>-->
+                      <td>
+                        <span t-field="o.client_order_ref"/>
                       </td>
                       <td>
-                        <p t-field="o.guarantee_limit"/>
-                      </td>
-                      <td>
-                        <table>
-                          <tbody>
-
-                            <tr t-if="o.partner_id.principal_contact">
-                              <td>
-                                <strong>Contact: </strong>
-                              </td>
-                              <td>
-                                <span t-field="o.partner_id.principal_contact.name"/>
-                                / <span t-field="o.partner_id.principal_contact.email"/>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <strong>V/Contact: </strong>
-                              </td>
-                              <td>
-                                <span t-field="o.create_uid.partner_id.name"/> /
-                                <span t-field="o.create_uid.email"/>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <span>
+                          <strong>V/contact affaire : </strong>
+                          <t t-if="o.contact_affaire">
+                            <span t-field="o.contact_affaire.name"/>
+                            /
+                            <span t-field="o.contact_affaire.email"/>
+                          </t>
+                        </span>
                       </td>
                     </tr>
                   </tbody>
-
                 </table>
+                <br/>
+                <span>
+                  <strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/>
+                </span>
+                <span>
+                  <strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/>
+                </span>
+                <br/>
 
                 <table class="table table-condensed">
                   <thead>
@@ -111,7 +140,6 @@
                   </thead>
                   <tbody>
                     <t t-if="o.operations">
-                      <tr><td colspan="5"><strong>Ligne(s) d'Opération(s) :</strong></td></tr>
                       <tr t-foreach="o.operations" t-as="line">
                         <t t-if="(line.to_invoice is True)">
                           <td>
@@ -142,7 +170,6 @@
                       </tr>
                     </t>
                     <t t-if="o.fees_lines">
-                      <tr><td colspan="5"><strong>Ligne(s) d'Honoraire(s) :</strong></td></tr>
                       <tr t-foreach="o.fees_lines" t-as="fees">
                         <t t-if="fees.to_invoice is True">
                           <td>
