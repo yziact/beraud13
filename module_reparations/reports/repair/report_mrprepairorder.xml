@@ -1,202 +1,229 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-  <data>
-    <template id="report_repair_devis"> 
-      <t t-name="report_repair_devis">
-        <t t-call="report.html_container">
-          <t t-foreach="docs" t-as="o">
-            <t t-call="report.external_layout">
-              <div class="page" style="font-size:11px;">
-                <div class="oe_structure"/>
-                <div class="row">
-                  <div class="col-xs-6 col-xs-offset-6">
-                    <div t-if="o.address_id">
-                      <div t-field="o.address_id"
-                        t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true, "phone_icons": true}'/>
-                    </div>
-                  </div>
-                </div>
-                
-                <h3>
-                  <span t-if="o.state != 'draft'">Commande d'Intervention # </span>
-                  <span t-if="o.state == 'draft'">Devis d'Intervention # </span>
-                  <span t-field="o.name" />
-                </h3>
+    <data>
+        <template id="report_repair_devis">
+            <t t-name="report_repair_devis">
+                <t t-call="report.html_container">
+                    <t t-foreach="docs" t-as="o">
+                        <t t-call="report.external_layout">
+                            <div class="page" style="font-size:11px;">
+                                <div class="oe_structure"/>
+                                <div class="row">
+                                    <br/>
+                                    <div class="col-xs-6 col-xs-offset-6">
+                                        <div t-if="o.address_id">
+                                            <div t-field="o.address_id"
+                                                 t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true, "phone_icons": true}'/>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <table class="table table-condensed table-bordered">
-                  <thead>
-                    <tr>
-                      <td>
-                        <strong>Date:</strong>
-                      </td>
-                      <td>
-                        <strong>Numéro</strong>
-                      </td>
-                      <td t-if="o.partner_id.ref">
-                        <strong>Client:</strong>
-                      </td>
-                      <td>
-                        <strong>Produit à Réparer :</strong>
-                      </td>
-                      <td>
-                        <strong>Numéro de Lot :</strong>
-                      </td>
-                      <td t-if="o.partner_id.user_id">
-                        <span><span><strong>Commercial: </strong></span><span t-field="o.partner_id.user_id.name"/> / <span t-field="o.partner_id.user_id.email"/></span>
-                      </td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <p t-esc="time.strftime('%Y-%m-%d')"/>
-                      </td>
-                      <td>
-                        <span t-field="o.name"/>
-                      </td>
-                      <td t-if="o.partner_id.ref">
-                        <span t-field="o.partner_id.ref"/>
-                      </td>
-                      <td t-if="o.product_id.name">
-                        <p t-field="o.product_id.name"/>
-                      </td>
-                      <td t-if="o.lot_id">
-                        <span t-field="o.lot_id.name"/>
-                      </td>
-                      <td>
-                        <table>
-                          <tbody>
-                            <tr t-if="o.partner_id.principal_contact">
-                              <td>
-                                <strong>Contact: </strong>
-                              </td>
-                              <td>
-                                <span t-field="o.partner_id.principal_contact.name"/>
-                                / <span t-field="o.partner_id.principal_contact.email"/>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <strong>V/Contact: </strong>
-                              </td>
-                              <td>
-                                <span t-field="o.create_uid.partner_id.name"/> /
-                                <span t-field="o.create_uid.email"/>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </td>
-                    </tr>
-                  </tbody>
+                                <h3>
+                                    <span t-if="o.state != 'draft'">Commande d'Intervention # </span>
+                                    <span t-if="o.state == 'draft'">Devis d'Intervention # </span>
+                                    <span t-field="o.name" />
+                                </h3>
+                                <h6>
+                                    <div>
+                                        <span t-if="o.contact"><strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/> / <span t-field="o.contact.email"/> </span>
+                                    </div>
+                                    <strong>Ref. Client : </strong>
+                                    <span t-field="o.partner_id.ref"/>
+                                </h6>
 
-                </table>
+                                <table id="cart" class="table table-condensed table-bordered">
+                                    <style>
+                                        #cart {
+                                        border:1px solid black;
+                                        border-spacing: 0.5rem;
+                                        border-collapse: collapse;
+                                        margin-bottom: 20px;
+                                        //background-color: red;
+                                        }
+                                        #cart td {
+                                        border:1px solid black;
+                                        padding-top: 5px;
+                                        padding-right: 5px;
+                                        padding-left: 5px;
+                                        }
+                                        #cart th {
+                                        padding: 5px;
+                                        border:1px solid black;
+                                        background-color: #bebebe;
+                                        }
+                                        #cart table th { border: none; }
+                                        #cart table td { border: none; }
+                                    </style>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <strong>Date</strong>
+                                            </th>
+                                            <!--<th>
+                                              <strong>Numéro</strong>
+                                            </th>-->
+                                            <!--<th t-if="o.partner_id.ref">-->
+                                            <!--<strong>Client:</strong>-->
+                                            <!--</th>-->
+                                            <th>
+                                                <strong>V/Ref.</strong>
+                                            </th>
+                                            <th>
+                                                <span>
+                                                    <strong>Commercial : </strong>
+                                                    <t t-if="o.user_id">
+                                                        <span t-field="o.user_id.name"/>
+                                                        /
+                                                        <span t-field="o.user_id.email"/>
+                                                    </t>
+                                                    <t t-if="(not o.user_id) and o.partner_id.user_id">
+                                                        <span t-field="o.partner_id.user_id.name"/>
+                                                        /
+                                                        <span t-field="o.partner_id.user_id.email"/>
+                                                    </t>
+                                                    <t t-if="not (o.user_id and o.partner_id.user_id)">
+                                                        <span t-field="o.partner_id.parent_id.user_id.name"/>
+                                                        /
+                                                        <span t-field="o.partner_id.parent_id.user_id.email"/>
+                                                    </t>
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <p t-esc="time.strftime('%dd/%MM/%y')"/>
+                                            </td>
+                                            <!--<td>
+                                                <span t-field="o.name"/>
+                                            </td>
+                                            <td t-if="o.partner_id.ref">
+                                                <span t-field="o.partner_id.ref"/>
+                                            </td>-->
+                                            <td>
+                                                <span t-field="O.client_order_ref"/>
+                                            </td>
+                                            <td>
+                                                <span>
+                                                    <strong>V/contact affaire : </strong>
+                                                    <t t-if="o.contact_affaire">
+                                                        <span t-field="o.contact_affaire.name"/>
+                                                        /
+                                                        <span t-field="o.contact_affaire.email"/>
+                                                    </t>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <br/>
+                                <span><strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/><strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/></span>
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th class="text-right">Quantité</th>
+                                            <th class="text-right">Prix Unitaire</th>
+                                            <th class="text-center">Taxe</th>
+                                            <th class="text-right">Prix</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-if="o.operations">
+                                            <!--<tr><td colspan="5"><strong>Ligne(s) d'Opération(s) :</strong></td></tr>-->
+                                            <tr t-foreach="o.operations" t-as="line">
+                                                <t t-if="(line.to_invoice is True)">
+                                                    <td>
+                                                        <span t-field="line.name" />
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-field="line.product_uom_qty"/>
+                                                        <span groups="product.group_uom" t-field="line.product_uom.name"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-field="line.price_unit"/>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <!-- <span t-esc="','.join(map( lambda x: str(x.amount)+'%', line.tax_id))"/> -->
+                                                        <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_id))"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-field="line.price_subtotal"
+                                                              t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                        <t t-if="o.fees_lines">
+                                            <!--<tr><td colspan="5"><strong>Ligne(s) d'Honoraire(s) :</strong></td></tr>-->
+                                            <tr t-foreach="o.fees_lines" t-as="fees">
+                                                <t t-if="fees.to_invoice is True">
+                                                    <td>
+                                                        <span t-field="fees.name"/>
+                                                    </td>
 
-                <table class="table table-condensed">
-                  <thead>
-                    <tr>
-                      <th>Description</th>
-                      <th class="text-center">Taxe</th>
-                      <th class="text-right">Quantité</th>
-                      <th class="text-right">Prix Unitaire</th>
-                      <th class="text-right">Prix</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <t t-if="o.operations">
-                      <tr><td colspan="5"><strong>Ligne(s) d'Opération(s) :</strong></td></tr>
-                      <tr t-foreach="o.operations" t-as="line">
-                        <t t-if="(line.to_invoice is True)">
-                          <td>
-                            <p t-if="line.type == 'add'"><i>(Ajouter)</i> <span t-field="line.name" /></p>
-                            <p t-if="line.type == 'remove'">(<i>Supprimer</i>) <span t-field="line.name"/></p>
-                          </td>
-                          <td class="text-center">
-                              <!-- <span t-esc="','.join(map( lambda x: str(x.amount)+'%', line.tax_id))"/> -->
-                              <!--<span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_id))"/>-->
-                          </td>
-                          <td class="text-right">
-                            <span t-field="line.product_uom_qty"/>
-                            <span groups="product.group_uom" t-field="line.product_uom.name"/>
-                          </td>
-                          <td class="text-right">
-                            <span t-field="line.price_unit"/>
-                          </td>
-                          <td class="text-right">
-                            <span t-field="line.price_subtotal"
-                              t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
-                          </td>
+                                                    <td class="text-right">
+                                                        <span t-field="fees.product_uom_qty"/>
+                                                        <span groups="product.group_uom" t-field="fees.product_uom.name"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-field="fees.price_unit"/>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span t-esc="','.join(map( lambda x: (x.description or x.name), fees.tax_id))"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-field="fees.price_subtotal"
+                                                              t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+
+                                <div class="row">
+                                    <div class="col-xs-4 pull-right">
+                                        <table class="table table-condensed">
+                                            <tr class="border-black">
+                                                <td><strong>Total HT</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="o.amount_untaxed"
+                                                          t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>TVA</td>
+                                                <td class="text-right">
+                                                    <span t-field="o.amount_tax"
+                                                          t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                                </td>
+                                            </tr>
+                                            <tr class="border-black">
+                                                <td><strong>Total TTC</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="o.amount_total"
+                                                          t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <p t-if="o.state == 'draft'">Toutes les pièces supplémentaires utilisées suite au
+                                    démontage seront facturées en plus, ainsi que les heures de main d'oeuvre
+                                    supplémentaires.
+                                </p>
+
+                                <p t-field="o.quotation_notes"/>
+                                <div class="oe_structure"/>
+                            </div>
                         </t>
-                      </tr>
                     </t>
-                    <t t-if="o.fees_lines">
-                      <tr><td colspan="5"><strong>Ligne(s) d'Honoraire(s) :</strong></td></tr>
-                      <tr t-foreach="o.fees_lines" t-as="fees">
-                        <t t-if="fees.to_invoice is True">
-                          <td>
-                            <span t-field="fees.name"/>
-                          </td>
-                          <td class="text-center">
-                            <span t-esc="','.join(map( lambda x: x.name, fees.tax_id))"/>
-                          </td>
-                          <td class="text-right">
-                            <span t-field="fees.product_uom_qty"/>
-                            <span groups="product.group_uom" t-field="fees.product_uom.name"/>
-                          </td>
-                          <td class="text-right">
-                            <span t-field="fees.price_unit"/>
-                          </td>
-                          <td class="text-right">
-                            <span t-field="fees.price_subtotal"
-                              t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
-                          </td>
-                        </t>
-                      </tr>
-                    </t>
-                  </tbody>
-                </table>
-
-                <div class="row">
-                  <div class="col-xs-4 pull-right">
-                    <table class="table table-condensed">
-                      <tr class="border-black">
-                        <td><strong>Total Hors-Taxes</strong></td>
-                        <td class="text-right">
-                          <span t-field="o.amount_untaxed"
-                            t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Taxes</td>
-                        <td class="text-right">
-                          <span t-field="o.amount_tax"
-                            t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
-                        </td>
-                      </tr>
-                      <tr class="border-black">
-                        <td><strong>Total</strong></td>
-                        <td class="text-right">
-                          <span t-field="o.amount_total"
-                            t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
-                        </td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-
-                <p t-if="o.state == 'draft'">Toutes les pièces supplémentaires utilisées suite au
-                  démontage seront facturées en plus, ainsi que les heures de main d'oeuvre
-                  supplémentaires.
-                </p>
-
-                <p t-field="o.quotation_notes"/>
-                <div class="oe_structure"/>
-              </div>
+                </t>
             </t>
-          </t>
-        </t>
-      </t>
-    </template>
-  </data>
+        </template>
+    </data>
 </openerp>
 

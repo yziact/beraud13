@@ -30,6 +30,34 @@ class MrpRepairInh(models.Model):
         loc_id = self.env['stock.location'].search([('complete_name','ilike','Partner Locations/Customers')])
         return loc_id
 
+    ### commercial system
+
+    def onchange_partner_id(self, cr, uid, ids, part, address_id):
+        res = super(MrpRepairInh, self).onchange_partner_id(cr, uid, ids, part, address_id)
+        part_env = self.pool.get('res.partner')
+        if not part:
+            return res
+
+        partner = part_env.browse(cr, uid, part)
+        if partner.user_id:
+            user_id = partner.user_id.id
+            res['value']['user_id'] = user_id
+        return res
+
+    def _default_commercial(self):
+        print "OUR DEFAULT COMMERCIAL"
+        print self.env.context
+        print self.env.user
+
+        if not self.contact_affaire:
+            return self.env.user
+
+    contact_affaire = fields.Many2one('res.users', string='V/Contact affaire', default=_default_commercial)
+    user_id = fields.Many2one('res.users', string='Salesperson', index=True, track_visibility='onchange',
+                              default=lambda self: self.env.user)
+    ####
+
+    client_order_ref = fields.Char('Customer Reference', size=64)
     # add contact
     contact = fields.Many2one('res.partner', readonly=True, states={'draft': [('readonly', False)]})
 
@@ -136,6 +164,8 @@ class MrpRepairInh(models.Model):
         print "clientsite has changed !"
         if not self.clientsite:
             self.tech = None
+
+
 
     @api.onchange('tech') 
     def tech_change(self):
