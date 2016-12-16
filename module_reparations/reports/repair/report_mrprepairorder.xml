@@ -9,6 +9,7 @@
                             <div class="page" style="font-size:11px;">
                                 <div class="oe_structure"/>
                                 <div class="row">
+                                    <br/>
                                     <div class="col-xs-6 col-xs-offset-6">
                                         <div t-if="o.address_id">
                                             <div t-field="o.address_id"
@@ -65,10 +66,7 @@
                                             <!--<strong>Client:</strong>-->
                                             <!--</th>-->
                                             <th>
-                                                <strong>Produit à Réparer </strong>
-                                            </th>
-                                            <th>
-                                                <strong>Numéro de Série </strong>
+                                                <strong>V/Ref.</strong>
                                             </th>
                                             <th>
                                                 <span>
@@ -95,7 +93,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <p t-esc="time.strftime('%Y-%m-%d')"/>
+                                                <p t-esc="time.strftime('%dd/%MM/%y')"/>
                                             </td>
                                             <!--<td>
                                                 <span t-field="o.name"/>
@@ -103,11 +101,8 @@
                                             <td t-if="o.partner_id.ref">
                                                 <span t-field="o.partner_id.ref"/>
                                             </td>-->
-                                            <td t-if="o.product_id.name">
-                                                <p t-field="o.product_id.name"/>
-                                            </td>
                                             <td>
-                                                <span t-field="o.lot_id.name"/>
+                                                <span t-field="O.client_order_ref"/>
                                             </td>
                                             <td>
                                                 <span>
@@ -122,7 +117,8 @@
                                         </tr>
                                     </tbody>
                                 </table>
-
+                                <br/>
+                                <span><strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/><strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/></span>
                                 <table class="table table-condensed">
                                     <thead>
                                         <tr>

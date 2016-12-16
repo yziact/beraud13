@@ -7,6 +7,7 @@
                     <div class="page" style="font-size:12px;">
                         <div class="oe_structure"/>
                         <div class="row">
+                            <br/>
                             <div class="col-xs-3">
                                 <span><strong>Adresse de livraison</strong></span>
                                 <div>
@@ -138,7 +139,7 @@
                         <table class="table table-condensed" style="page-break-inside:auto">
                             <thead>
                                 <tr>
-                                    <th></th> <!-- placeholder for image -->
+                                    <th><span t-field="doc.name"/></th> <!-- placeholder for image -->
                                     <th>Description</th>
                                     <th class="text-right">Qté</th>
                                     <th class="text-right">PU HT</th>
@@ -221,6 +222,7 @@
                             <strong>Position fiscale</strong>
                             <span t-field="doc.fiscal_position_id.note"/>
                         </p>
+                        <span><strong>Ref à rappeler : </strong><span t-field="doc.name"/></span>
                         <div class="oe_structure"/>
                         <div style="bottom:0px">
                             <table class="table table-condensed table-bordered" style="page-break-inside:avoid; ">
@@ -267,6 +269,7 @@
                 <div class="page" style="font-size:12px;">
                         <div class="oe_structure"/>
                         <div class="row">
+                            <br/>
                             <div class="col-xs-3">
                                 <span><strong>Adresse de livraison</strong></span>
                                 <div>
@@ -295,7 +298,7 @@
                         </h6>
 
 
-                        <table id="cart">
+                        <table id="cart" class="table table-condensed table-bordered">
                             <!-- putting the style inside the table so its easier fetched from the
                                  code that duplicates the cart to other pages -->
                             <style>
@@ -332,7 +335,7 @@
                                         <strong>Incoterms:</strong>
                                     </th>
                                     <th>
-                                        <span>
+                                        <span t-if="doc.partner_id.user_id">
                                             <t t-if="doc.company_id.id == 3">
                                                 <strong>Commercial : </strong>
                                             </t>
@@ -398,11 +401,11 @@
                         <table class="table table-condensed" style="page-break-inside:auto">
                             <thead>
                                 <tr>
-                                    <th></th> <!-- placeholder for image -->
+                                    <th><span t-field="doc.name"/></th> <!-- placeholder for image -->
                                     <th>Description</th>
                                     <th class="text-right">Qté</th>
                                     <th class="text-right">PU HT</th>
-                                    <th t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">Rem.</th>
+                                    <th t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">Rem(M/%)</th>
                                     <th class="text-right">TVA</th>
                                     <th class="text-right">Prix</th>
                                 </tr>
@@ -481,6 +484,7 @@
                             <strong>Position fiscale</strong>
                             <span t-field="doc.fiscal_position_id.note"/>
                         </p>
+                        <span><strong>Ref à rappeler : </strong><span t-field="doc.name"/></span>
                         <div class="oe_structure"/>
                         <div style="bottom:0px">
                             <table class="table table-condensed table-bordered" style="page-break-inside:avoid; ">
