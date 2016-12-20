@@ -1,14 +1,49 @@
 <openerp>
     <data>
-        <record id="cron_internal_invoice" model="ir.cron">
-            <field name="name">Internal invoice</field>
-            <field name="user_id" ref="base.user_root"/>
-            <field name="interval_number">1</field>
-            <field name="interval_type">months</field>
-            <field name="numbercall">-1</field>
-            <field eval="False" name="doall"/>
-            <field eval="'beraud.invoice'" name="model"/>
-            <field eval="'create_internal_invoice'" name="function"/>
+        <!--        <record id="cron_internal_invoice" model="ir.cron">
+                    <field name="name">Internal invoice</field>
+                    <field name="user_id" ref="base.user_root"/>
+                    <field name="interval_number">1</field>
+                    <field name="interval_type">months</field>
+                    <field name="numbercall">-1</field>
+                    <field eval="False" name="doall"/>
+                    <field eval="'beraud.invoice'" name="model"/>
+                    <field eval="'create_internal_invoice'" name="function"/>
+                </record>-->
+
+        <record id="internal_invoicing"  model="ir.ui.view">
+            <field name="name">Re-Facturation Inter-Société</field>
+            <field name="model">beraud.invoice</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group name="date">
+                        <field name="date"/>
+                    </group>
+                    <group name="buttons">
+                        <button  name="action_create_internal_invoice" string="générer Factures" type="object" class="btn-success" icon="fa-download" attrs="{'invisible': [('date','=',False)]}"/>
+                    </group>
+                </form>
+            </field>
         </record>
+
+        <record id="action_wizard_invoice_beraud" model="ir.actions.act_window">
+            <field name="name">Re-Facturation Inter-Société</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">beraud.invoice</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="internal_invoicing"/>
+            <field name="target">new</field>
+        </record>
+
+        <act_window id="act_wizard_invoice_beraud"
+                    name="Re-Facturation Inter-Société"
+                    res_model="beraud.invoice"
+                    src_model="beraud.invoice"
+                    view_id="internal_invoicing"
+                    target="new"
+        />
+
+        <menuitem name="Re-Facturation Inter-Société" id="menu_invoice_beraud" action="action_wizard_invoice_beraud" parent="beraud.menu_export_root"/>
+
     </data>
 </openerp>
