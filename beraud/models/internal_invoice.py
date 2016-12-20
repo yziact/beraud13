@@ -206,7 +206,7 @@ class Internal_Invoice(models.Model):
     @api.multi
     def action_create_internal_invoice(self):
         date = self.date
-        self.create_internal_invoice(date)
+        self.sudo().create_internal_invoice(date)
 
     @api.model
     def create_internal_invoice(self, date):
