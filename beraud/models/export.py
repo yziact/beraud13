@@ -290,7 +290,6 @@ class AccountMove(models.Model):
     exported = fields.Boolean()
 
 
-
 class Export_Tiers(models.Model):
     _name = 'export.tier'
 
@@ -307,6 +306,7 @@ class Export_Tiers(models.Model):
         partner_env = self.env['res.partner']
         sale_env = self.env['sale.order']
         purchase_env = self.env['purchase.order']
+        invoice_env = self.env['account.invoice']
 
         csvfile = StringIO.StringIO()
         fieldnames = [u'Numero compte', u'intitule', 'Type', u'N compte principal', u'Qualite',
@@ -340,9 +340,10 @@ class Export_Tiers(models.Model):
                 partner_fils = partner_env.search([('type', '=', 'invoice'), ('parent_id', '=', partner.id), ('is_principal', '=', True)], limit=1)
 
                 sale = sale_env.search([('partner_id', '=', partner.id), ('state', 'in', ['sale', 'done'])])
-                purchase = purchase_env.search([('partner_id', '=', partner.id), ('state', 'in', ['sale', 'done'])])
+                purchase = purchase_env.search([('partner_id', '=', partner.id), ('state', 'in', ['purchase', 'done'])])
+                invoice = invoice_env.search([('partner_id', '=', partner.id), ('state', 'in', ['open', 'paid'])])
 
-                if sale or purchase :
+                if sale or purchase or invoice:
                     if partner_fils:
                         contact = partner_fils.title + " " + partner_fils.name
                         contact = contact[:35].encode("windows-1252")

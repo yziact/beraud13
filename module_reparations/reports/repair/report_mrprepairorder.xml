@@ -93,7 +93,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <p t-esc="time.strftime('%d/%M/%Y')"/>
+                                                <p t-esc="time.strftime('%d/%m/%Y')"/>
                                             </td>
                                             <!--<td>
                                                 <span t-field="o.name"/>
@@ -120,7 +120,7 @@
                                 <br/>
                                 <span>
                                     <strong>Produit à Réparer : </strong><span t-field="o.product_id.name"/>
-                                </span>    
+                                </span>
                                 <span>
                                     <strong> Numéro de Série : </strong><span t-field="o.lot_id.name"/>
                                 </span>
