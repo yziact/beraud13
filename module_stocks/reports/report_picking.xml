@@ -82,15 +82,11 @@
                         <table class="table table-condensed table-bordered">
                             <thead>
                                 <tr>
-                                    <th><strong>Date d'Engagement</strong></th>
-                                    <th name="td_sched_date_h"><strong>Date Prévue</strong></th>
+                                    <th name="td_sched_date_h"><strong>Date</strong></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>
-                                        <span t-field="o.date" t-field-options='{"format":"dd/MM/y"}'/>
-                                    </td>
                                     <td name="td_sched_date">
                                         <span t-field="o.min_date" t-field-options='{"format":"dd/MM/y"}'/>
                                     </td>

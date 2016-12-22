@@ -10,6 +10,12 @@
             <xpath expr="//field[@name='partner_shipping_id']" position="after">
                 <field name="contact"/>
             </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="contact_affaire" string="V/Contact affaire"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="string">Commercial</attribute>
+            </xpath>
         </field>
     </record>
 

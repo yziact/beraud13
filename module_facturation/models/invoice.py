@@ -4,6 +4,15 @@ from openerp import models, api, fields
 class AccountInvoiceInherit(models.Model):
     _inherit = 'account.invoice'
 
+    def _default_commercial(self):
+        print "OUR DEFAULT COMMERCIAL"
+        print self.env.context
+        print self.env.user
+
+        if not self.contact_affaire:
+            return self.env.user
+
+    contact_affaire = fields.Many2one('res.users', string='V/Contact affaire', default=_default_commercial)
     partner_shipping_id = fields.Many2one('res.partner', string='Adresse de Livraison', readonly=True, states={'draft': [('readonly', False)]}, help="Delivery address for current sales order.")
 
     last_bl_from_bc = fields.Many2one('stock.picking', string='Last Validated BL linked to BC', readonly=True,
@@ -13,7 +22,7 @@ class AccountInvoiceInherit(models.Model):
 
     @api.multi
     @api.onchange('partner_id')
-    def _onchange_partner_id(self):
+    def onchange_partner_id(self):
         print "[%s] account.invoice our _onchange_partner_id" % __name__
 
         """
@@ -35,6 +44,7 @@ class AccountInvoiceInherit(models.Model):
                 'partner_shipping_id': addr['delivery'],
             }
             self.update(values)
+
 
     @api.multi
     @api.returns('self')

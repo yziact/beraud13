@@ -10,6 +10,13 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="contact" domain="[('parent_id', '=', partner_id)]"/>
             </xpath>
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="user_id" string="Commercial"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="contact_affaire" string="V/Contact affaire"/>
+            </xpath>
+
         </field>
     </record>
 </odoo>
