@@ -15,6 +15,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 import logging 
 _logger = logging.getLogger(__name__)
 
+no_tech_loc_error_default = "Tech has no assigned locations, field filled with default values"
 
 class MrpRepairInh(models.Model):
     _inherit = 'mrp.repair'
@@ -140,66 +141,16 @@ class MrpRepairInh(models.Model):
     @api.onchange('tech') 
     def tech_change(self):
         print "tech has changed !"
-        self._set_dest_of_lines()
+        error = 0
+        for line in self.operations:
+            error += line.update_line();
+        if error :
+            return { 'warning': {'title': 'Attention', 'message': no_tech_loc_error_default} }
 
     def action_repair_validate(self, cr, uid, ids, context=None):
         print "mrp_repair our action_validate"
         for repair in self.browse(cr, uid, ids, context=context):
             self.write(cr, uid, [repair.id], {'state': 'valid'}, context=context)
-
-    def _set_dest_of_lines(self, new_tech=None):
-        print "_set_dest_of_lines"
-
-        loc_obj = self.env["stock.location"]
-        t_obj = self.env['res.users']
-        orig_loc_id = 0
-        dest_loc_id = 0
-        print '[sdol]self.tech : ', self.tech
-        print '[sdol]new_tech : ', new_tech
-
-        customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
-        prod_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
-
-        stock_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
-        remove_loc_id = stock_loc_id
-
-        if self.partner_id.company_id.id == 3:
-            stock_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])
-            remove_loc_id = stock_loc_id
-
-        for line in self.operations:
-            if new_tech:
-                new_tech_name = t_obj.browse(new_tech).name
-                orig_loc_id = stock_loc_id
-                if line.type == 'remove':
-                    orig_loc_id = customer_loc_id
-                dest_loc_id = loc_obj.search([('tech', 'ilike', new_tech_name)])
-                print "--> new tech, dest_loc_id : ", dest_loc_id
-                if not dest_loc_id:
-                    raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
-            #False means we changed from a tech to None, None means we didn't pass anything
-            elif self.tech and new_tech != False: 
-                orig_loc_id = stock_loc_id
-                if line.type == 'remove':
-                    orig_loc_id = customer_loc_id
-                dest_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
-                print "--> tech, dest_loc_id : ", dest_loc_id
-                if not dest_loc_id:
-                    raise UserError("[gslfr] Le Technicien spécifié n'a pas d'emplacement de stock assigné")
-            else:
-                orig_loc_id = stock_loc_id
-                dest_loc_id = prod_loc_id
-                if line.type == 'remove':
-                    orig_loc_id = customer_loc_id
-                    dest_loc_id = remove_loc_id
-                if not dest_loc_id:
-                    raise UserError("[gslfr] Emplacement destination non trouvé.")
-
-            print "line orig_loc_id : ", orig_loc_id.name
-            print "line dest_loc_id : ", dest_loc_id.name
-
-            line.write({'location_id': orig_loc_id.id })
-            line.write({'location_dest_id': dest_loc_id.id })
 
     @api.model
     def create(self, vals):
@@ -246,7 +197,7 @@ class MrpRepairInh(models.Model):
         t_obj = self.env['res.users']
         l_obj = self.env['stock.location']
 
-        if vals['operations']:
+        if vals.get('operations', False):
             for v in vals['operations']:
                 o = v[2]
                 print "o was : ", o
@@ -599,7 +550,8 @@ class MrpRepairInh(models.Model):
                 if not tech_loc_id : 
                     raise UserError("Un problème est survenu lors de la recherche de l'emplacement associé au technicien")
                 
-                for op_line in repair.operations : 
+                processed_moves = []
+                for op_line in repair.operations :
                     orig_loc_id = tech_loc_id
                     dest_loc_id = customer_loc_id
                     if op_line.type == 'remove':
@@ -617,22 +569,62 @@ class MrpRepairInh(models.Model):
                     # the move will be considered a sale if
                     # the tech has the product in his stock
                     # and the quant.origin of the move in the
-                    # stock moves of the BL_internal to his stock
-                    # were different than the customer he used the product for.
+                    # the BL_internal to his stock
+                    # is different than the company_id of the customer he used the product for.
 
-                    quant_origin = 0
+                    isSale = False
+                    checked_quants = []
+                    for quant in tech_quants:
+                        if (quant not in checked_quants) and op_line.type == 'add':
+                            checked_quants.append(quant)
+                            isSale = True;
+
+                    """
+                    isSale = False
+                    print '*** looping on quants of moves of bl equal to product id..'
                     for move in repair.bl_internal.move_lines :
-                        if move.product_id.id == op_line.product_id.id: 
+                        if move.product_id.id == op_line.product_id.id:
                             for quant in move.quant_ids :
-                                quant_origin = quant.origin
-                    print 'quant_origin : ', quant_origin
+                                if quant.origin != repair.partner_id.company_id.id:
+                                    print '''quant.origin is different from
+                                    repair.partner_id.company_id in move : %s,
+                                    quant : %s, repair.partner_id : %s''' % \
+                                    (move.id, quant.id, repair.partner_id)
+                                    isSale = True
+                    """
 
+                    """
+                    # same but checking with move.company_id, since moves can only take quants that are of the same company_id as them
+                    isSale = False
+                    print '*** looping on moves of BL equal to product id..'
+                    for move in repair.bl_internal.move_lines :
+                        print 'loop, op_line : %s,  move : %s' % (op_line, move)
+                        print 'processed_moves : ', processed_moves
+                        print 'move.product_id :', move.product_id
+                        print 'op_line.product_id :', op_line.product_id
+                        print 'move.company_id :', move.company_id
+                        print 'repair.partner_id.company_id :', repair.partner_id.company_id
+                        if move.id in processed_moves :
+                            print 'move had already been checked, moving on'
+                            continue
+                        else :
+                            processed_moves.append(move.id);
+                            if (move.product_id.id == op_line.product_id.id) and op_line.type == 'add' :
+                                print 'move product_id and op_line product_id are the same'
+                                if move.company_id.id != repair.partner_id.company_id.id :
+                                    print 'move company_id and repair partner company_id different, isSale True'
+                                    isSale = True
+                    """
+                    
+                    """
                     isSale = False
                     if op_line.type=='add' and qty_quants > 0 and\
                        quant_origin != repair.partner_id.id :
                         isSale = True
+                    """
                     
-                    print "*** isSale : "
+                    print "*** isSale : ", isSale
+                    # these moves should be from the technician the the client
                     move_id = move_obj.create(cr, uid, {
                         'origin': repair.name,
                         'name': op_line.name,
@@ -652,15 +644,10 @@ class MrpRepairInh(models.Model):
                     move_obj.action_done(cr, uid, move_id)
 
                     print "move done, id : ", move_id
-                    m = move_obj.browse(cr, uid, move_id)
-                    print "m.quants : ", m.quant_ids
+                    print "move was a sale ? : ", isSale
 
+                    #m = move_obj.browse(cr, uid, move_id)
                     #print "BL_INTERNAL MOVES WERE : "
-                    #for move in repair.bl_internal.move_lines : 
-                        #print "move.origin : ", move.origin
-                        #print "move.quant_ids : ", move.quant_ids
-                        #print "move.product_id : ", move.product_id
-                        #print "move.product_id.name : ", move.product_id.name
 
         return res
 
@@ -706,6 +693,16 @@ class MrpRepairInh(models.Model):
 
         return res
 
+    def get_loc_from_tech(self, tech):
+        loc_obj = self.env['stock.location']
+        t_loc_id = loc_obj.search([('tech', 'ilike', tech.name)])
+        return t_loc_id
+
+    def get_tech_loc(self):
+        loc_obj = self.env['stock.location']
+        t_loc_id = loc_obj.search([('tech', 'ilike', self.tech.name)])
+        return t_loc_id
+
 
 class MrpRepairLine(models.Model):
 
@@ -715,11 +712,36 @@ class MrpRepairLine(models.Model):
     # state either 'confirmed' or 'started', create move, reserve it,
     # and store it here.
     associated_move = fields.Many2one('stock.move')
+    #tech_name = fields.Many2one(related='repair_id.tech', store=True)
+
+    # called by the repair_id onchange on the tech. So the tech has changed
+    def update_line(self):
+        ''' set depending on line type, '''
+        print "[%s] mrp_repair_line UPDATE_LINE" % __name__
+
+        loc_obj = self.env['stock.location']
+        ber_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
+        atom_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])
+        customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
+
+        error = 0
+        for line in self:
+            stock_loc_id = ber_loc_id if line.repair_id.company_id.id == 1 else atom_loc_id
+            if line.type == 'add':
+                #import pudb;pudb.set_trace();
+                line.location_id = line.repair_id.get_loc_from_tech(line.repair_id.tech).id or stock_loc_id
+                line.location_dest_id = line.repair_id.location_dest_id.id # customer loc id
+            else:
+                line.location_id = line.repair_id.location_dest_id.id #customer loc
+                line.location_dest_id = line.repair_id.get_loc_from_tech(line.repair_id.tech).id or stock_loc_id
+            if not line.repair_id.get_loc_from_tech(line.repair_id.tech):
+                error += 1
+        return error
 
     @api.model
     def create(self, vals):
-        print "*** MRP_REPAIR_LINE our create"
-
+        print "[%s] mrp_repair_line CREATE" % __name__
+        ''' set the locations of the lines at creation time if we are in the correct states '''
 
         loc_obj = self.env['stock.location']
         ber_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
@@ -730,12 +752,28 @@ class MrpRepairLine(models.Model):
         if not vals.get('location_dest_id'):
             vals.update({'location_dest_id': ber_loc_id.id})
 
-
         repair_line = super(MrpRepairLine, self).create(vals)
 
-        print 'TECH IS : ', repair_line.repair_id.tech.name
+        tech = repair_line.repair_id.tech
 
-        # we are in the right states, first we have to determine the origin/dest of the line
+        print 'tech name is : ', repair_line.repair_id.tech.name
+        # if there's a tech and we are in these states, set the right locations and return
+        # without making move (move will be made when repair is ended)
+        if tech :
+            tech_loc_id = loc_obj.search([('tech', 'ilike', tech.name)])
+            # check for errors getting the tech loc id
+            if not tech_loc_id:
+                raise UserError("Problem while finding the tech location. He probably has no location assigned.")
+            # line from tech stock to client stock 
+            repair_line.location_id = tech_loc_id.id
+            repair_line.location_dest_id = repair_line.repair_id.location_dest_id.id
+            return repair_line
+
+        # if there's no tech and we are not in these states, do nothing more, just create the line
+        if repair_line.repair_id.state not in ('confirmed', 'ready', 'under_repair'):
+            return repair_line
+
+        # if there is no tech and we are in the right states, create move associated with the line
         move_obj = self.env['stock.move']
         repair_obj = self.env['mrp.repair']
         customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
@@ -760,18 +798,9 @@ class MrpRepairLine(models.Model):
             raise UserError("Il y a eu un problème lors de la sélection des emplacements source/destination de la ligne.")
 
         # update repair_line with the right info so it creates OK
-        # these assigns generate writes
+        # these assigns generate writes (write is called)
         repair_line.location_id = orig_loc_id
         repair_line.location_dest_id = dest_loc_id
-
-        # do nothing more if we are no in the right states
-        if repair_line.repair_id.state not in ('confirmed', 'ready', 'under_repair'):
-            return repair_line
-
-        # do nothing more if there's a tech
-        tech = repair_line.repair_id.tech
-        if tech : 
-            return repair_line
 
         # if there's no tech and we are in the right states, create the move
         print "REPAIR_LINE IS : ", repair_line
@@ -805,9 +834,10 @@ class MrpRepairLine(models.Model):
 
         return repair_line
 
+
     @api.multi
     def write(self, vals):
-        print "*** MRP_REPAIR_LINE our write"
+        print "[%s] mrp_repair_line WRITE" % __name__
 
         loc_obj = self.env['stock.location']
         ber_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
@@ -815,76 +845,91 @@ class MrpRepairLine(models.Model):
         customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
         prod_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
 
-
         for repair_line in self:
 
-            new_type = vals.get('type')
-            our_type = new_type if new_type else repair_line.type
-
-            p_comp_id = repair_line.repair_id.partner_id.company_id.id
-            
-            stock_loc_id = ber_loc_id
-            print 'p_comp_id : ', p_comp_id
-            if p_comp_id == 3:
-                stock_loc_id = atom_loc_id
-
-            orig_loc_id = 0
-            dest_loc_id = 0
-            print 'self.repair_id.tech : ', repair_line.repair_id.tech
-            if repair_line.repair_id.tech :
-                tech_loc_id = loc_obj.search([('tech', 'ilike', repair_line.repair_id.tech.name)])
-                orig_loc_id = stock_loc_id
-                dest_loc_id = tech_loc_id
-                if our_type == 'remove' :
-                    orig_loc_id = customer_loc_id
-                    dest_loc_id = tech_loc_id
-            else:
-                orig_loc_id = stock_loc_id
-                dest_loc_id = prod_loc_id
-                if our_type == 'remove' :
-                    orig_loc_id = customer_loc_id
-                    dest_loc_id = stock_loc_id
-
-            if (not orig_loc_id) or (not dest_loc_id) :
-                raise UserError("Problème lors de la sélection des empalcements src/dst de la ligne.")
-
-            vals.update({'location_id': orig_loc_id.id})
-            vals.update({'location_dest_id': dest_loc_id.id})
-
-            # write when locations OK
-            # pass repair_line, and not self...
-            super(MrpRepairLine, repair_line).write(vals)
-
-            print "repair_line : ", repair_line
-            print "repair_line.associated_move : ", repair_line.associated_move
-            
-            print "*** REPAIR_LINE_WRITE LOOP ***"
-            print "repair_line location_id : ", repair_line.location_id
-            print "repair_line location_dest_id : ", repair_line.location_dest_id
-            #import pdb; pdb.set_trace();
-
-            # if there's a tech, don't create any moves
-            if repair_line.repair_id.tech :
+            # if we are in the states when we do weird things at create time on the lines, don't do
+            # anything more in the write
+            if repair_line.repair_id.tech :#and repair_line.repair_id.state in ('confirmed', 'ready', 'under_repair'):
+                print '[write] there is a tech, doing the tech line stuff'
+                vals.update(repair_line.get_tech_line_vals(repair_line))
+                super(MrpRepairLine, repair_line).write(vals)
                 continue
 
-            # if there is an associated move, unreserve it, modify it, reserve it again
-            if repair_line.associated_move : 
-                repair_line.associated_move.do_unreserve()
+            # no tech and states when we do moves
+            if repair_line.repair_id.state in ('confirmed', 'ready', 'under_repair'):
+                print "[write] there is _no_ tech, we're in the states to do the moves, doing the move line stuff"
+                vals.update(repair_line.get_move_line_vals(repair_line))
+                super(MrpRepairLine, repair_line).write(vals)
+                repair_line.modify_move_line(repair_line)
+                continue
 
-                repair_line.associated_move.write({
-                    'product_uom': repair_line.product_id.uom_id.id,
-                    'product_id': repair_line.product_id.id,
-                    'product_uom_qty': repair_line.product_uom_qty,
+            # no tech, and we are not in the states where we do the moves
+            print "[write] there is _no_ tech, we're _not_ in the states to do the moves, doing the move line stuff, not modifying moves"
+            vals.update(repair_line.get_move_line_vals(repair_line))
+            super(MrpRepairLine, repair_line).write(vals)
 
-                    #'location_id': repair_line.location_id.id, # line location
-                    #'location_dest_id': repair_line.location_dest_id.id, #line location
 
-                    'location_id': orig_loc_id.id, # line location
-                    'location_dest_id': dest_loc_id.id, #line location
+    def get_tech_line_vals(self, line):
+        print "[%s] mrp_repair_line GET_TECH_LINE_VALS" % __name__
 
-                    'restrict_lot_id': repair_line.lot_id.id,
-                })
-                repair_line.associated_move.action_assign()
+        loc_obj = self.env['stock.location']
+        ber_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
+        atom_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])
+        customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
+        prod_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+        stock_loc_id = ber_loc_id if line.repair_id.company_id.id == 1 else atom_loc_id
+
+        vals = {}
+        if line.type == 'add':
+            vals.update({'location_id': stock_loc_id.id,
+                    'location_dest_id': line.repair_id.get_tech_loc().id})
+        else :
+            vals.update({'location_id': customer_loc_id.id,
+                    'location_dest_id': line.repair_id.get_tech_loc().id})
+        return vals
+
+    def get_move_line_vals(self, line):
+        print "[%s] mrp_repair_line GET_MOVE_LINE_VALS" % __name__
+
+        loc_obj = self.env['stock.location']
+        ber_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
+        atom_loc_id = loc_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])
+        customer_loc_id = loc_obj.search([('complete_name','ilike','Partner Locations/Customers')])
+        prod_loc_id = loc_obj.search([('complete_name','ilike','Virtual Locations/Production')])
+        stock_loc_id = ber_loc_id if line.repair_id.company_id.id == 1 else atom_loc_id
+
+        vals = {}
+        if line.type == 'add':
+            vals.update({'location_id': stock_loc_id.id,
+                    'location_dest_id': prod_loc_id.id})
+        else :
+            vals.update({'location_id': customer_loc_id.id,
+                    'location_dest_id': stock_loc_id.id})
+        return vals
+
+    def modify_move_line(self, line):
+        print "[%s] mrp_repair_line WRITE_LINE_WITH_MOVE" % __name__
+        # if there is an associated move, unreserve it, modify it, reserve it again
+
+        if line.associated_move : 
+            line.associated_move.do_unreserve()
+
+            line.associated_move.write({
+                'product_uom': line.product_id.uom_id.id,
+                'product_id': line.product_id.id,
+                'product_uom_qty': line.product_uom_qty,
+
+                #'location_id': repair_line.location_id.id, # line location
+                #'location_dest_id': repair_line.location_dest_id.id, #line location
+                #'location_id': orig_loc_id.id, # line location
+                #'location_dest_id': dest_loc_id.id, #line location
+
+                'location_id': line.location_id.id, # line location
+                'location_dest_id': line.location_dest_id.id, #line location
+
+                'restrict_lot_id': line.lot_id.id,
+            })
+            line.associated_move.action_assign()
 
     @api.multi
     def unlink(self):

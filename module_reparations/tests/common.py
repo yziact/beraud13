@@ -137,11 +137,12 @@ class TestsCommon(common.TransactionCase):
             'rounding': 1.0})
 
         # Product for different unit of measure.
+        """
         self.DozA = self.ProductObj.create({'name': 'Dozon-A', 'uom_id': self.uom_dozen.id, 'uom_po_id': self.uom_dozen.id})
         self.SDozA = self.ProductObj.create({'name': 'SuperDozon-A', 'uom_id': self.uom_sdozen.id, 'uom_po_id': self.uom_sdozen.id})
         self.SDozARound = self.ProductObj.create({'name': 'SuperDozenRound-A', 'uom_id': self.uom_sdozen_round.id, 'uom_po_id': self.uom_sdozen_round.id})
         self.UnitA = self.ProductObj.create({'name': 'Unit-A'})
         self.kgB = self.ProductObj.create({'name': 'kg-B', 'uom_id': self.uom_kg.id, 'uom_po_id': self.uom_kg.id})
         self.gB = self.ProductObj.create({'name': 'g-B', 'uom_id': self.uom_gm.id, 'uom_po_id': self.uom_gm.id})
-
+        """
 

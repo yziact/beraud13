@@ -31,7 +31,7 @@
         'module_report_filename',
         'module_sequences',
         'module_stocks',
-        'module_reparations',
+        #'module_reparations',
         'module_sale',
         'module_purchase',
         'module_project',

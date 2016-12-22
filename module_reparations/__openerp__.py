@@ -19,6 +19,7 @@
         'product',
         'stock',
         'mrp_repair',
+        'beraud',
 
         # our modules
         'module_stocks',
