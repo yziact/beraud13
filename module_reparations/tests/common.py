@@ -49,6 +49,7 @@ class TestsCommon(common.TransactionCase):
 
         #self.partner = self.env.ref('base.res_partner_1')
         self.ProductObj = self.env['product.product']
+        self.UserObj = self.env['res.users']
         self.UomObj = self.env['product.uom']
         self.PartnerObj = self.env['res.partner']
         self.ModelDataObj = self.env['ir.model.data']

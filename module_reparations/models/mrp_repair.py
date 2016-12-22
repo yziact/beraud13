@@ -275,7 +275,7 @@ class MrpRepairInh(models.Model):
             repair.task_id = task_id
 
             src_loc = loc_obj.browse(cr, uid, repair.location_id.id, context=context)
-            wh = loc_obj.get_warehouse(cr, uid, src_loc, context={})
+            wh = loc_obj.get_warehouse(cr, 1, src_loc, context={})
 
             v_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Partner Locations/Vendors')])
             vendeur_loc_id = loc_obj.browse(cr, uid, v_loc_id)
@@ -430,7 +430,7 @@ class MrpRepairInh(models.Model):
 
                 # create BL Internal only if there are lines in the OR
                 s_loc_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
-                if repair.partner_id.company_id.id == 3:
+                if repair.sudo().partner_id.company_id.id == 3:
                     s_loc_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
                 stock_loc_id = loc_obj.browse(cr, uid, s_loc_id)
 
@@ -552,6 +552,7 @@ class MrpRepairInh(models.Model):
                 
                 processed_moves = []
                 for op_line in repair.operations :
+                    print "=========////////=========////////// looping in op_line : ", op_line.product_id.name
                     orig_loc_id = tech_loc_id
                     dest_loc_id = customer_loc_id
                     if op_line.type == 'remove':
@@ -573,59 +574,15 @@ class MrpRepairInh(models.Model):
                     # is different than the company_id of the customer he used the product for.
 
                     isSale = False
-                    checked_quants = []
-                    for quant in tech_quants:
-                        if (quant not in checked_quants) and op_line.type == 'add':
-                            checked_quants.append(quant)
+                    for quant in tech_quants :
+                        print "quant_origin : ", quant.origin
+                        print "repair.partner_id.company_id.id : ", repair.partner_id.company_id.id
+                        if (quant.origin.id != repair.partner_id.company_id.id) and op_line.type == 'add':
                             isSale = True;
 
-                    """
-                    isSale = False
-                    print '*** looping on quants of moves of bl equal to product id..'
-                    for move in repair.bl_internal.move_lines :
-                        if move.product_id.id == op_line.product_id.id:
-                            for quant in move.quant_ids :
-                                if quant.origin != repair.partner_id.company_id.id:
-                                    print '''quant.origin is different from
-                                    repair.partner_id.company_id in move : %s,
-                                    quant : %s, repair.partner_id : %s''' % \
-                                    (move.id, quant.id, repair.partner_id)
-                                    isSale = True
-                    """
-
-                    """
-                    # same but checking with move.company_id, since moves can only take quants that are of the same company_id as them
-                    isSale = False
-                    print '*** looping on moves of BL equal to product id..'
-                    for move in repair.bl_internal.move_lines :
-                        print 'loop, op_line : %s,  move : %s' % (op_line, move)
-                        print 'processed_moves : ', processed_moves
-                        print 'move.product_id :', move.product_id
-                        print 'op_line.product_id :', op_line.product_id
-                        print 'move.company_id :', move.company_id
-                        print 'repair.partner_id.company_id :', repair.partner_id.company_id
-                        if move.id in processed_moves :
-                            print 'move had already been checked, moving on'
-                            continue
-                        else :
-                            processed_moves.append(move.id);
-                            if (move.product_id.id == op_line.product_id.id) and op_line.type == 'add' :
-                                print 'move product_id and op_line product_id are the same'
-                                if move.company_id.id != repair.partner_id.company_id.id :
-                                    print 'move company_id and repair partner company_id different, isSale True'
-                                    isSale = True
-                    """
-                    
-                    """
-                    isSale = False
-                    if op_line.type=='add' and qty_quants > 0 and\
-                       quant_origin != repair.partner_id.id :
-                        isSale = True
-                    """
-                    
-                    print "*** isSale : ", isSale
                     # these moves should be from the technician the the client
                     move_id = move_obj.create(cr, uid, {
+                        'company_id': repair.tech.company_id.id,
                         'origin': repair.name,
                         'name': op_line.name,
                         'product_uom': op_line.product_id.uom_id.id,
@@ -645,9 +602,6 @@ class MrpRepairInh(models.Model):
 
                     print "move done, id : ", move_id
                     print "move was a sale ? : ", isSale
-
-                    #m = move_obj.browse(cr, uid, move_id)
-                    #print "BL_INTERNAL MOVES WERE : "
 
         return res
 
