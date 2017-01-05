@@ -21,6 +21,7 @@ class StockPicking(models.Model):
     repair_id = fields.Many2one('mrp.repair', 'Reparation')
     incoterm_id = fields.Many2one('stock.incoterms', 'Incoterms')
     create_date = fields.Datetime("Date")
+    reliquat = fields.Boolean("Reliquat")
 
     @api.model
     def fields_view_get(self, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
@@ -151,16 +152,20 @@ class StockPicking(models.Model):
             if pick.picking_type_id.name == u'Réceptions' or\
                pick.picking_type_id.name == u'Receipts':
                 print "[action_assign] reception, calling super"
-                super(StockPicking, pick).action_assign()
+                super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
 
             if 'SAV' in pick.picking_type_id.name :
                 print "[action_assign] SAV, calling super"
-                super(StockPicking, pick).action_assign()
+                super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
 
             if pick.location_id.tech :
-                super(StockPicking, pick).action_assign()
+                super(StockPicking, self).action_assign(cr, uid, pick.id, context)
+                continue
+
+            if pick.reliquat:
+                super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
 
             r = []
@@ -182,14 +187,13 @@ class StockPicking(models.Model):
                 m = self.check_stocks_for_move(pick, move, src, dst)
                 if m :
                     r.append(m)
-
             if r :
                 print "opening tsis"
                 return self._open_tsis(cr, uid, ids, dst, src, r)
             else :
                 print "calling super.action_assign()"
                 #super(StockPicking, pick).action_assign(cr, uid, ids, context=context)
-                super(StockPicking, pick).action_assign()
+                super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 move._compute_stock_nums()
 
         return {}
