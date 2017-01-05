@@ -23,6 +23,9 @@
         <field name="origin" position="after">
           <field name="date_done"/>
         </field>
+        <xpath expr="//field[@name='location_dest_id']" position="after">
+          <field name="reliquat"/>
+        </xpath>
 
         <xpath expr="//field[@name='move_lines']" position="attributes">
           <attribute name="attrs">{'invisible': [('state', 'not in', ('draft', 'confirmed', 'waiting','done'))]}</attribute>

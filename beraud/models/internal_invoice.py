@@ -118,11 +118,17 @@ class Internal_Invoice(models.Model):
         list_ber = []
         list_atom = []
         for move in list_move:
-            if move.partner_id.id == 6:
-                list_ber.append(move)
+            if 'OR' in move.origin:
+                if move.partner_id.company_id.id == 3:
+                    list_ber.append(move)
+                elif move.partner_id.company_id.id == 1:
+                    list_atom.append(move)
+            else:
+                if move.partner_id.id == 6:
+                    list_ber.append(move)
 
-            elif move.partner_id.id == 1:
-                list_atom.append(move)
+                elif move.partner_id.id == 1:
+                    list_atom.append(move)
 
         return list_ber, list_atom
 
