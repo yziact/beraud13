@@ -1,7 +1,7 @@
 # -*- Encoding: UTF-8 -*-
 
 from openerp import models, api, fields
-import datetime
+from datetime import datetime, date, time
 
 class Internal_Invoice(models.Model):
     _name = "beraud.invoice"
@@ -13,7 +13,7 @@ class Internal_Invoice(models.Model):
         invoice_env = self.env['account.invoice']
         sale_invoice = invoice_env.create({'origin': 'Internal',
                                            'type': type,
-                                           'date_invoice': datetime.date.today(),
+                                           'date_invoice': date.today(),
                                            'partner_id': partner_id,
                                            'company_id': company_id,
                                            'account_id': account_id,
@@ -27,11 +27,49 @@ class Internal_Invoice(models.Model):
         invoice_line_env = self.env['account.invoice.line']
         account_env = self.env['account.account']
         partner_env = self.env['res.partner']
+        stock_pack_ope_lot_env = self.env['stock.pack.operation.lot']
+        slist = sorted(list, key=lambda k: k['date'])
 
         # fpos = invoice.partner_id.property_account_position_id.id
         list_line_ids = []
-        for item in list:
+        for item in slist:
             price_unit = item.product_id.tarif
+            name = item.product_id.name
+            # date = item.date
+            origin=""
+            daten =""
+            serial=""
+
+
+            if not item.origin == 'TSIS move':
+                # print "DEBUG 1"
+                origin = ' Origine : ' + item.origin
+
+                if item.picking_id:
+                    daten = ' Date : ' + datetime.strptime(item.picking_id.date.split(' ')[0], '%Y-%m-%d').strftime('%d-%m-%Y')
+                    # date = item.picking_id.date
+                if item.restrict_lot_id:
+                    serial = u" N°série : " + item.restrict_lot_id.name
+                    # print "DEBUG 2"
+                name += origin + daten + serial
+
+            else:
+                if item.restrict_lot_id:
+                    stock_pack_ope_lot_ids = stock_pack_ope_lot_env.search([('lot_id', '=', item.restrict_lot_id.id)])
+                    serial = u" N°série : " + item.restrict_lot_id.name
+                    for pack in stock_pack_ope_lot_ids:
+                        # print "DEBUG 3"
+                        picking = pack.operation_id.picking_id
+                        # print picking.picking_type_id.code
+                        if picking.picking_type_id.code == 'outgoing':
+                            # print "DEBUG 4",
+                            origin = ' Origine : ' + picking.name
+                            daten = ' Date : ' + datetime.strptime(picking.date.split(' ')[0], '%Y-%m-%d').strftime('%d-%m-%Y')
+                            # date = picking.date
+
+                            name += origin + daten + serial
+
+
 
             if type == 'out_invoice':
                 prod_code = item.product_id.property_account_income_id.code[:-2] + "10"
@@ -47,13 +85,13 @@ class Internal_Invoice(models.Model):
                     account_id = item.product_id.property_account_expense_id
 
             line = invoice_line_env.create({'origin': 'internal',
-                                            'create_date': datetime.date.today(),
+                                            'create_date': date.today(),
                                             'price_unit': price_unit,
                                             'partner_id': partner_id,
                                             'company_id': company_id,
                                             'account_id': account_id.id,
                                             'uom_id': item.product_uom.id,
-                                            'name': item.product_id.name,
+                                            'name': name,
                                             'product_id': item.product_id.id,
                                             'invoice_id': invoice.id,
                                             'quantity': item.product_qty,
@@ -93,7 +131,7 @@ class Internal_Invoice(models.Model):
                     account_id = item['product'].property_account_expense_id
 
             line = invoice_line_env.create({'origin': 'internal',
-                                            'create_date': datetime.date.today(),
+                                            'create_date': date.today(),
                                             'partner_id': partner_id,
                                             'company_id': company_id,
                                             'account_id': account_id.id,
