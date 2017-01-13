@@ -77,11 +77,18 @@ class StockPicking(models.Model):
             else:
                 qty = wanted_qty - dst_qty
 
+            if move.origin and 'OR' in move.origin:
+                origin = move.origin
+            else:
+                origin = move.picking_id.name
+
             wizard_line_id = self.pool.get('wizard.transfer.stock.intercompany.line').create(cr, uid, {
                 'wizard_id':wizard_id,
-                'restrict_lot_id':move.restrict_lot_id.id,
+                'restrict_lot_id': move.restrict_lot_id.id,
                 'quantity': qty,
-                'product_id':move.product_id.id, 
+                'product_id': move.product_id.id,
+                'origin': origin,
+                'date': move.date,
             }, context)
 
         print "returning"

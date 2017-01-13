@@ -47,7 +47,9 @@ class Internal_Invoice(models.Model):
 
                 if item.picking_id:
                     daten = ' Date : ' + datetime.strptime(item.picking_id.date.split(' ')[0], '%Y-%m-%d').strftime('%d-%m-%Y')
-                    # date = item.picking_id.date
+                elif item.date:
+                    daten = ' Date : ' + datetime.strptime(item.date.split(' ')[0], '%Y-%m-%d').strftime('%d-%m-%Y')
+
                 if item.restrict_lot_id:
                     serial = u" N°série : " + item.restrict_lot_id.name
                     # print "DEBUG 2"
