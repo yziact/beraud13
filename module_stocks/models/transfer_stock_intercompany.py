@@ -25,7 +25,7 @@
 from openerp import models, api, fields
 from openerp.tools.translate import _
 from openerp.exceptions import UserError
-
+from datetime import date
 
 class wizard_transfer_stock_intercompany_line(models.TransientModel):
     _name = "wizard.transfer.stock.intercompany.line"
@@ -36,6 +36,13 @@ class wizard_transfer_stock_intercompany_line(models.TransientModel):
     quantity = fields.Float(string='Quantity', digits=(16, 8), help="Enter the quantity to transfer.")
     product_id = fields.Many2one('product.product', string='Product', help='Select the product.', required=True, )
     stock_move_id = fields.Many2one('stock.move', string='Movement', help='Any linked stock move.')
+
+
+    #modif Ber
+    origin = fields.Char('origin')
+    date = fields.Date('Date')
+
+
 
 
 class wizard_transfer_stock_intercompany(models.TransientModel):
@@ -50,6 +57,7 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
     production_id = fields.Many2one('mrp.production', string='Production', help='The production.')
     picking_id = fields.Many2one('stock.picking', string='Picking', help='The stock picking.')
     update_data = fields.Boolean(string='Update', help='Check this box if the product list is to be updated on changing the company source and/or destination', default=True)
+    origin = fields.Char(string='Origine', default='TSIS move')
     is_ok = fields.Boolean(string='Is ok', compute='_get_is_ok', )
 
     @api.multi
@@ -182,10 +190,22 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 total_qty = sum([quant.qty for quant in quants])
                 print "[__TSIS__] quantity of product available : ", total_qty
                 print "[__TSIS__] going to transfer: ", line.quantity
+
+                if line.origin:
+                    print line.origin
+                    origin = line.origin
+                else:
+                    origin = self.origin
+
+                if line.date:
+                    datel = line.date
+                else:
+                    datel = date.today()
                 
                 move_vals = {
                     'name': _('Intercompany transit %s - Source') % (line.product_id.name),
-                    'origin': 'TSIS move',
+                    'origin': origin,
+                    'date': datel,
                     'product_id': line.product_id.id,
                     'product_uom': line.product_id.uom_id.id,
                     'product_uom_qty': line.quantity,
