@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="partner_shipping_id"  attrs="{'invisible':[('type', 'in', ['in_invoice', 'in_refund'])]}"/>
+                <button  name="fix_me" string="Recalcule" type="object" class="btn btn-success" icon="fa-download" />
             </xpath>
             <xpath expr="//field[@name='partner_shipping_id']" position="after">
                 <field name="contact"/>
@@ -15,6 +16,15 @@
             </xpath>
             <xpath expr="//field[@name='user_id']" position="attributes">
                 <attribute name="string">Commercial</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_untaxed']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_tax']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
             </xpath>
         </field>
     </record>
