@@ -171,6 +171,15 @@ class Export_Journal(models.Model):
             print sorted(dict_sum_line, reverse=True)
             for dict in sorted(dict_sum_line, reverse=True):
                 print dict
+                dict_sum_line[dict]['Montant'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant']))
+
+                if '-' in dict_sum_line[dict]['Montant signe']:
+                    dict_sum_line[dict]['Montant signe'] = ('-' + "{0:.2f}".format(float(dict_sum_line[dict]['Montant signe'].strip("-").replace(',', '.')))).replace(',', '.')
+                else:
+                    dict_sum_line[dict]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[dict]['Montant signe'].replace(',', '.')))).replace('.', ',')
+
+                dict_sum_line[dict]['Montant debit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant debit'].replace(',', '.'))).replace('.', ',')
+                dict_sum_line[dict]['Montant credit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant credit'].replace(',', '.'))).replace('.', ',')
                 list_row.append(dict_sum_line[dict])
             move.exported = True
         writer.writerows(list_row)
