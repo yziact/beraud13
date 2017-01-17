@@ -35,7 +35,9 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='origin']" position="after">
-                <field name="last_bl_from_bc" />
+                <field name="last_bl_from_bc" string="Dernier BL du BC"/>
+                <field name="bl_date" string="Date BL du BC"/>
+
             </xpath>
         </field>
     </record>
