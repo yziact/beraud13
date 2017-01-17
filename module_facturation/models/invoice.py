@@ -23,21 +23,22 @@ class AccountInvoiceInherit(models.Model):
     contact = fields.Many2one('res.partner', readonly=True,
                               states={'draft': [('readonly', False)], 'proforma2': [('readonly', False)]})
 
-    @api.one
-    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
-    def _compute_amount(self):
-        self.amount_untaxed = "{0:.2f}".format(sum(line.price_subtotal for line in self.invoice_line_ids))
-        self.amount_tax = "{0:.2f}".format(sum(line.amount for line in self.tax_line_ids))
-        self.amount_total = self.amount_untaxed + self.amount_tax
-        amount_total_company_signed = self.amount_total
-        amount_untaxed_signed = self.amount_untaxed
-        if self.currency_id and self.currency_id != self.company_id.currency_id:
-            amount_total_company_signed = self.currency_id.compute(self.amount_total, self.company_id.currency_id)
-            amount_untaxed_signed = self.currency_id.compute(self.amount_untaxed, self.company_id.currency_id)
-        sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
-        self.amount_total_company_signed = amount_total_company_signed * sign
-        self.amount_total_signed = self.amount_total * sign
-        self.amount_untaxed_signed = amount_untaxed_signed * sign
+    # @api.one
+    # @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
+    # def _compute_amount(self):
+    #     self.amount_untaxed = "{0:.2f}".format(sum(line.price_subtotal for line in self.invoice_line_ids))
+    #     self.amount_tax = "{0:.2f}".format(sum(line.amount for line in self.tax_line_ids))
+    #     print self.amount_tax
+    #     self.amount_total = self.amount_untaxed + self.amount_tax
+    #     amount_total_company_signed = self.amount_total
+    #     amount_untaxed_signed = self.amount_untaxed
+    #     if self.currency_id and self.currency_id != self.company_id.currency_id:
+    #         amount_total_company_signed = self.currency_id.compute(self.amount_total, self.company_id.currency_id)
+    #         amount_untaxed_signed = self.currency_id.compute(self.amount_untaxed, self.company_id.currency_id)
+    #     sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
+    #     self.amount_total_company_signed = amount_total_company_signed * sign
+    #     self.amount_total_signed = self.amount_total * sign
+    #     self.amount_untaxed_signed = amount_untaxed_signed * sign
 
 
 
@@ -87,9 +88,20 @@ class AccountInvoiceInherit(models.Model):
     @api.multi
     def fix_me(self):
         # invoice_ids = self.search([('id', '=', 302)])
-
+        move_env = self.env['account.move']
+        move_line_env = self.env['account.move.line']
         for invoice in self:
+            move_obj = move_env.search([('id', '=', invoice.move_id.id)])
+            move_line = move_line_env.search([('move_id', '=', move_obj.id)])
+
+            for line in move_line:
+                move_line_env._cr.execute("DELETE FROM account_move_line WHERE move_id=%s ", (move_obj.id,))
+
+            invoice.move_id = None
+            move_env._cr.execute("DELETE FROM account_move WHERE id=%s", (move_obj.id,))
+
             if invoice.invoice_line_ids:
+
                 sale_line = invoice.invoice_line_ids[0].sale_line_ids
                 sale = sale_line.order_id
 
@@ -103,7 +115,7 @@ class AccountInvoiceInherit(models.Model):
                 TTHT = 0
                 TVA = 0
                 for line in invoice.invoice_line_ids:
-                    sub_tt = line.quantity * line.price_unit
+                    sub_tt = line.quantity * (line.price_unit * (1 - (line.discount / 100.0)))
                     TTHT += sub_tt
                     line.price_subtotal = sub_tt
                     TVA += 20 * sub_tt / 100
@@ -112,6 +124,8 @@ class AccountInvoiceInherit(models.Model):
                     tax.amount = "{0:.2f}".format(TVA)
 
                 invoice._compute_amount()
+                invoice.action_move_create()
+
 
                 print TVA
                 print TTHT
