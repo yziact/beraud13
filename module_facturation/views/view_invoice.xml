@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="partner_shipping_id"  attrs="{'invisible':[('type', 'in', ['in_invoice', 'in_refund'])]}"/>
+                <button  name="fix_me" string="Recalcule" type="object" class="btn btn-success" icon="fa-download" />
             </xpath>
             <xpath expr="//field[@name='partner_shipping_id']" position="after">
                 <field name="contact"/>
@@ -16,6 +17,15 @@
             <xpath expr="//field[@name='user_id']" position="attributes">
                 <attribute name="string">Commercial</attribute>
             </xpath>
+            <xpath expr="//field[@name='amount_untaxed']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_tax']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
         </field>
     </record>
 
@@ -25,7 +35,9 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='origin']" position="after">
-                <field name="last_bl_from_bc" />
+                <field name="last_bl_from_bc" string="Dernier BL du BC"/>
+                <field name="bl_date" string="Date BL du BC"/>
+
             </xpath>
         </field>
     </record>
