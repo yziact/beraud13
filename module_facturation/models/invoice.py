@@ -94,11 +94,12 @@ class AccountInvoiceInherit(models.Model):
             move_obj = move_env.search([('id', '=', invoice.move_id.id)])
             move_line = move_line_env.search([('move_id', '=', move_obj.id)])
 
-            for line in move_line:
-                move_line_env._cr.execute("DELETE FROM account_move_line WHERE move_id=%s ", (move_obj.id,))
+            if not invoice.status in ['draft']:
+                for line in move_line:
+                    move_line_env._cr.execute("DELETE FROM account_move_line WHERE move_id=%s ", (move_obj.id,))
 
-            invoice.move_id = None
-            move_env._cr.execute("DELETE FROM account_move WHERE id=%s", (move_obj.id,))
+                invoice.move_id = None
+                move_env._cr.execute("DELETE FROM account_move WHERE id=%s", (move_obj.id,))
 
             if invoice.invoice_line_ids:
 
