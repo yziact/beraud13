@@ -58,18 +58,21 @@
                       <th>
                         <strong>Date</strong>
                       </th>
+                      <th>
+                        <strong>V/Ref</strong>
+                      </th>
                       <!--<th>
                         <strong>Numéro</strong>
                       </th>-->
                       <!--<th t-if="o.partner_id.ref">-->
                       <!--<strong>Client:</strong>-->
                       <!--</th>-->
-                      <th>
+                      <!--<th>
                         <strong>Produit à Réparer </strong>
                       </th>
                       <th>
                         <strong>Numéro de Série </strong>
-                      </th>
+                      </th>-->
                       <th>
                         <span>
                           <strong>Commercial : </strong>
