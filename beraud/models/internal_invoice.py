@@ -53,6 +53,8 @@ class Internal_Invoice(models.Model):
                     else:
                         continue
 
+                date_bl = item.date
+
                 if item.restrict_lot_id:
                     serial = item.restrict_lot_id.name
 
@@ -139,6 +141,7 @@ class Internal_Invoice(models.Model):
 
             line = invoice_line_env.create({'origin': 'internal',
                                             'num_bl': item.get('origin', ''),
+                                            'date_move': item.get('date', ''),
                                             'create_date': date.today(),
                                             'partner_id': partner_id,
                                             'company_id': company_id,
@@ -199,6 +202,7 @@ class Internal_Invoice(models.Model):
                                              'product': product_time,
                                              'name': (line.user_id.name + " : " + line.name),
                                              'origin': repair.name,
+                                             'date': line.date,
                                              'timesheet_id': line.id,
                                              })
 
@@ -209,6 +213,7 @@ class Internal_Invoice(models.Model):
                                               'product': product_time,
                                               'name': (line.user_id.name + " : " + line.name),
                                               'origin': repair.name,
+                                              'date': line.date,
                                               'timesheet_id': line.id,
                                               })
                     else:
@@ -220,6 +225,7 @@ class Internal_Invoice(models.Model):
                                              'product': product_time,
                                              'name': (line.user_id.name + " : " + line.name),
                                              'origin': repair.name,
+                                             'date': line.date,
                                              'timesheet_id': line.id,
                                              })
 
@@ -230,8 +236,9 @@ class Internal_Invoice(models.Model):
                                               'product': product_time,
                                               'name': (line.user_id.name + " : " + line.name),
                                               'origin': repair.name,
+                                              'date': line.date,
                                               'timesheet_id': line.id,
-                                          })
+                                              })
                 else:
 
                     if line.user_id.company_id.id == 1:
@@ -240,6 +247,7 @@ class Internal_Invoice(models.Model):
                         time_ber.append({'quantity': line.unit_amount,
                                          'product': product_time,
                                          'name': (line.user_id.name + " : " + line.name),
+                                         'date': line.date,
                                          'timesheet_id': line.id,
                                          })
 
@@ -248,6 +256,7 @@ class Internal_Invoice(models.Model):
 
                         time_atom.append({'quantity': line.unit_amount,
                                           'product': product_time,
+                                          'date': line.date,
                                           'name': (line.user_id.name + " : " + line.name),
                                           'timesheet_id': line.id,
                                           })
@@ -287,7 +296,7 @@ class Internal_Invoice(models.Model):
         time_ber, time_atom = self.get_task(projet_line_task)
 
 
- ### CAS FACTURE VENTE BERAUD
+        ### CAS FACTURE VENTE BERAUD
 
         #Test si il y a une liste de bien echangee de ber -> atom
         if len(list_ber) !=0:
@@ -330,7 +339,7 @@ class Internal_Invoice(models.Model):
 
             purchase_invoice.compute_taxes()
 
- ### CAS FACTURE VENTE ATOM
+            ### CAS FACTURE VENTE ATOM
         sale_line_ids = []
         if len(list_atom) != 0:
             account_id = partner_env.browse([1]).with_context(company_id=3).property_account_receivable_id.id
@@ -394,7 +403,7 @@ class inherit_AccountInvoice(models.Model):
     @api.multi
     def action_cancel(self):
         res = super(inherit_AccountInvoice, self).action_cancel()
-        
+
         for invoice in self:
             for invoice_line in invoice.invoice_line_ids:
                 if invoice_line.move_id.id:
