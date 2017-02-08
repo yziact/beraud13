@@ -98,7 +98,7 @@
                                 </th>
                                 <th>
                                     <span>
-                                        <t t-if="o.company_id == 3">
+                                        <t t-if="o.company_id.id == 3">
                                             <strong>Commercial : </strong>
                                         </t>
                                         <t t-if="o.team_id.id == 1">
