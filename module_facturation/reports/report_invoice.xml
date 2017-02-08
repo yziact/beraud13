@@ -45,30 +45,18 @@
                                 <span t-field="o.contact.email"/>
                             </span>
                         </div>
-                       <!-- <div>
-                            <span id="vcontact">
-                                <strong>V/Contact: </strong>
-                                <span t-field="o.create_uid.name"/>
-                                /
-                                <span t-field="o.create_uid.email"/>
-                            </span>
+                        <!-- <div>
+                             <span id="vcontact">
+                                 <strong>V/Contact: </strong>
+                                 <span t-field="o.create_uid.name"/>
+                                 /
+                                 <span t-field="o.create_uid.email"/>
+                             </span>
 
-                        </div>-->
-                        <div class="col-xs-6">
+                         </div>-->
+                        <div>
                             <span id="Code_client"><strong>Ref. Client : </strong></span><span t-field="o.account_id.code"/>
                         </div>
-                        <div class="col-xs-6" t-if="o.last_bl_from_bc">
-                            <span>
-                                <strong>Bon de Livraison : </strong>
-                            </span>
-                            <span t-field="o.last_bl_from_bc.name"/>
-                            <span t-if="o.bl_date" t-field="o.bl_date"/>
-                            <span>
-                                <strong> Date : </strong>
-                            </span>
-                            <span t-if="not o.bl_date" t-field="o.last_bl_from_bc.date_done" t-field-options='{"format":"dd/MM/y"}'/>
-                        </div>
-                        <br/>
                     </h6>
 
                     <table id="cart"  class="table table-condensed table-bordered">
@@ -168,6 +156,17 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div t-if="o.last_bl_from_bc">
+                        <span>
+                            <strong>Bon de Livraison : </strong>
+                        </span>
+                        <span t-field="o.last_bl_from_bc.name"/>
+                        <span t-if="o.bl_date" t-field="o.bl_date"/>
+                        <span>
+                            <strong> Date : </strong>
+                        </span>
+                        <span t-if="not o.bl_date" t-field="o.last_bl_from_bc.date_done" t-field-options='{"format":"dd/MM/y"}'/>
+                    </div>
 
                     <!-- Is there a discount on at least one line? -->
                     <t t-set="display_discount" t-value="any([l.discount for l in o.invoice_line_ids])"/>
@@ -177,9 +176,9 @@
                             <tr>
                                 <th t-if="o.origin == 'Internal'">Date Mouvement</th>
                                 <th>Description</th>
-                                <th class="text-right">N°BL</th>
-                                <th class="text-right" t-if="o.origin == 'Internal'">Date BL/OR</th>
-                                <th class="text-right">N°série</th>
+                                <th t-if="o.origin == 'Internal'">N°BL</th>
+                                <th t-if="o.origin == 'Internal'">Date BL/OR</th>
+                                <th t-if="o.origin == 'Internal'">N°série</th>
                                 <th class="text-right">Qté</th>
                                 <th class="text-right">PU HT</th>
                                 <th t-if="display_discount" class="text-right">Disc.(%)</th>
