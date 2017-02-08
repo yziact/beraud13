@@ -54,9 +54,21 @@
                             </span>
 
                         </div>-->
-                        <div>
+                        <div class="col-xs-6">
                             <span id="Code_client"><strong>Ref. Client : </strong></span><span t-field="o.account_id.code"/>
                         </div>
+                        <div class="col-xs-6" t-if="o.last_bl_from_bc">
+                            <span>
+                                <strong>Bon de Livraison : </strong>
+                            </span>
+                            <span t-field="o.last_bl_from_bc.name"/>
+                            <span t-if="o.bl_date" t-field="o.bl_date"/>
+                            <span>
+                                <strong> Date : </strong>
+                            </span>
+                            <span t-if="not o.bl_date" t-field="o.last_bl_from_bc.date_done" t-field-options='{"format":"dd/MM/y"}'/>
+                        </div>
+                        <br/>
                     </h6>
 
                     <table id="cart"  class="table table-condensed table-bordered">
