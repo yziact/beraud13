@@ -94,7 +94,7 @@ class AccountInvoiceInherit(models.Model):
             move_obj = move_env.search([('id', '=', invoice.move_id.id)])
             move_line = move_line_env.search([('move_id', '=', move_obj.id)])
 
-            if not invoice.status in ['draft']:
+            if not invoice.state in ['draft']:
                 for line in move_line:
                     move_line_env._cr.execute("DELETE FROM account_move_line WHERE move_id=%s ", (move_obj.id,))
 
@@ -127,8 +127,12 @@ class AccountInvoiceInherit(models.Model):
                 invoice._compute_amount()
                 invoice.action_move_create()
 
-
                 print TVA
                 print TTHT
 
 
+class inherit_AccountInvoiceLine(models.Model):
+    _inherit = "account.invoice.line"
+
+    num_bl = fields.Char('Num BL/OR')
+    serial = fields.Char('Num serie')

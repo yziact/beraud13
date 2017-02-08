@@ -167,7 +167,6 @@ class MrpRepairInh(models.Model):
             self.tech = None
 
 
-
     @api.onchange('tech') 
     def tech_change(self):
         print "tech has changed !"
@@ -176,6 +175,7 @@ class MrpRepairInh(models.Model):
             error += line.update_line();
         if error :
             return { 'warning': {'title': 'Attention', 'message': no_tech_loc_error_default} }
+
 
     def action_repair_validate(self, cr, uid, ids, context=None):
         print "mrp_repair our action_validate"
