@@ -163,7 +163,11 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr>
+                                <th t-if="o.origin == 'Internal'">Date Mouvement</th>
                                 <th>Description</th>
+                                <th class="text-right">N°BL</th>
+                                <th class="text-right" t-if="o.origin == 'Internal'">Date BL/OR</th>
+                                <th class="text-right">N°série</th>
                                 <th class="text-right">Qté</th>
                                 <th class="text-right">PU HT</th>
                                 <th t-if="display_discount" class="text-right">Disc.(%)</th>
@@ -173,8 +177,20 @@
                         </thead>
                         <tbody class="invoice_tbody">
                             <tr t-foreach="o.invoice_line_ids" t-as="l">
+                                <td t-if="o.origin == 'Internal'">
+                                    <span t-field="l.date_move"/>
+                                </td>
                                 <td class="col-xs-6">
                                     <span t-field="l.name"/>
+                                </td>
+                                <td t-if="o.origin == 'Internal'">
+                                    <span t-field="l.num_bl"/>
+                                </td>
+                                <td t-if="o.origin == 'Internal'">
+                                    <span t-field="l.date_bl"/>
+                                </td>
+                                <td t-if="o.origin == 'Internal'">
+                                    <span t-field="l.serial"/>
                                 </td>
                                 <td class="text-right">
                                     <span t-field="l.quantity"/>

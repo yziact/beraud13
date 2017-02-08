@@ -127,8 +127,12 @@ class AccountInvoiceInherit(models.Model):
                 invoice._compute_amount()
                 invoice.action_move_create()
 
-
                 print TVA
                 print TTHT
 
 
+class inherit_AccountInvoiceLine(models.Model):
+    _inherit = "account.invoice.line"
+
+    num_bl = fields.Char('Num BL/OR')
+    serial = fields.Char('Num serie')
