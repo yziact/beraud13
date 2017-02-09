@@ -189,16 +189,16 @@
                         <tbody class="invoice_tbody">
                             <tr t-foreach="o.invoice_line_ids" t-as="l">
                                 <td t-if="o.origin == 'Internal'">
-                                    <span t-field="l.date_move"/>
+                                    <span t-field="l.date_move" t-field-options='{"format":"dd/MM/y"}'/>
                                 </td>
-                                <td class="col-xs-6">
+                                <td class="col-xs-5">
                                     <span t-field="l.name"/>
                                 </td>
                                 <td t-if="o.origin == 'Internal'">
                                     <span t-field="l.num_bl"/>
                                 </td>
                                 <td t-if="o.origin == 'Internal'">
-                                    <span t-field="l.date_bl"/>
+                                    <span t-field="l.date_bl" t-field-options='{"format":"dd/MM/y"}'/>
                                 </td>
                                 <td t-if="o.origin == 'Internal'">
                                     <span t-field="l.serial"/>
