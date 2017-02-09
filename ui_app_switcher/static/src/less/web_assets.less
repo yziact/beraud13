@@ -1,3 +1,8 @@
+// CUSTOM COLORS
+@odoo-brand-primary: #996600;
+@odoo-brand-optional: #996600;
+@navbar-inverse-link-hover-bg: @odoo-brand-optional;
+@link-color: @odoo-brand-primary;
 
 .o_application_switcher {
     background: url("/ui_app_switcher/static/src/img/application-switcher-bg.jpg") no-repeat center center fixed;
@@ -17,7 +22,7 @@
             .o-app-icon-common() {
                 width: 100%;
                 max-width: 80px;
-                border-radius: 8%;
+                border-radius: 5%;
             }
 
             .o_app_web_icon {
@@ -33,7 +38,7 @@
                 padding: 2vw;
                 font-size: 18vw; // Adapt fa size (would be 100% of parent, which is himself 22% of body)
                 @media (min-width: 363px) { // Size where 22vw = 80px
-                    padding: 8px;
+                    padding: 2px;
                     font-size: 64px;
                 }
             }
