@@ -156,8 +156,6 @@ class Internal_Invoice(models.Model):
                                             })
             line._set_taxes()
             line.update({'price_unit': price_unit})
-            # line._onchange_product_id()
-            # line.write({'name': item['name']})
 
             list_line_ids.append(line)
 
@@ -178,7 +176,6 @@ class Internal_Invoice(models.Model):
 
                 elif move.partner_id.id == 1:
                     list_atom.append(move)
-
         return list_ber, list_atom
 
     def get_task(self, projet_line_task):
@@ -202,7 +199,7 @@ class Internal_Invoice(models.Model):
                                              'product': product_time,
                                              'name': (line.user_id.name + " : " + line.name),
                                              'origin': repair.name,
-                                             'date': line.date,
+                                             'date': datetime.strptime(line.date, '%Y-%m-%d').strftime('%d-%m-%Y'),
                                              'timesheet_id': line.id,
                                              })
 
@@ -213,7 +210,7 @@ class Internal_Invoice(models.Model):
                                               'product': product_time,
                                               'name': (line.user_id.name + " : " + line.name),
                                               'origin': repair.name,
-                                              'date': line.date,
+                                              'date': datetime.strptime(line.date, '%Y-%m-%d').strftime('%d-%m-%Y'),
                                               'timesheet_id': line.id,
                                               })
                     else:
@@ -225,7 +222,7 @@ class Internal_Invoice(models.Model):
                                              'product': product_time,
                                              'name': (line.user_id.name + " : " + line.name),
                                              'origin': repair.name,
-                                             'date': line.date,
+                                             'date': datetime.strptime(line.date, '%Y-%m-%d').strftime('%d-%m-%Y'),
                                              'timesheet_id': line.id,
                                              })
 
@@ -236,7 +233,7 @@ class Internal_Invoice(models.Model):
                                               'product': product_time,
                                               'name': (line.user_id.name + " : " + line.name),
                                               'origin': repair.name,
-                                              'date': line.date,
+                                              'date': datetime.strptime(line.date, '%Y-%m-%d').strftime('%d-%m-%Y'),
                                               'timesheet_id': line.id,
                                               })
                 else:
@@ -247,7 +244,7 @@ class Internal_Invoice(models.Model):
                         time_ber.append({'quantity': line.unit_amount,
                                          'product': product_time,
                                          'name': (line.user_id.name + " : " + line.name),
-                                         'date': line.date,
+                                         'date': datetime.strptime(line.date, '%Y-%m-%d').strftime('%d-%m-%Y'),
                                          'timesheet_id': line.id,
                                          })
 
@@ -256,7 +253,7 @@ class Internal_Invoice(models.Model):
 
                         time_atom.append({'quantity': line.unit_amount,
                                           'product': product_time,
-                                          'date': line.date,
+                                          'date': datetime.strptime(line.date, '%Y-%m-%d').strftime('%d-%m-%Y'),
                                           'name': (line.user_id.name + " : " + line.name),
                                           'timesheet_id': line.id,
                                           })

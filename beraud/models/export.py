@@ -110,10 +110,14 @@ class Export_Journal(models.Model):
                     nb_invoice = str(line.invoice_id.number)[:10]
 
                 if line.invoice_id:
+                    label_type = "Facture "
+                    if 'refund' in line.invoice_id.type:
+                        label_type = "Avoir "
+
                     if line.invoice_id.partner_id.name:
-                        label = "Facture " + line.invoice_id.partner_id.name.encode("windows-1252")
+                        label = label_type + line.invoice_id.partner_id.name.encode("windows-1252")
                     elif line.invoice_id.partner_id.display_name:
-                        label = "Facture " + line.invoice_id.partner_id.display_name.encode("windows-1252")
+                        label = label_type + line.invoice_id.partner_id.display_name.encode("windows-1252")
                     else:
                         raise UserError(_("Une erreur c'est produite lors de l'export veuillez contacter votre administrateur : [Code err : 01]"))
 
