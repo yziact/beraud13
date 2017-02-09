@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="partner_shipping_id"  attrs="{'invisible':[('type', 'in', ['in_invoice', 'in_refund'])]}"/>
-                <button  name="fix_me" string="Recalcule" type="object" class="btn btn-success" icon="fa-download" />
             </xpath>
             <xpath expr="//field[@name='partner_shipping_id']" position="after">
                 <field name="contact"/>
@@ -26,6 +25,16 @@
             <xpath expr="//field[@name='amount_total']" position="attributes">
                  <attribute name="digits">(10, 2)</attribute>
             </xpath>
+            <!--info facture IS-->
+            <xpath expr="//tree/field[@name='name']" position="before">
+                <field name="date_move"/>
+            </xpath>
+            <xpath expr="//tree/field[@name='name']" position="after">
+                <field name="num_bl"/>
+                <field name="date_bl"/>
+                <field name="serial"/>
+            </xpath>
+
         </field>
     </record>
 
@@ -42,5 +51,20 @@
         </field>
     </record>
 
+    <record id="inherit_form_invoice_upplier" model="ir.ui.view">
+        <field name="name">invoice form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='name']" position="before">
+                <field name="date_move"/>
+            </xpath>
+            <xpath expr="//tree/field[@name='name']" position="after">
+                <field name="num_bl"/>
+                <field name="date_bl"/>
+                <field name="serial"/>
+            </xpath>
+        </field>
+    </record>
 
 </odoo>
