@@ -110,10 +110,14 @@ class Export_Journal(models.Model):
                     nb_invoice = str(line.invoice_id.number)[:10]
 
                 if line.invoice_id:
+                    label_type = "Facture "
+                    if 'refund' in line.invoice_id.type:
+                        label_type = "Avoir "
+
                     if line.invoice_id.partner_id.name:
-                        label = "Facture " + line.invoice_id.partner_id.name.encode("windows-1252")
+                        label = label_type + line.invoice_id.partner_id.name.encode("windows-1252")
                     elif line.invoice_id.partner_id.display_name:
-                        label = "Facture " + line.invoice_id.partner_id.display_name.encode("windows-1252")
+                        label = label_type + line.invoice_id.partner_id.display_name.encode("windows-1252")
                     else:
                         raise UserError(_("Une erreur c'est produite lors de l'export veuillez contacter votre administrateur : [Code err : 01]"))
 
@@ -171,6 +175,15 @@ class Export_Journal(models.Model):
             print sorted(dict_sum_line, reverse=True)
             for dict in sorted(dict_sum_line, reverse=True):
                 print dict
+                dict_sum_line[dict]['Montant'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant']))
+
+                if '-' in dict_sum_line[dict]['Montant signe']:
+                    dict_sum_line[dict]['Montant signe'] = ('-' + "{0:.2f}".format(float(dict_sum_line[dict]['Montant signe'].strip("-").replace(',', '.')))).replace(',', '.')
+                else:
+                    dict_sum_line[dict]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[dict]['Montant signe'].replace(',', '.')))).replace('.', ',')
+
+                dict_sum_line[dict]['Montant debit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant debit'].replace(',', '.'))).replace('.', ',')
+                dict_sum_line[dict]['Montant credit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant credit'].replace(',', '.'))).replace('.', ',')
                 list_row.append(dict_sum_line[dict])
             move.exported = True
         writer.writerows(list_row)

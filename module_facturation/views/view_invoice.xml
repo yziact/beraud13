@@ -16,6 +16,25 @@
             <xpath expr="//field[@name='user_id']" position="attributes">
                 <attribute name="string">Commercial</attribute>
             </xpath>
+            <xpath expr="//field[@name='amount_untaxed']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_tax']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                 <attribute name="digits">(10, 2)</attribute>
+            </xpath>
+            <!--info facture IS-->
+            <xpath expr="//tree/field[@name='name']" position="before">
+                <field name="date_move"/>
+            </xpath>
+            <xpath expr="//tree/field[@name='name']" position="after">
+                <field name="num_bl"/>
+                <field name="date_bl"/>
+                <field name="serial"/>
+            </xpath>
+
         </field>
     </record>
 
@@ -25,10 +44,27 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='origin']" position="after">
-                <field name="last_bl_from_bc" />
+                <field name="last_bl_from_bc" string="Dernier BL du BC"/>
+                <field name="bl_date" string="Date BL du BC"/>
+
             </xpath>
         </field>
     </record>
 
+    <record id="inherit_form_invoice_upplier" model="ir.ui.view">
+        <field name="name">invoice form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='name']" position="before">
+                <field name="date_move"/>
+            </xpath>
+            <xpath expr="//tree/field[@name='name']" position="after">
+                <field name="num_bl"/>
+                <field name="date_bl"/>
+                <field name="serial"/>
+            </xpath>
+        </field>
+    </record>
 
 </odoo>
