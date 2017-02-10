@@ -42,7 +42,7 @@ class PTReportController(ReportController):
         doc_obj = model_obj.browse(int(doc_id))
 
         # doc_obj.name is Sequence
-        filename = report.name + '-' + doc_obj.name
+        filename = report.name.replace(' ','-') + '-' + doc_obj.name
         print "filename of downloaded report will be : ", filename
         #_logger.error("Filename is : %s", filename)
 
