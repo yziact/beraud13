@@ -49,6 +49,16 @@ class ProductTemplate(models.Model):
 
         return res
 
+    @api.multi
+    def fix_me(self):
+        product_ids = self.search([])
+
+        for product_id in product_ids:
+            if product_id.standard_price == 0.0 :
+                product_id.write({'standard_price': product_id.tarif})
+
+
+
 class ProductCategory(models.Model):
     _inherit = "product.category"
 
