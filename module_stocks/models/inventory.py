@@ -44,6 +44,51 @@ class our_inventory(models.Model):
     #                             required=True, select=True, readonly=True,
     #                             states={'draft': [('readonly', False)]})
 
+    def _get_inventory_lines(self, cr, uid, inventory, context=None):
+        print "[%s] our _get_inventory_lines" % __name__
+
+        location_obj = self.pool.get('stock.location')
+        product_obj = self.pool.get('product.product')
+        location_ids = location_obj.search(cr, uid, [('id', 'child_of', [inventory.location_id.id])], context=context)
+        domain = ' location_id in %s'
+        args = (tuple(location_ids),)
+        if inventory.partner_id:
+            domain += ' and owner_id = %s'
+            args += (inventory.partner_id.id,)
+        if inventory.lot_id:
+            domain += ' and lot_id = %s'
+            args += (inventory.lot_id.id,)
+        if inventory.product_id:
+            domain += ' and product_id = %s'
+            args += (inventory.product_id.id,)
+        if inventory.package_id:
+            domain += ' and package_id = %s'
+            args += (inventory.package_id.id,)
+
+        cr.execute('''
+           SELECT q.product_id, sum(q.qty) as product_qty, q.location_id, q.lot_id as prod_lot_id, q.package_id, q.owner_id as partner_id
+           FROM stock_quant q
+            LEFT JOIN product_product p on p.id = q.product_id
+            LEFT JOIN product_template t on t.id = p.product_tmpl_id
+            WHERE t.type = 'product' AND ''' + domain + '''
+           GROUP BY product_id, location_id, lot_id, package_id, partner_id
+        ''', args)
+        vals = []
+        for product_line in cr.dictfetchall():
+            #replace the None the dictionary by False, because falsy values are tested later on
+            for key, value in product_line.items():
+                if not value:
+                    product_line[key] = False
+            product_line['inventory_id'] = inventory.id
+            product_line['theoretical_qty'] = product_line['product_qty']
+            if product_line['product_id']:
+                product = product_obj.browse(cr, uid, product_line['product_id'], context=context)
+                product_line['product_uom_id'] = product.uom_id.id
+            vals.append(product_line)
+        return vals
+
+
+
 class our_inventory_line(osv.osv):
 
     _inherit = 'stock.inventory.line'
