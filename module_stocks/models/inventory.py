@@ -10,21 +10,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-# class our_stock_change_product_qty(osv.osv_memory):
-# _inherit = "stock.stock_change_product_qty"
-#    _inherit = "stock.change.product.qty"
-
-#    def _prepare_inventory_line(self, cr, uid, inventory_id, data, context=None):
-
-#        print "_prepare_inventory_line"
-#        print "product_id : ", data.product_id
-#        print "location_id : ", data.location_id
-#        print "location_id.complete_name : ", data.location_id.complete_name
-#        print "location_id.company_id : ", data.location_id.company_id
-
-#        res = super(our_stock_change_product_qty, self)._prepare_inventory_line(cr, uid, inventory_id, data, context)
-#        return res
-
 class our_inventory(models.Model):
     _inherit = "stock.inventory"
 
@@ -84,6 +69,13 @@ class our_inventory(models.Model):
             vals.append(product_line)
         return vals
 
+    @api.multi
+    def action_compute_cout(self):
+
+        for invventory in self:
+            for line in invventory.line_ids:
+                line._compute_cout()
+
 
 class our_inventory_line(osv.osv):
     _inherit = 'stock.inventory.line'
@@ -101,7 +93,6 @@ class our_inventory_line(osv.osv):
         print "OUR CDOMPUTE COST"
 
         for line in self:
-            print line
             line.cout = line.product_id.product_tmpl_id.standard_price
 
             if line.product_qty >= 0:
