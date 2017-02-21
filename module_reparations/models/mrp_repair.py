@@ -387,7 +387,7 @@ class MrpRepairInh(models.Model):
                 picking_id = sp_obj.create(cr, uid, {
                     'origin':repair.name,
                     'product_id': repair.product_id.id,
-                    'partner_id': repair.partner_id.id, 
+                    'partner_id': repair.address_id and repair.address_id.id or repair.partner_id.id,
                     'picking_type_id': picking_type_out.id,
                     'location_id': repair.location_id.id, 
                     'location_dest_id': repair.location_dest_id.id,
@@ -401,7 +401,7 @@ class MrpRepairInh(models.Model):
                     'product_id': repair.product_id.id,
                     'product_uom': repair.product_uom.id or repair.product_id.uom_id.id,
                     'product_uom_qty': repair.product_qty,
-                    'partner_id': repair.address_id and repair.address_id.id or False,
+                    'partner_id': repair.address_id and repair.address_id.id or repair.partner_id.id,
                     'location_id': repair.location_id.id,
                     'location_dest_id': repair.location_dest_id.id,
                     'picking_id': picking_id,
