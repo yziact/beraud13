@@ -123,6 +123,11 @@
                     <field name="cout_global"/>
                 </xpath>
 
+                <xpath expr="//field[@name='line_ids']" position="after">
+                    <group class="oe_subtotal_footer oe_right" colspan="2" name="inventory_total">
+                        <field name="total" widget='monetary' string="Total"/>
+                    </group>
+                </xpath>
             </field>
         </record>
 
