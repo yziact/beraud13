@@ -68,7 +68,16 @@
                     <td></td>
                 </tr>
             </table>
+            <div class="col-xs-4 pull-right">
+                <table class="table table-condensed">
+                    <tr class="border-black">
+                        <td><strong>Total</strong></td>
+                        <td class="text-right">
+                            <span t-field="o.total"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </xpath>
-
     </template>
 </odoo>
