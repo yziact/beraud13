@@ -19,9 +19,21 @@ class our_inventory(models.Model):
             raise UserError("location ID not defined while retrieving the default company_id")
         return self.location_id.company_id.id
 
+    @api.onchange('line_ids', 'line_ids.cout_global')
+    def _compute_total(self):
+        print 'OUR COMPUTE TOTO'
+        total = 0.0
+        for line in self.line_ids:
+            total += line.cout_global
+
+        self.total = total
+
+
     company_id = fields.Many2one('res.company', related='location_id.company_id',
                                  required=True, select=True, readonly=True,
                                  states={'draft': [('readonly', False)]})
+
+    total = fields.Float('Total', compute=_compute_total)
 
     #Overwrite de la function pour virer les consomables  de l inventaire
     def _get_inventory_lines(self, cr, uid, inventory, context=None):
@@ -72,9 +84,11 @@ class our_inventory(models.Model):
     @api.multi
     def action_compute_cout(self):
 
-        for invventory in self:
-            for line in invventory.line_ids:
+        for inventory in self:
+            for line in inventory.line_ids:
                 line._compute_cout()
+
+            inventory._compute_total()
 
 
 class our_inventory_line(osv.osv):
