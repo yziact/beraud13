@@ -5,9 +5,14 @@
             <field name="model">export.ecriture_sage</field>
             <field name="arch" type="xml">
                 <form>
-                    <group name="date">
-                        <field name="date_debut"/>
-                        <field name="date_fin"/>
+                    <group>
+                        <group name="date">
+                            <field name="date_debut"/>
+                            <field name="date_fin"/>
+                        </group>
+                        <group>
+                            <field name="test"/>
+                        </group>
                     </group>
                     <group name="buttons">
                         <group name="ber">

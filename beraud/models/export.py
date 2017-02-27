@@ -27,6 +27,8 @@ class Export_Journal(models.Model):
     file_atm_achat = fields.Char(string='Filename', size=256, readonly=True)
     value_atm_achat = fields.Binary(readonly=True)
 
+    test = fields.Boolean('Test export', help=u"Si coché les lignes exportés ne seront pas marquées comme tel")
+
     def formatDate(self, dateEN):
         date = dateEN.split('-')
         formatted_date = date[2]+date[1]+date[0][-2:]
@@ -35,7 +37,7 @@ class Export_Journal(models.Model):
 
 
     @api.multi
-    def action_export(self, journal_id, value, date_debut, date_fin, filename, code, collectif, type):
+    def action_export(self, journal_id, value, date_debut, date_fin, filename, code, collectif, type, test):
         list_row = []
 
         account_move = self.env['account.move']
@@ -187,7 +189,9 @@ class Export_Journal(models.Model):
                 dict_sum_line[dict]['Montant debit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant debit'].replace(',', '.'))).replace('.', ',')
                 dict_sum_line[dict]['Montant credit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant credit'].replace(',', '.'))).replace('.', ',')
                 list_row.append(dict_sum_line[dict])
-            move.exported = True
+
+            if not test:
+                move.exported = True
         writer.writerows(list_row)
         fecvalue = csvfile.getvalue()
         self.write({
@@ -209,8 +213,9 @@ class Export_Journal(models.Model):
         filename = 'file_ber_vente'
         name = "Export Beraud Vente %s" %date
         nb_compte_collectif = '41100000'
+        test = self.test
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif, 'vente')
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif, 'vente', test)
 
         action = {
             'name': 'ecriture_sage',
@@ -234,8 +239,9 @@ class Export_Journal(models.Model):
         filename = 'file_ber_achat'
         name = "Export Beraud Achat %s" % date
         nb_compte_collectif = '40100000'
+        test = self.test
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif, 'achat')
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif, 'achat', test)
 
         action = {
             'name': 'ecriture_sage',
@@ -259,8 +265,10 @@ class Export_Journal(models.Model):
         filename = 'file_atm_vente'
         name = "Export Atom Vente %s" % date
         nb_compte_collectif = '41100000'
+        test = self.test
 
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif, 'vente')
+
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'V1', nb_compte_collectif, 'vente', test)
 
         action = {
             'name': 'ecriture_sage',
@@ -284,9 +292,9 @@ class Export_Journal(models.Model):
         filename = 'file_atm_achat'
         name = "Export Atom Achat %s" % date
         nb_compte_collectif = '40100000'
+        test = self.test
 
-
-        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif, 'achat')
+        self.action_export(journal_id, value, self.date_debut, self.date_fin, filename, 'A1', nb_compte_collectif, 'achat', test)
 
         action = {
             'name': 'ecriture_sage',
