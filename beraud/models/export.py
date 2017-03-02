@@ -79,7 +79,7 @@ class Export_Journal(models.Model):
                 if line.invoice_id.origin:
                     origine = line.invoice_id.origin[:17].encode("windows-1252")
                 if line.invoice_id.reference :
-                    origine = line.invoice_id.origin[:17].encode("windows-1252")
+                    origine = line.invoice_id.reference[:17].encode("windows-1252")
                 if line.internal_note:
                     note = line.internal_note.encode("windows-1252")
                 if line.debit == 0:
