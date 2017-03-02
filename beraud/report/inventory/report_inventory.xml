@@ -19,48 +19,48 @@
         </xpath>
 -->
         <xpath expr="(//table[@class='table table-condensed'])[2]" position="replace">
-            <table class="table table-condensed">
+            <table class="table table-condensed" style="font-size:11px;">
                 <thead>
                     <tr>
-                        <th>
+                        <th style="width:10%;">
                             <strong>Location</strong>
                         </th>
-                        <th>
+                        <th style="width:30%;">
                             <strong>Product</strong>
                         </th>
-                        <th>
+                        <th style="width:10%;">
                             <strong>Production Lot</strong>
                         </th>
                         <!--<th><strong>Package</strong></th>-->
-                        <th class="text-right">
+                        <th class="text-right" style="max-width:10%;">
                             <strong>Quantity</strong>
                         </th>
-                        <th>
+                        <th class="text-right">
                             <strong>Coût</strong>
                         </th>
-                        <th>
+                        <th class="text-right">
                             <strong>Coût Global</strong>
                         </th>
                     </tr>
                 </thead>
                 <tr t-foreach="o.line_ids" t-as="line">
-                    <td>
+                    <td style="width:20%;">
                         <span t-field="line.location_id"/> <span t-field="line.product_id.emplacement"/>
                     </td>
-                    <td>
+                    <td style="width:40%;">
                         <span t-field="line.product_id"/>
                     </td>
-                    <td>
+                    <td style="width:10%;">
                         <span t-field="line.prod_lot_id"/>
                     </td>
                     <!--<td><span t-field="line.package_id"/></td>-->
-                    <td class="text-right">
-                        <span t-field="line.product_qty"/> <span t-field="line.product_uom_id" groups="product.group_uom"/>
+                    <td class="text-right" style="width:10%;">
+                        <span t-field="line.product_qty"/>
                     </td>
-                    <td>
+                    <td class="text-right" style="width:10%;">
                         <span  t-field="line.cout"/>
                     </td>
-                    <td>
+                    <td class="text-right" style="width:10%;">
                         <span t-field="line.cout_global"/>
                     </td>
                 </tr>
