@@ -58,10 +58,10 @@
                         <span t-field="line.product_qty"/>
                     </td>
                     <td class="text-right" style="width:10%;">
-                        <span  t-field="line.cout"/>
+                        <span t-esc="'%.3f'%(line.cout)"/>
                     </td>
                     <td class="text-right" style="width:10%;">
-                        <span t-field="line.cout_global"/>
+                        <span t-esc="'%.3f'%(line.cout_global)"/>
                     </td>
                 </tr>
                 <tr>
