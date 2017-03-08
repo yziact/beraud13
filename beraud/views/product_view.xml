@@ -9,19 +9,30 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="priority" eval="90"/>
             <field name="arch" type="xml">
+
                 <xpath expr="//field[@name='categ_id']" position="after">
                     <field name="emplacement"/>
                     <field name="emplacement_atom"/>
                 </xpath>
+
                 <xpath expr="//div[@name='volume']" position="after">
                     <label for="nb_palette" string="Nombre de palettes"/>
                     <div class="o_row">
                         <field name="nb_palette"/>
                     </div>
                 </xpath>
+
                 <xpath expr="//field[@name='list_price']" position="after">
                     <field name="tarif" string="Prix de vente IS" widget='monetary' digits='(14,3)'/>
                 </xpath>
+
+                <xpath expr="//field[@name='standard_price']" position="after">
+                    <div>
+                        <button name="atom_cout_multi" string="Multi coût Atom" class="btn-info" help="Cherche TOUS LES articles avec un coût à 0 et le remplace par le tarif IS" attrs="{'invisible': [('id', '=', False)]}" groups="mybase.group_fix_me"/>
+                        <button name="atom_cout_courant" string="Coût Atom" class="btn-info" help="Remplace le coût Atom, si à 0.0, par le tarif IS de l'article courant" attrs="{'invisible': [('id', '=', False)]}" groups="mybase.group_creation_article"/>
+                    </div>
+                </xpath>
+
                 <!--<xpath expr="//field[@name='default_code']" position="attributes">
                     <attribute name="attrs">{'required': True}</attribute>
                 </xpath>-->

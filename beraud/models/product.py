@@ -50,12 +50,31 @@ class ProductTemplate(models.Model):
         return res
 
     @api.multi
-    def fix_me(self):
-        product_ids = self.search([])
+    def atom_cout_multi(self):
+        prod_obj = self.pool.get('product.template')
+        product_ids = prod_obj.search(self._cr, 13, [('standard_price', '=', 0.0)])
+        print len(product_ids)
 
-        for product_id in product_ids:
-            if product_id.standard_price == 0.0 :
-                product_id.write({'standard_price': product_id.tarif})
+        for id in product_ids:
+            prod = prod_obj.browse(self._cr, 13, [id])
+            tarif = prod.tarif
+            print tarif
+
+            if tarif != 0.0:
+                print "write : ", tarif
+                prod.write({'standard_price': tarif})
+
+    @api.multi
+    def atom_cout_courant(self):
+        prod_obj = self.pool.get('product.template')
+        product_id = prod_obj.search(self._cr, 13, [('id', '=', self.id)])
+        prod = prod_obj.browse(self._cr, 13, product_id)
+        tarif = prod.tarif
+        print tarif
+
+        if tarif != 0.0 and prod.standard_price:
+            print "write : ", tarif
+            prod.write({'standard_price': tarif})
 
 
 
