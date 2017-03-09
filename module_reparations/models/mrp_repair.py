@@ -286,8 +286,12 @@ class MrpRepairInh(models.Model):
 
             # create the task in project 'SAV'
             proj_name = 'REPARATIONS ATELIER'
+            user = uid
             if repair.clientsite : 
                 proj_name = 'SAV'
+
+                if repair.tech:
+                    user = repair.tech.id
 
             p_id = proj_obj.search(cr, uid, [('name', 'ilike', proj_name)])
             project_id = proj_obj.browse(cr, uid, p_id)
@@ -299,8 +303,9 @@ class MrpRepairInh(models.Model):
                 'project_id' : project_id.id,
                 'name' : repair.name,
                 'partner_id' : repair.partner_id.id,
+                'user_id' : user,
             })
-            
+
             print "task créée, id : ", task_id
             repair.task_id = task_id
 
@@ -433,6 +438,7 @@ class MrpRepairInh(models.Model):
                     move_obj.action_confirm(cr, uid, move_id)
                     move_obj.action_assign(cr, uid, move_id)
                     print "created move, move_id : ", move_id
+                    line.associated_move = move_id
                     repair_obj.write(cr, uid, [repair.id], {'linked_moves' : [(4, move_id)]} )
 
                 print "*** LINKED MOVES : ", repair.linked_moves
@@ -554,6 +560,10 @@ class MrpRepairInh(models.Model):
                 # take moves from linked_moves, and make them done.
                 print "linked_moves : ", repair.linked_moves
                 for move in repair.linked_moves :
+                    move_obj.action_assign(cr,uid, move.id)
+
+                    if move.state != 'assigned':
+                        raise UserError(u"Il n'y a pas de stock réservable pour la pièce %s" % move.product_id.name)
                     move_obj.action_done(cr, uid, move.id)
 
 ### CLIENT SITE REPAIR DONE CASE ###

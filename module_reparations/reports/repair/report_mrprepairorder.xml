@@ -93,7 +93,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <p t-esc="time.strftime('%d/%m/%Y')"/>
+                                                <p t-field="o.create_date" t-field-options='{"format":"dd/MM/y"}'/>
                                             </td>
                                             <!--<td>
                                                 <span t-field="o.name"/>
