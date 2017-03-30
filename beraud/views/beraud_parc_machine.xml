@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="beraud_parc_machine_form" model="ir.ui.view">
+        <field name="name">Parc machine</field>
+        <field name="model">parc_machine</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="product_id"/>
+                            <field name="lot_id"   context="{'default_product_id': product_id}"/>
+                            <field name="quantity" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="date_prod"/>
+                            <field name="date_guarantee"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="quant_id"/>
+                        <field name="location_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="beraud_parc_machine_tree" model="ir.ui.view">
+        <field name="name">Parc machine tree</field>
+        <field name="model">parc_machine</field>
+        <field name="arch" type="xml">
+            <tree>
+                <!--<field name="name"/>-->
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="company_id"/>
+                <field name="lot_id"/>
+                <field name="date_prod"/>
+                <field name="date_guarantee"/>
+                <field name="quant_id"/>
+                <field name="location_id"/>
+                <field name="quantity" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="beraud_parc_machine_action" model="ir.actions.act_window">
+        <field name="name">parc_machine_action</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">parc_machine</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+    </record>
+
+    <!-- This Menu Item must have a parent and an action -->
+    <menuitem id="parc_beraud_machine" name="parc_machine_beraud" parent="base.menu_board_root" action="beraud_parc_machine_action"/>
+
+
+
+
+</odoo>

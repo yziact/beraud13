@@ -2,6 +2,8 @@
 
 from openerp import api, models, fields
 import openerp.addons.decimal_precision as dp
+from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta as rd
 
 class stock_view_parc(models.Model):
     _name = 'stock.view.parc'
@@ -16,18 +18,21 @@ class stock_view_parc(models.Model):
 
     quantity = fields.Float(u'Quantité totale', digits=dp.get_precision('Product Unit of Measure'))
 
-
     def init(self, cr):
         # tools.sql.drop_view_if_exists(cr, 'stock_view_logistique')
+
         cr.execute("""
         CREATE OR REPLACE VIEW stock_view_parc AS (
            SELECT row_number() OVER(win) as id,
-           SUM(qty) as quantity,
-           m.partner_id,
-           p.lot_id,
-           p.product_id,
-           p.company_id,
-           p.location_id FROM stock_move m, stock_quant_move_rel r, stock_quant p
+               SUM(qty) as quantity,
+               m.partner_id,
+               p.lot_id,
+               p.product_id,
+               p.company_id,
+               p.location_id
+           FROM stock_quant p
+           LEFT JOIN stock_quant_move_rel r ON r.quant_id = p.id
+           LEFT JOIN stock_move m ON m.id = r.move_id
            LEFT JOIN stock_location l ON l.id = p.location_id
            WHERE ((l.usage = 'customer' AND m.location_dest_id = l.id) AND  (m.id = r.move_id AND p.id = r.quant_id) )
            GROUP BY p.lot_id, p.product_id, p.company_id, p.location_id, m.partner_id
@@ -36,59 +41,104 @@ class stock_view_parc(models.Model):
         )
         """)
 
+class stock_parc_machine(models.Model):
+    _name = 'parc_machine'
 
-    # valorisation = fields.Float('Valorisation', compute='_get_valorisation')
-    # dluo_state = fields.Selection([('ok', 'OK'), ('warn', 'Attention'), ('alert', 'Alerte')], string='Etat DLUO', compute='_get_dluo_state')
+    name = fields.Char()
+    product_id = fields.Many2one(
+        'product.product',
+        'Produit',
+        domain="[('categ_id','!=', False), ('categ_id.is_machine','=',True)]"
+    )
+    lot_id = fields.Many2one('stock.production.lot', 'Lot', domain="[('product_id', '=', product_id)]")
+    partner_id = fields.Many2one('res.partner', 'Client', domain="[('customer','=', True)]")
+    location_id = fields.Many2one('stock.location', 'Emplacement', domain="[('usage', 'in', ('internal','customer'))]")
+    company_id = fields.Many2one('res.company', u'Société')
+    quant_id = fields.Many2one('stock.quant', domain="[('product_id', '=', product_id)]")
+    date_prod = fields.Date('Date de mise en production')
+    date_guarantee = fields.Date('Date de fin de garantie', compute="get_guarantee", inverse="get_prod")
+    quantity = fields.Float(u'Quantité totale', digits=dp.get_precision('Product Unit of Measure'))
 
-    # @api.multi
-    # def _get_dluo_state(self):
-    #     for line in self:
-    #         if line.lot_id.use_date:
-    #             dluo = datetime.datetime.strptime(line.lot_id.use_date, "%Y-%m-%d %H:%M:%S")
-    #             # Si DLUO < now : alerte
-    #             if dluo < datetime.datetime.now():
-    #                 line.dluo_state = 'alert'
-    #             else:
-    #                 if line.product_id.use_time:
-    #                     # Si delta (dluo - now) < product_use_days
-    #                     delta_days_produit = datetime.timedelta(days=line.product_id.use_time)
-    #                     delta_days_dluo = dluo - datetime.datetime.now()
-    #                     if (int(delta_days_dluo.days) < (int(delta_days_produit.days) / 2)):
-    #                         line.dluo_state = 'warn'
-    #                     else:
-    #                         line.dluo_state = 'ok'
-    #                 else:
-    #                     line.dluo_state = 'ok'
-    #         else:
-    #             line.dluo_state = 'ok'
+    @api.model
+    def create(self, vals):
+        """
+        part_name = ""
+        prod_name = ""
+
+        if 'partner_id' in vals:
+            part_name = vals['partner_id'].name[:5]
+
+        if 'product_id' in vals :
+            prod_name = vals['product_id'].name[:5]
+
+        vals['name'] = part_name + " " + prod_name
+        """
+        print vals
+
+        quant_obj = self.env['stock.quant']
+
+        #par defaut la localisation est celle du client pour la reprise de donnees
+        loc = 9
+        vals['quantity'] = 1
+        if 'location_id' in vals and vals['location_id']:
+            loc = vals['location_id']
+        else:
+            vals['location_id'] = loc
+
+        quant_id = quant_obj.create(
+            {
+                'product_id': vals['product_id'],
+                'lot_id': vals['lot_id'],
+                'location_id': loc,
+                'qty': vals['quantity'],
+            })
+        vals['quant_id'] = quant_id.id
+
+        res = super(stock_parc_machine, self).create(vals)
+
+        return res
 
 
-    # @api.multi
-    # def _get_valorisation(self):
-    #     def clean_char(data):
-    #         try :
-    #             return float(data.replace(',','.'))
-    #         except:
-    #             # Trucs bizzares from LSI, genre ' '
-    #             return 0
-    #
-    #     for line in self:
-    #         # Calcul du prix
-    #         if not line.product_id.standard_price:
-    #             line.valorisation = clean_char(line.product_id.ext_qual_pmp) * line.quantity
-    #         else :
-    #             line.valorisation = line.product_id.standard_price * line.quantity
+    @api.multi
+    @api.depends('date_prod')
+    def get_guarantee(self):
 
-    # @api.one
-    # def _get_reservations(self):
-    #     print "_get_reservations"
-    #     q_obj = self.env['stock.quant']
-    #     MV_IDS = []
-    #
-    #     for quant in q_obj.search([('lot_id','=',self.lot_id.id),
-    #                                ('location_id','=',self.location_id.id),
-    #                                ('reservation_id','!=',False)]):
-    #
-    #         if not quant.reservation_id.id in MV_IDS:
-    #             MV_IDS.append(quant.reservation_id.id)
-    #             self.reservations += quant.reservation_id
+        for item in self:
+            if item.date_prod and item.product_id:
+                delta = item.product_id.warranty
+                date_mise_prod = datetime.strptime(item.date_prod, '%Y-%m-%d')
+                month = int(delta) + date_mise_prod.month
+                days = int(str(delta).split('.')[1])
+
+                # gestion des demi mois uniquement
+                if days == 5:
+                    days = 15
+                else:
+                    days = 0
+
+                relativedelta = rd(months=month, days=days)
+                date_guarantee = date_mise_prod + relativedelta
+
+                item.update({'date_guarantee': datetime.strftime(date_guarantee, '%Y-%m-%d')})
+
+    @api.multi
+    @api.depends('date_guarantee')
+    def get_prod(self):
+
+        for item in self:
+            if item.date_guarantee and item.product_id:
+                delta = item.product_id.warranty
+                guarantee = datetime.strptime(item.date_guarantee, '%Y-%m-%d')
+                month = int(delta) + guarantee.month
+                days = int(str(delta).split('.')[1])
+
+                # gestion des demi mois uniquement
+                if days == 5:
+                    days = 15
+                else:
+                    days = 0
+
+                relativedelta = rd(months=month, days=days)
+                date_prod = guarantee - relativedelta
+
+                item.update({'date_prod': datetime.strftime(date_prod, '%Y-%m-%d')})

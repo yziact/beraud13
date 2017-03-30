@@ -1,6 +1,6 @@
 <openerp>
     <data>
-        <record id="beraud.stock_parc_tree_view" model="ir.ui.view">
+        <!--<record id="beraud.stock_parc_tree_view" model="ir.ui.view">
             <field name="name">stock_parc_tree_view</field>
             <field name="model">stock.view.parc</field>
             <field name="type">tree</field>
@@ -56,7 +56,7 @@
 
         <menuitem name="Parc Machines" id="beraud.parc" parent="base.menu_board_root"
                   action="beraud.action_parc_tree_view" groups="base.group_user"/>
-        <menuitem name="Parc Machines" id="beraud.parc_machine" parent="beraud.parc" groups="base.group_user"/>
+        <menuitem name="Parc Machines" id="beraud.parc_machine" parent="beraud.parc" groups="base.group_user"/>-->
     </data>
 </openerp>
 
