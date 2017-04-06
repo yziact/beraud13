@@ -41,7 +41,7 @@ class stock_view_parc(models.Model):
         )
         """)
 
-class stock_parc_machine(models.Model):
+class StockParcMachine(models.Model):
     _name = 'parc_machine'
 
     name = fields.Char()
@@ -61,20 +61,7 @@ class stock_parc_machine(models.Model):
 
     @api.model
     def create(self, vals):
-        """
-        part_name = ""
-        prod_name = ""
-
-        if 'partner_id' in vals:
-            part_name = vals['partner_id'].name[:5]
-
-        if 'product_id' in vals :
-            prod_name = vals['product_id'].name[:5]
-
-        vals['name'] = part_name + " " + prod_name
-        """
-        print vals
-
+        print vals.keys()
         quant_obj = self.env['stock.quant']
 
         #par defaut la localisation est celle du client pour la reprise de donnees
@@ -85,19 +72,18 @@ class stock_parc_machine(models.Model):
         else:
             vals['location_id'] = loc
 
-        quant_id = quant_obj.create(
-            {
-                'product_id': vals['product_id'],
-                'lot_id': vals['lot_id'],
-                'location_id': loc,
-                'qty': vals['quantity'],
-            })
-        vals['quant_id'] = quant_id.id
+        if not 'quant_id' in vals:
+            quant_id = quant_obj.create(
+                {
+                    'product_id': vals['product_id'],
+                    'lot_id': vals['lot_id'],
+                    'location_id': loc,
+                    'qty': vals['quantity'],
+                })
+            vals['quant_id'] = quant_id.id
 
-        res = super(stock_parc_machine, self).create(vals)
-
+        res = super(StockParcMachine, self).create(vals)
         return res
-
 
     @api.multi
     @api.depends('date_prod')
@@ -142,3 +128,102 @@ class stock_parc_machine(models.Model):
                 date_prod = guarantee - relativedelta
 
                 item.update({'date_prod': datetime.strftime(date_prod, '%Y-%m-%d')})
+
+    @api.one
+    def fix_me(self):
+        move_env = self.env['stock.move']
+        move_ids = move_env.search([('product_id.categ_id.is_machine', '=', True), ('location_dest_id', '=', 9), ('partner_id', '!=', False)])
+
+        for move in move_ids:
+            for quant in move.quant_ids:
+                i = 0
+                while i < quant.qty:
+                    self.create({
+                        'partner_id':move.partner_id.id,
+                        'quant_id': quant.id,
+                        'product_id': quant.product_id.id,
+                        'lot_id': quant.lot_id.id or False,
+                        'location_id': quant.location_id.id,
+                        'company_id': move.company_id.id,
+                        'quantity': 1.0,
+                        'date_prod': move.date
+                    })
+                    i += 1
+
+    # _sql_constraints = [
+    #     ('unique_quant',
+    #      'UNIQUE(quant_id)',
+    #      'Un quant ne peut être duplique')
+    # ]
+
+"""
+class StockQuant(models.Model):
+    _inherit = 'stock.quant'
+
+    @api.multi
+    @api.onchange('location_id')
+    def on_change_location_id(self):
+        print "LOCATION CHANGEEEEEEE !!!! "
+
+        parc_env = self.env['parc.machine']
+
+        for quant in self:
+            if quant.product_id.categ_id.is_machine:
+                parc_rec = parc_env.search([('quant_id', '=', quant.id)])
+                if parc_rec:
+                    parc_rec.update({'location_id': quant.location_id})
+
+                elif quant.location_id == 9:
+                    move_id = quant.latest_move()
+                    parc_env.create({
+                        'partner_id': move_id.partner_id.id,
+                        'quant_id': quant.id,
+                        'product_id': quant.product_id.id,
+                        'lot_id': quant.lot_id.id or False,
+                        'location_id': quant.location_id.id,
+                        'company_id': move_id.company_id.id,
+                        'quantity': 1.0,
+                        'date_prod': move_id.date
+                    })
+
+        res = super(StockQuant, self).onchange_location_id()
+
+        return res
+"""
+
+
+class StockMove(models.Model):
+    _inherit = 'stock.move'
+
+    @api.multi
+    def action_done(self):
+        res = super(StockMove, self).action_done()
+        parc_env = self.env['parc_machine']
+
+        for move in self:
+            if move.product_id.categ_id.is_machine:
+                parc_rec = parc_env.search([('quant_id', '=', move.quant_ids.id)])
+
+                if parc_rec:
+                    print 'parc trouver'
+                    parc_rec.update({
+                        'location_id': move.location_dest_id.id,
+                        'partner_id': move.partner_id.id or move.picking_partner_id.id
+                    })
+                elif move.location_dest_id.id == 9:
+                    for quant in move.quant_ids:
+                        i = 0
+                        while i < quant.qty:
+                            parc_env.create({
+                                'partner_id': move.partner_id.id or move.picking_partner_id.id,
+                                'quant_id': quant.id ,
+                                'product_id': quant.product_id.id,
+                                'lot_id': quant.lot_id.id or False,
+                                'location_id': quant.location_id.id,
+                                'company_id': move.company_id.id,
+                                'quantity': 1.0,
+                                'date_prod': move.date
+                            })
+                            i += 1
+
+        return res
