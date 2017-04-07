@@ -72,7 +72,7 @@ class ProductTemplate(models.Model):
         tarif = prod.tarif
         print tarif
 
-        if tarif != 0.0 and prod.standard_price:
+        if tarif != 0.0:
             print "write : ", tarif
             prod.write({'standard_price': tarif})
 
