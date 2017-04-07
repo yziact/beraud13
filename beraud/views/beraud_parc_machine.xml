@@ -21,7 +21,7 @@
                         </group>
                     </group>
                     <group>
-                        <field name="quant_id"/>
+                        <field name="quant_id" groups="base.group_no_one"/>
                         <field name="location_id"/>
                     </group>
                 </sheet>
