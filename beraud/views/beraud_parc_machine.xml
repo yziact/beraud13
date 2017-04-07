@@ -41,7 +41,7 @@
                 <field name="lot_id"/>
                 <field name="date_prod"/>
                 <field name="date_guarantee"/>
-                <field name="quant_id"/>
+                <!--<field name="quant_id"/>-->
                 <field name="location_id"/>
                 <field name="quantity" sum="Total"/>
             </tree>
@@ -57,9 +57,6 @@
     </record>
 
     <!-- This Menu Item must have a parent and an action -->
-    <menuitem id="parc_beraud_machine" name="parc_machine_beraud" parent="base.menu_board_root" action="beraud_parc_machine_action"/>
-
-
-
+    <menuitem id="parc_beraud_machine" name="Parc Machines" parent="base.menu_board_root" action="beraud_parc_machine_action"/>
 
 </odoo>
