@@ -60,7 +60,7 @@ class Export_Journal(models.Model):
 
             for line in data__line:
                 # montant = str(math.fabs(line.amount_residual))
-                montant = str(math.fabs(line.balance))
+                montant = math.fabs(line.balance)
                 sens = ""
                 note = ""
                 origine = ""
@@ -78,11 +78,14 @@ class Export_Journal(models.Model):
 
                 if line.invoice_id.origin:
                     origine = line.invoice_id.origin[:17].encode("windows-1252")
+
                 if line.invoice_id.reference :
                     origine = line.invoice_id.reference[:17].encode("windows-1252")
+
                 if line.internal_note:
                     note = line.internal_note.encode("windows-1252")
                 # if line.amount_residual < 0 or line.balance < 0:
+
                 if line.balance < 0:
                     sens = "C"
                 else:
@@ -90,8 +93,10 @@ class Export_Journal(models.Model):
 
                 if line.date:
                     dateL = self.formatDate(line.date)
+
                 if line.account_id.code:
                     nbcompte = line.account_id.code[:8]
+
                     if 'CA' in nbcompte or 'CB' in nbcompte or 'F' in nbcompte:
                         compte = collectif
 
@@ -103,15 +108,19 @@ class Export_Journal(models.Model):
 
                     else:
                         compte = nbcompte
+
                     if compte == '445201':
                         compte = '44520000'
+
                     if len(compte) < 8:
                         raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas un compte comptable (%s) valide dans Sage : [Code err: 03]]" % (line.invoice_id.id, compte)))
 
                 if line.account_id.name:
                     nomcompte = line.account_id.name[:40].encode("windows-1252")
+
                 if line.invoice_id.number:
                     nb_piece = str(line.invoice_id.number)[:13]
+
                 if line.invoice_id.number:
                     nb_invoice = str(line.invoice_id.number)[:10]
 
@@ -122,8 +131,10 @@ class Export_Journal(models.Model):
 
                     if line.invoice_id.partner_id.name:
                         label = label_type + line.invoice_id.partner_id.name.encode("windows-1252")
+
                     elif line.invoice_id.partner_id.display_name:
                         label = label_type + line.invoice_id.partner_id.display_name.encode("windows-1252")
+
                     else:
                         raise UserError(_("Une erreur c'est produite lors de l'export veuillez contacter votre administrateur : [Code err : 01]"))
 
@@ -132,8 +143,10 @@ class Export_Journal(models.Model):
 
                 if compte[0] not in ['7', '6']:
                     tax_code = ""
+
                 elif 'ACEE' in tax:
                     tax_code = 'ACEE'
+
                 else:
                     if tax:
                         tax_code = tax[0]
@@ -141,6 +154,7 @@ class Export_Journal(models.Model):
                 if line.invoice_id.payment_term_id:
                     if line.invoice_id.payment_term_id.type_sage :
                         term = line.invoice_id.payment_term_id.type_sage
+
                     else :
                         raise UserError(_("Il semblerait que la facture ID : %s n'utilise pas une condition de paiement valide dans Sage : [Code err: 02]]" %(line.invoice_id.id)))
 
@@ -164,22 +178,20 @@ class Export_Journal(models.Model):
                                              'Montant de la devise': "",
                                              'Type de norme': "D",
                                              'Sens': sens,
-                                             'Montant': montant[:12],
-                                             'Montant signe': str(line.balance).replace('.', ',')[:13].encode("windows-1252") ,
-                                             # 'Montant signe': str(line.amount_residual).replace('.', ',')[:13].encode("windows-1252") ,
-                                             'Montant debit': str(line.debit).replace('.', ',')[:12].encode("windows-1252") ,
-                                             'Montant credit': str(line.credit).replace('.', ',')[:12].encode("windows-1252"),
+                                             'Montant': montant,
+                                             'Montant signe':line.balance,
+                                             'Montant debit': line.debit,
+                                             'Montant credit': line.credit,
                                              'Type d ecriture':"G",
                                              'No de plan analytique':"0",
                                              'No de section':"",
                                              'Information libre 1': note,
                                              }
+
                 else :
+                    dict_sum_line[nbcompte]['Montant signe'] = dict_sum_line[nbcompte]['Montant signe'] + line.balance
 
-                    dict_sum_line[nbcompte]['Montant signe'] = str(float(dict_sum_line[nbcompte]['Montant signe'].replace(',', '.')) + line.balance)[:13]
-                    # dict_sum_line[nbcompte]['Montant signe'] = str(float(dict_sum_line[nbcompte]['Montant signe'].replace(',', '.')) + line.amount_residual)[:13]
-
-                    if '-' in dict_sum_line[nbcompte]['Montant signe'] or '-' in str(line.balance):
+                    if '-' in str(dict_sum_line[nbcompte]['Montant signe']) or '-' in str(line.balance):
                         sens = "C"
                     else:
                         sens = "D"
@@ -187,39 +199,39 @@ class Export_Journal(models.Model):
                     # cas remise montant avec changement de sens
                     if sens != dict_sum_line[nbcompte]['Sens']:
                         dict_sum_line[nbcompte]['Sens'] = sens
-                        dict_sum_line[nbcompte]['Montant'] = str(float(montant) - float(dict_sum_line[nbcompte]['Montant'].replace(',', '.')))[:12]
+                        dict_sum_line[nbcompte]['Montant'] = montant - dict_sum_line[nbcompte]['Montant']
 
                         if dict_sum_line[nbcompte]['Sens'] == 'C':
-                            dict_sum_line[nbcompte]['Montant credit'] = str(float(dict_sum_line[nbcompte]['Montant credit'].replace(',', '.')) +line.credit - float(dict_sum_line[nbcompte]['Montant debit'].replace(',', '.')))[:12]
-                            dict_sum_line[nbcompte]['Montant debit'] = "0.0"
+                            dict_sum_line[nbcompte]['Montant credit'] = dict_sum_line[nbcompte]['Montant credit'] + line.credit - dict_sum_line[nbcompte]['Montant debit']
+                            dict_sum_line[nbcompte]['Montant debit'] = 0.0
 
                         else:
-                            dict_sum_line[nbcompte]['Montant debit'] = str(float(dict_sum_line[nbcompte]['Montant debit'].replace(',', '.')) + line.credit - float(dict_sum_line[nbcompte]['Montant credit'].replace(',', '.')))[:12]
-                            dict_sum_line[nbcompte]['Montant credit'] = "0.0"
+                            dict_sum_line[nbcompte]['Montant debit'] = dict_sum_line[nbcompte]['Montant debit'] + line.credit - dict_sum_line[nbcompte]['Montant credit']
+                            dict_sum_line[nbcompte]['Montant credit'] = 0.0
 
                     else:
                         if dict_sum_line[nbcompte]['Sens'] == 'C':
                             # cas d une remise montant
                             if str(line.debit) != "0.0":
-                                dict_sum_line[nbcompte]['Montant'] = str(float(dict_sum_line[nbcompte]['Montant'].replace(',', '.')) - float(montant))[:12]
-                                dict_sum_line[nbcompte]['Montant credit'] = str(float(dict_sum_line[nbcompte]['Montant credit'].replace(',', '.')) - line.debit + line.credit)[:12]
-                                dict_sum_line[nbcompte]['Montant debit'] = "0.0"
+                                dict_sum_line[nbcompte]['Montant'] = dict_sum_line[nbcompte]['Montant'] - montant
+                                dict_sum_line[nbcompte]['Montant credit'] = dict_sum_line[nbcompte]['Montant credit'] - line.debit + line.credit
+                                dict_sum_line[nbcompte]['Montant debit'] = 0.0
+
                             else:
-                                dict_sum_line[nbcompte]['Montant'] = str(float(dict_sum_line[nbcompte]['Montant'].replace(',', '.')) + float(montant))[:12]
-                                dict_sum_line[nbcompte]['Montant credit'] = str(float(dict_sum_line[nbcompte]['Montant credit'].replace(',', '.')) + line.credit)[:12]
-                                dict_sum_line[nbcompte]['Montant debit'] = "0.0"
+                                dict_sum_line[nbcompte]['Montant'] = dict_sum_line[nbcompte]['Montant'] + montant
+                                dict_sum_line[nbcompte]['Montant credit'] = dict_sum_line[nbcompte]['Montant credit'] + line.credit
+                                dict_sum_line[nbcompte]['Montant debit'] = 0.0
 
                         if dict_sum_line[nbcompte]['Sens'] == 'D':
                             if str(line.credit) != "0.0":
-                                dict_sum_line[nbcompte]['Montant'] = str(float(dict_sum_line[nbcompte]['Montant'].replace(',', '.')) - float(montant))[:12]
-                                dict_sum_line[nbcompte]['Montant debit'] = str(float(dict_sum_line[nbcompte]['Montant debit'].replace(',', '.')) - line.credit + line.debit)[:12]
-                                dict_sum_line[nbcompte]['Montant credit'] = "0.0"
+                                dict_sum_line[nbcompte]['Montant'] = dict_sum_line[nbcompte]['Montant'] - montant
+                                dict_sum_line[nbcompte]['Montant debit'] = dict_sum_line[nbcompte]['Montant debit'] - line.credit + line.debit
+                                dict_sum_line[nbcompte]['Montant credit'] = 0.0
 
                             else:
-                                dict_sum_line[nbcompte]['Montant'] = str(float(dict_sum_line[nbcompte]['Montant'].replace(',', '.')) + float(montant))[:12]
-                                dict_sum_line[nbcompte]['Montant debit'] = str(float(dict_sum_line[nbcompte]['Montant debit'].replace(',', '.')) + line.debit)[:12]
-                                dict_sum_line[nbcompte]['Montant credit'] = "0.0"
-
+                                dict_sum_line[nbcompte]['Montant'] = dict_sum_line[nbcompte]['Montant'] + montant
+                                dict_sum_line[nbcompte]['Montant debit'] = dict_sum_line[nbcompte]['Montant debit'] + line.debit
+                                dict_sum_line[nbcompte]['Montant credit'] = 0.0
 
             # print sorted(dict_sum_line, reverse=True)
             ##### Gestion des arrondis de TVA####
@@ -229,7 +241,7 @@ class Export_Journal(models.Model):
             montant_TVA = 0.0
             for dict in sorted(dict_sum_line, reverse=True):
                 # print dict
-                dict_sum_line[dict]['Montant'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant']))
+                dict_sum_line[dict]['Montant'] = "{0:.2f}".format(dict_sum_line[dict]['Montant'])
                 if dict_sum_line[dict]['Code taxe'] or dict_sum_line[dict]['Code taxe'] == "" and dict_sum_line[dict]['No compte tiers'] == "" and "TVA" not in dict_sum_line[dict]['Intitule compte general']:
                     montant += float(dict_sum_line[dict]['Montant'])
 
@@ -245,25 +257,36 @@ class Export_Journal(models.Model):
                     print "montant_test : ", montant_test
                     print "total : ", total
 
+                    # gestion de l erreur d arrondi, sois le total est superieur alors ajout du centime a la TVA, sois la tva est supeieur alors soustraction du centime a la TVA
+                    # TODO : il faudrait refactorer les if si-dessous avec des fonctions pour un code plus propre et lisible
+
                     if str(total) != str(montant_test):
-                        dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) + 0.01)
-                        if '-' in dict_sum_line[tva]['Montant signe']:
-                            dict_sum_line[tva]['Montant signe'] = ('-' + "{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].strip("-").replace(',', '.')) + 0.01)).replace(',', '.')
+                        if total > montant_test:
+                            dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) + 0.01)
+                            if '-' in dict_sum_line[tva]['Montant signe']:
+                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) - 0.01)).replace('.', ',')
+                            else:
+                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
+
+                            if dict_sum_line[tva]['Sens'] == 'D':
+                                dict_sum_line[tva]['Montant debit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) + 0.01)).replace('.', ',')
+                            else:
+                                dict_sum_line[tva]['Montant credit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) + 0.01)).replace('.', ',')
                         else:
-                            dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
+                            dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) - 0.01)
+                            if '-' in dict_sum_line[tva]['Montant signe']:
+                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
+                            else:
+                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) - 0.01)).replace('.', ',')
 
-                        if dict_sum_line[tva]['Sens'] == 'D':
-                            dict_sum_line[tva]['Montant debit'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) + 0.01).replace('.', ',')
-                        else:
-                            dict_sum_line[tva]['Montant credit'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) +0.01).replace('.', ',')
+                            if dict_sum_line[tva]['Sens'] == 'D':
+                                dict_sum_line[tva]['Montant debit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) - 0.01)).replace('.', ',')
+                            else:
+                                dict_sum_line[tva]['Montant credit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) - 0.01)).replace('.', ',')
 
-                if '-' in dict_sum_line[dict]['Montant signe']:
-                    dict_sum_line[dict]['Montant signe'] = ('-' + "{0:.2f}".format(float(dict_sum_line[dict]['Montant signe'].strip("-").replace(',', '.')))).replace(',', '.')
-                else:
-                    dict_sum_line[dict]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[dict]['Montant signe'].replace(',', '.')))).replace('.', ',')
-
-                dict_sum_line[dict]['Montant debit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant debit'].replace(',', '.'))).replace('.', ',')
-                dict_sum_line[dict]['Montant credit'] = "{0:.2f}".format(float(dict_sum_line[dict]['Montant credit'].replace(',', '.'))).replace('.', ',')
+                dict_sum_line[dict]['Montant signe'] = ("{0:.2f}".format(dict_sum_line[dict]['Montant signe'])).replace('.', ',')
+                dict_sum_line[dict]['Montant debit'] = ("{0:.2f}".format(dict_sum_line[dict]['Montant debit'])).replace('.', ',')
+                dict_sum_line[dict]['Montant credit'] = ("{0:.2f}".format(dict_sum_line[dict]['Montant credit'])).replace('.', ',')
 
 
             for dict in sorted(dict_sum_line, reverse=True):

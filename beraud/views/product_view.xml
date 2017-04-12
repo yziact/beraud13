@@ -28,8 +28,8 @@
 
                 <xpath expr="//field[@name='standard_price']" position="after">
                     <div>
-                        <button name="atom_cout_multi" string="Multi coût Atom" class="btn-info" help="Cherche TOUS LES articles avec un coût à 0 et le remplace par le tarif IS" attrs="{'invisible': [('id', '=', False)]}" groups="mybase.group_fix_me"/>
-                        <button name="atom_cout_courant" string="Coût Atom" class="btn-info" help="Remplace le coût Atom, si à 0.0, par le tarif IS de l'article courant" attrs="{'invisible': [('id', '=', False)]}" groups="mybase.group_creation_article"/>
+                        <button name="atom_cout_multi" type="object" string="Multi coût Atom" class="btn-info" help="Cherche TOUS LES articles avec un coût à 0 et le remplace par le tarif IS" attrs="{'invisible': [('id', '=', False)]}" groups="mybase.group_fix_me"/>
+                        <button name="atom_cout_courant" type="object" string="Coût Atom" class="btn-info" help="Remplace le coût Atom, si à 0.0, par le tarif IS de l'article courant" attrs="{'invisible': [('id', '=', False)]}" groups="mybase.group_creation_article"/>
                     </div>
                 </xpath>
 

@@ -3,6 +3,8 @@
 from openerp import models, api, fields
 import openerp.addons.decimal_precision as dp
 import datetime
+import logging
+_log = logging.getLogger(__name__)
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
@@ -87,6 +89,17 @@ class ProductProduct(models.Model):
     _inherit = "product.product"
 
     default_code = fields.Char('Internal Reference', select=True, required=True)
+
+    def get_formview_id(self, cr, uid, id, context=None):
+
+        try :
+            view_id = self.pool.get('ir.ui.view').get_view_id(cr, uid,'beraud.product_template_inherit_form_view')
+        except Exception:
+            view_id = False
+            _log.critical(u"la vue des product.product n'a pas ete trouvee")
+
+        return view_id
+
 
     _sql_constraints = [
         ('unique_code',
