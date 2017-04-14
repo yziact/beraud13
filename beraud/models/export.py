@@ -243,14 +243,14 @@ class Export_Journal(models.Model):
                 # print dict
                 dict_sum_line[dict]['Montant'] = "{0:.2f}".format(dict_sum_line[dict]['Montant'])
                 if dict_sum_line[dict]['Code taxe'] or dict_sum_line[dict]['Code taxe'] == "" and dict_sum_line[dict]['No compte tiers'] == "" and "TVA" not in dict_sum_line[dict]['Intitule compte general']:
-                    montant += float(dict_sum_line[dict]['Montant'])
+                    montant += float("{0:.2f}".format(dict_sum_line[dict]['Montant signe']))
 
                 elif dict_sum_line[dict]['Code taxe'] == "" and dict_sum_line[dict]['No compte tiers'] == "" and "TVA" in dict_sum_line[dict]['Intitule compte general']:
                     tva = dict
-                    montant_TVA = float(dict_sum_line[dict]['Montant'])
+                    montant_TVA += float("{0:.2f}".format(dict_sum_line[dict]['Montant signe']))
                 else:
                     total = float(dict_sum_line[dict]['Montant'])
-                    montant_test = montant + montant_TVA
+                    montant_test = math.fabs(montant) + math.fabs(montant_TVA)
 
                     print "montant : ", montant
                     print "montant_TVA : ", montant_TVA
@@ -260,7 +260,7 @@ class Export_Journal(models.Model):
                     # gestion de l erreur d arrondi, sois le total est superieur alors ajout du centime a la TVA, sois la tva est supeieur alors soustraction du centime a la TVA
                     # TODO : il faudrait refactorer les if si-dessous avec des fonctions pour un code plus propre et lisible
 
-                    if str(total) != str(montant_test):
+                    if "{0:.2f}".format(total) != "{0:.2f}".format(montant_test):
                         if total > montant_test:
                             dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) + 0.01)
                             if '-' in dict_sum_line[tva]['Montant signe']:
