@@ -101,8 +101,9 @@
                                     <th><strong>Produit</strong></th>
                                     <th class="text-right"><strong>Quantité</strong></th>
                                     <t t-if="o.picking_type_id.code != 'incoming'"><th><strong>Source</strong></th></t>
-                                    <t t-if="o.picking_type_id.code != 'outgoing'"><th><strong>Destination</strong></th></t>
-                                    <th></th>
+                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.picking_type_id.code != 'internal'"><th><strong>Destination</strong></th></t>
+                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.picking_type_id.code != 'incoming'"><th><strong>Dépôt</strong></th></t>
+                                    <t t-if="o.picking_type_id.code != 'internal'"><th></th></t>
                                 </tr>
                             </thead>
                             <tbody>
@@ -122,18 +123,23 @@
                                             <span t-field="pack_operation.package_id"/>
                                         </td>
                                     </t>
-                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.company_id.id == 1">
+                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.picking_type_id.code != 'internal' and o.company_id.id == 1">
                                         <td>
                                             <span t-field="pack_operation.product_id.emplacement"/>
                                             <span t-if="pack_operation.result_package_id">:</span>
                                             <span t-field="pack_operation.result_package_id"/>
                                         </td>
                                     </t>
-                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.company_id.id == 3">
+                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.picking_type_id.code != 'internal' and o.company_id.id == 3">
                                         <td>
                                             <span t-field="pack_operation.product_id.emplacement_atom"/>
                                             <span t-if="pack_operation.result_package_id">:</span>
                                             <span t-field="pack_operation.result_package_id"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="o.picking_type_id.code != 'outgoing' and o.picking_type_id.code != 'incoming'">
+                                        <td>
+                                            <span t-field="pack_operation.location_dest_id"/>
                                         </td>
                                     </t>
                                     <td>
