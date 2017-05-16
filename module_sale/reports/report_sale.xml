@@ -77,10 +77,10 @@
                                             <t t-if="doc.company_id.id == 3">
                                                 <strong>Commercial : </strong>
                                             </t>
-                                            <t t-if="doc.team_id.id == 1">
+                                            <t t-if="doc.company_id.id != 3 and doc.team_id.id == 1">
                                                 <strong>Commercial Machine : </strong>
                                             </t>
-                                            <t t-if="doc.team_id.id in [2,10,9]">
+                                            <t t-if="doc.company_id.id != 3 and  doc.team_id.id in [2,10,9]">
                                                 <strong>Commercial Pièces : </strong>
                                             </t>
                                             <t t-if="doc.user_id">
@@ -168,7 +168,7 @@
                                         </td>
                                         <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
                                             <t t-if="l.is_da"><span t-field="l.discount_amount" t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/></t>
-                                            <t t-if="not l.is_da"><span t-field="l.discount"/> %</t>
+                                            <t t-if="not l.is_da"><!-- span t-field="l.discount"/ --><span t-esc="'{0:.2f}'.format(l.discount)"/> %</t>
                                             <!--<span t-esc="'%.2f'%(l.discount)+' '"/>-->
                                         </td>
                                         <td class="text-right">
@@ -339,10 +339,10 @@
                                             <t t-if="doc.company_id.id == 3">
                                                 <strong>Commercial : </strong>
                                             </t>
-                                            <t t-if="doc.team_id.id == 1">
+                                            <t t-if="doc.company_id.id != 3 and doc.team_id.id == 1">
                                                 <strong>Commercial Machine : </strong>
                                             </t>
-                                            <t t-if="doc.team_id.id in [2,10,9]">
+                                            <t t-if="doc.company_id.id != 3 and  doc.team_id.id in [2,10,9]">
                                                 <strong>Commercial Pièces : </strong>
                                             </t>
                                             <t t-if="doc.user_id">
@@ -369,14 +369,6 @@
                                     <td>
                                         <p t-if="doc.date_order" t-field="doc.date_order"  t-field-options='{"format":"dd/MM/y"}'/>
                                     </td>
-                                    <!--<td>-->
-                                        <!--<span t-field="doc.name"/>-->
-                                    <!--</td>-->
-                                    <!--
-                                    <td>
-                                        <span t-field="doc.partner_id.ref"/>
-                                    </td>
-                                    -->
                                     <td name="ref_client_data" >
                                         <p t-if="doc.client_order_ref" t-field="doc.client_order_ref"/>
                                     </td>
@@ -428,10 +420,13 @@
                                         <td class="text-right">
                                             <span t-field="l.price_unit"/>
                                         </td>
-                                        <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
-                                            <t t-if="l.is_da"><span t-field="l.discount_amount" t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/></t>
-                                            <t t-if="not l.is_da"><span t-field="l.discount"/> %</t>
-                                            <!--<span t-esc="'%.2f'%(l.discount)+' '"/>-->
+                                         <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
+                                            <t t-if="l.is_da">
+                                                <span t-field="l.discount_amount" t-field-options='{"widget": "monetary", "display_currency": "doc.pricelist_id.currency_id"}'/>
+                                            </t>
+                                            <t t-if="not l.is_da">
+                                                <span t-esc="'{0:.2f}'.format(l.discount)"/> %
+                                            </t>
                                         </td>
                                         <td class="text-right">
                                             <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.tax_id))"/>
@@ -444,7 +439,6 @@
                                 </t>
                             </tbody>
                         </table>
-
                         <div class="row" name="total">
                             <div class="col-xs-4 pull-right">
                                 <table class="table table-condensed">
@@ -477,9 +471,6 @@
                         <p t-if="doc.payment_term_id.note">
                             <span t-field="doc.payment_term_id.note"/>
                         </p>
-                        <!--<p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
-                            <span t-field="doc.partner_id.property_payment_term_id.note"/>
-                        </p>-->
                         <p id="fiscal_position_remark" t-if="doc.fiscal_position_id and doc.fiscal_position_id.note">
                             <strong>Position fiscale</strong>
                             <span t-field="doc.fiscal_position_id.note"/>
