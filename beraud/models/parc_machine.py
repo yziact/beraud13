@@ -90,7 +90,7 @@ class StockParcMachine(models.Model):
     def get_guarantee(self):
 
         for item in self:
-            if item.date_prod and item.product_id:
+            if item.date_prod and item.product_id and not item.date_guarantee:
                 delta = item.product_id.warranty
                 date_mise_prod = datetime.strptime(item.date_prod, '%Y-%m-%d')
                 month = int(delta) + date_mise_prod.month
@@ -112,7 +112,7 @@ class StockParcMachine(models.Model):
     def get_prod(self):
 
         for item in self:
-            if item.date_guarantee and item.product_id:
+            if item.date_guarantee and item.product_id and not item.date_prod:
                 delta = item.product_id.warranty
                 guarantee = datetime.strptime(item.date_guarantee, '%Y-%m-%d')
                 month = int(delta) + guarantee.month
