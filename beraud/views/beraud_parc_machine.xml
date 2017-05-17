@@ -15,14 +15,16 @@
                             <field name="quantity" invisible="1"/>
                         </group>
                         <group>
+                            <field name="cm"/>
                             <field name="company_id"/>
                             <field name="date_prod"/>
                             <field name="date_guarantee"/>
                         </group>
                     </group>
                     <group>
+                        <field name="location_partner"/>
                         <field name="quant_id" groups="base.group_no_one"/>
-                        <field name="location_id"/>
+                        <field name="location_id" groups="base.group_no_one"/>
                     </group>
                 </sheet>
             </form>
@@ -42,7 +44,9 @@
                 <field name="date_prod"/>
                 <field name="date_guarantee"/>
                 <!--<field name="quant_id"/>-->
-                <field name="location_id"/>
+                <!--<field name="location_id"/>-->
+                <field name="location_partner" />
+                <field name="cm"/>
                 <field name="quantity" sum="Total"/>
             </tree>
         </field>

@@ -58,6 +58,8 @@ class StockParcMachine(models.Model):
     date_prod = fields.Date('Date de mise en production')
     date_guarantee = fields.Date('Date de fin de garantie', compute="get_guarantee", inverse="get_prod")
     quantity = fields.Float(u'Quantité totale', digits=dp.get_precision('Product Unit of Measure'))
+    cm = fields.Boolean(string="Contrat de maintenance")
+    location_partner = fields.Many2one('res.partner', domain="[('type','=','delivery'), ('parent_id','=',partner_id)]")
 
     @api.model
     def create(self, vals):
