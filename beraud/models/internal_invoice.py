@@ -165,17 +165,37 @@ class Internal_Invoice(models.Model):
         list_ber = []
         list_atom = []
         for move in list_move:
-            if 'OR' in move.origin:
+            if move.location_dest_id.id not in [18,17,32,10] and 'Intercompany transit' not in move.name :
+                # LE MOVE N' EST PAS UN TSIS MOVE !!
                 if move.partner_id.company_id.id == 3:
                     list_ber.append(move)
                 elif move.partner_id.company_id.id == 1:
                     list_atom.append(move)
+
             else:
+                # LE MOVE EST UN TSIS MOVE !!
                 if move.partner_id.id == 6:
                     list_ber.append(move)
 
                 elif move.partner_id.id == 1:
                     list_atom.append(move)
+
+
+            """
+            if 'OR' in move.origin:
+                # pas tsis move
+                if move.partner_id.company_id.id == 3:
+                    list_ber.append(move)
+                elif move.partner_id.company_id.id == 1:
+                    list_atom.append(move)
+            else:
+                # tsis move
+                if move.partner_id.id == 6:
+                    list_ber.append(move)
+
+                elif move.partner_id.id == 1:
+                    list_atom.append(move)
+            """
         return list_ber, list_atom
 
     def get_task(self, projet_line_task):
@@ -410,8 +430,16 @@ class inherit_AccountInvoice(models.Model):
 
         return res
 
+    @api.multi
+    def fix_me_is(self):
+        for invoice in self :
+            print 'INVOICE NAME : ', invoice.name, 'INVOICE ID : ', invoice.id
 
-
+            for invoice_line in invoice.invoice_line_ids:
+                if invoice_line.move_id.id:
+                    invoice_line.move_id.billed = False
+                if invoice_line.timesheet_id.id:
+                    invoice_line.timesheet_id.billed = False
 
 
 class inherit_stock_move(models.Model):
