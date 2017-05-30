@@ -41,9 +41,10 @@ class Internal_Invoice(models.Model):
             date_bl = ''
             serial = ''
 
-            if not item.origin == 'TSIS move':
-                origin_move = item.origin
+            origin_move = item.origin
+            print origin_move
 
+            if not item.origin == 'TSIS move':
                 # Si le mouvement a un BL lier on recupere ses info
                 if item.picking_id:
                     #seulement si la date du BL est inferieur a la borne, sinon on ne facture pas le mouvement ce mois si
@@ -54,7 +55,6 @@ class Internal_Invoice(models.Model):
                         continue
 
                 date_bl = item.date
-
                 if item.restrict_lot_id:
                     serial = item.restrict_lot_id.name
 
@@ -72,7 +72,9 @@ class Internal_Invoice(models.Model):
                         #si le type du picking est outgoing alors c est un BL client
                         if picking.picking_type_id.code == 'outgoing':
                             pick_date = picking.date
-                            origin_move = picking.name
+                            if picking.name != '':
+                                print picking.name
+                                origin_move = picking.name
                             date_bl = datetime.strptime(picking.date.split(' ')[0], '%Y-%m-%d').strftime('%d-%m-%Y')
 
                     if pick_date and pick_date > date_borne:
