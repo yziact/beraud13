@@ -165,37 +165,25 @@ class Internal_Invoice(models.Model):
         list_ber = []
         list_atom = []
         for move in list_move:
+
             if move.location_dest_id.id not in [18,17,32,10] and 'Intercompany transit' not in move.name :
                 # LE MOVE N' EST PAS UN TSIS MOVE !!
+                print 'C est pas un TSIS MOVE'
+
                 if move.partner_id.company_id.id == 3:
                     list_ber.append(move)
                 elif move.partner_id.company_id.id == 1:
                     list_atom.append(move)
-
             else:
                 # LE MOVE EST UN TSIS MOVE !!
+                print 'TSIS MOVE'
+
                 if move.partner_id.id == 6:
                     list_ber.append(move)
 
                 elif move.partner_id.id == 1:
                     list_atom.append(move)
 
-
-            """
-            if 'OR' in move.origin:
-                # pas tsis move
-                if move.partner_id.company_id.id == 3:
-                    list_ber.append(move)
-                elif move.partner_id.company_id.id == 1:
-                    list_atom.append(move)
-            else:
-                # tsis move
-                if move.partner_id.id == 6:
-                    list_ber.append(move)
-
-                elif move.partner_id.id == 1:
-                    list_atom.append(move)
-            """
         return list_ber, list_atom
 
     def get_task(self, projet_line_task):
