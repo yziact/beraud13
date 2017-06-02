@@ -54,3 +54,7 @@ class PurchaseOrder(models.Model):
         help="Depicts the date where the Quotation should be validated and converted into a purchase order.")
 
 
+class PurchaseOrderLine(models.Model):
+    _inherit = 'purchase.order.line'
+
+    name = fields.Html()

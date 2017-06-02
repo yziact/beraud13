@@ -1,4 +1,15 @@
 <odoo>
+    <record id="inherit_tree_invoice" model="ir.ui.view">
+        <field name="name">invoice tree</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="name"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="inherit_form_invoice" model="ir.ui.view">
         <field name="name">invoice form</field>
         <field name="model">account.invoice</field>

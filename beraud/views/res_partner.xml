@@ -47,7 +47,7 @@
             <field name="arch" type="xml">
                <xpath expr="//div[@class='o_kanban_image']" position="before">
                    <div>
-                       <label for="exported" string=" " class="fa fa-asterisk fa-3x" style="font-size:15px; float: right;" attrs="{'invisible': [('exported','=',True)]}"/>
+                       <label for="exported" string=" " class="fa fa-asterisk fa-3x" style="font-size:15px; float: right;" attrs="{'invisible': ['|',('exported','=',True),('parent_id', '!=', False)]}"/>
                        <field name="exported" attrs="{'invisible':True}"/>
                    </div>
                </xpath>

@@ -706,6 +706,7 @@ class MrpRepairLine(models.Model):
     # state either 'confirmed' or 'started', create move, reserve it,
     # and store it here.
     associated_move = fields.Many2one('stock.move')
+    to_invoice = fields.Boolean(default=True)
     #tech_name = fields.Many2one(related='repair_id.tech', store=True)
 
     # called by the repair_id onchange on the tech. So the tech has changed
