@@ -91,7 +91,7 @@ class ProductProduct(models.Model):
     default_code = fields.Char('Internal Reference', select=True, required=True)
 
     def get_formview_id(self, cr, uid, id, context=None):
-
+	print context
         try :
             view_id = self.pool.get('ir.ui.view').get_view_id(cr, uid,'beraud.product_template_inherit_form_view')
         except Exception:
