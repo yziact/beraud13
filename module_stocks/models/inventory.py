@@ -4,9 +4,10 @@ from openerp.osv import fields, osv
 from openerp.exceptions import UserError, AccessError
 
 from openerp import models, api, fields
-
+from lxml import etree
+import pprint
 import logging
-
+pp = pprint.PrettyPrinter(indent=2)
 _logger = logging.getLogger(__name__)
 
 
@@ -27,7 +28,6 @@ class our_inventory(models.Model):
             total += line.cout_global
 
         self.total = total
-
 
     company_id = fields.Many2one('res.company', related='location_id.company_id',
                                  required=True, select=True, readonly=True,
@@ -60,12 +60,13 @@ class our_inventory(models.Model):
 
         # on ajout a la requete deux LEFT JOIN pour remonter aux product_template.type
         cr.execute('''
-           SELECT q.product_id, sum(q.qty) as product_qty, q.location_id, q.lot_id as prod_lot_id, q.package_id, q.owner_id as partner_id
+           SELECT q.product_id, sum(q.qty) as product_qty, q.location_id, q.lot_id as prod_lot_id, q.package_id, q.owner_id as partner_id, t.emplacement, t.emplacement_atom
            FROM stock_quant q
             LEFT JOIN product_product p on p.id = q.product_id
             LEFT JOIN product_template t on t.id = p.product_tmpl_id
             WHERE t.type = 'product' AND ''' + domain + '''
-           GROUP BY product_id, location_id, lot_id, package_id, partner_id
+           GROUP BY product_id, location_id, lot_id, package_id, partner_id, emplacement, emplacement_atom
+           ORDER BY emplacement ASC
         ''', args)
         vals = []
         for product_line in cr.dictfetchall():
@@ -90,9 +91,56 @@ class our_inventory(models.Model):
 
             inventory._compute_total()
 
+    @api.model
+    def fields_view_get(self, view_id=None, view_type=None, context=None, toolbar=False, submenu=False):
+        print 'OUR FIELDS VIEW GET IN SALE CONTRACT'
+
+        """
+        Modification dynamique des valeurs envoyees a la vue
+        """
+        result = super(our_inventory, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar,
+                                                            submenu=submenu)
+        doc = etree.XML(result['arch'])
+        print 'CONTEXT : ', self.env.context
+        params = self.env.context.get('params', False)
+        print 'CONTEXT GET :', params
+
+        print(etree.tostring(doc, pretty_print=True))
+
+        if params:
+            pass
+            id = params.get('id', False)
+            print 'ID : ', id
+
+            if id:
+                record = self.env['stock.inventory'].browse(id)
+                company_id = record.company_id.id
+                print 'COMPANY : ', company_id
+
+            node = doc.xpath("//tree")
+            print 'NODE :', node
+
+            """
+                if company_id != 1:
+                    node.attrib['modifiers'] = '{"invisible":True}'
+                    pp.pprint(node.values())
+                    pp.pprint(doc.keys())
+
+            for node in doc.xpath("//field[@name='emplacement_atom']"):
+                print 'NODE 2'
+                if company_id != 3:
+                    node.attrib['modifiers'] = '{"invisible":True}'
+                    pp.pprint(node.values())
+                    pp.pprint(doc.keys())
+
+            """
+        result['arch'] = etree.tostring(doc)
+        return result
+
 
 class our_inventory_line(osv.osv):
     _inherit = 'stock.inventory.line'
+    _order = 'emplacement, emplacement_atom'
 
     def _get_quants(self, cr, uid, line, context=None):
         quant_obj = self.pool["stock.quant"]
@@ -114,7 +162,11 @@ class our_inventory_line(osv.osv):
             else:
                 line.cout_global = 0
 
+
+
     cout = fields.Float('Cout', type='float', compute=_compute_cout, store=True)
     cout_global = fields.Float('Cout global', compute=_compute_cout, type='float', store=True)
-
+    emplacement = fields.Char('Emplacement')
+    emplacement_atom = fields.Char('Emplacement')
+    company_id = fields.Many2one('res.company')
 

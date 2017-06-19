@@ -43,10 +43,17 @@
                         </th>
                     </tr>
                 </thead>
-                <tr t-foreach="o.line_ids" t-as="line">
-                    <td style="width:20%;">
-                        <span t-field="line.location_id"/> <span t-field="line.product_id.emplacement"/>
-                    </td>
+                <tr t-foreach="o.line_ids" t-as="line" ordered="">
+                    <t t-if="o.company_id.id == 1">
+                        <td style="width:20%;">
+                            <span t-field="line.location_id"/> <span t-field="line.product_id.emplacement"/>
+                        </td>
+                    </t>
+                    <t t-if="o.company_id.id == 3">
+                        <td style="width:20%;">
+                            <span t-field="line.location_id"/> <span t-field="line.product_id.emplacement_atom"/>
+                        </td>
+                    </t>
                     <td style="width:40%;">
                         <span t-field="line.product_id"/>
                     </td>
