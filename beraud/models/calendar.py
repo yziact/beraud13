@@ -9,6 +9,7 @@ class CalendarInherit(models.Model):
         print 'CONTEXT : ', context
         print 'NO MAIL : ', context.get('no_email')
         context['no_email'] = True
+        print 'NO MAIL : ', context.get('no_email')
 
 
         res = super(CalendarInherit, self).create_attendees(cr, uid, ids, context=context)
