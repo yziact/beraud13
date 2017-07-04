@@ -44,7 +44,17 @@ class stock_view_parc(models.Model):
 class StockParcMachine(models.Model):
     _name = 'parc_machine'
 
-    name = fields.Char()
+    # @api.depends('partner_id', 'product_id')
+    def _compute_name(self):
+        print 'GET NAME'
+        name = ""
+        if self.partner_id and self.product_id :
+            name = self.partner_id.name + ' : ' + self.product_id.name
+
+        print name
+        self.name = name
+
+    name = fields.Char(string="Name", compute='_compute_name')
     product_id = fields.Many2one(
         'product.product',
         'Produit',
@@ -55,11 +65,11 @@ class StockParcMachine(models.Model):
     location_id = fields.Many2one('stock.location', 'Emplacement', domain="[('usage', 'in', ('internal','customer'))]")
     company_id = fields.Many2one('res.company', u'Société')
     quant_id = fields.Many2one('stock.quant', domain="[('product_id', '=', product_id)]")
-    date_prod = fields.Date('Date de mise en production')
-    date_guarantee = fields.Date('Date de fin de garantie', compute="get_guarantee", inverse="get_prod")
+    date_prod = fields.Date('Date de mise en production', store=True)
+    date_guarantee = fields.Date('Date de fin de garantie', compute="get_guarantee",inverse="get_prod", store=True)
     quantity = fields.Float(u'Quantité totale', digits=dp.get_precision('Product Unit of Measure'))
     cm = fields.Boolean(string="Contrat de maintenance")
-    location_partner = fields.Many2one('res.partner', domain="[('type','=','delivery'), ('parent_id','=',partner_id)]")
+    location_partner = fields.Many2one('res.partner', domain="['|',('id', '=', partner_id), '&', ('type','=','delivery'), ('parent_id','=',partner_id)]")
 
     @api.model
     def create(self, vals):
@@ -112,7 +122,7 @@ class StockParcMachine(models.Model):
     @api.multi
     @api.depends('date_guarantee')
     def get_prod(self):
-
+        # return True
         for item in self:
             if item.date_guarantee and item.product_id and not item.date_prod:
                 delta = item.product_id.warranty
@@ -203,6 +213,10 @@ class StockMove(models.Model):
         parc_env = self.env['parc_machine']
 
         for move in self:
+            partner_id = move.partner_id.id or move.picking_partner_id.id
+            if move.partner_id.type == 'delivery':
+                partner_id = move.partner_id.parent_id.id
+
             if move.product_id.categ_id.is_machine:
                 parc_rec = parc_env.search([('quant_id', '=', move.quant_ids.id)])
 
@@ -217,14 +231,15 @@ class StockMove(models.Model):
                         i = 0
                         while i < quant.qty:
                             parc_env.create({
-                                'partner_id': move.partner_id.id or move.picking_partner_id.id,
+                                'partner_id': partner_id,
                                 'quant_id': quant.id ,
                                 'product_id': quant.product_id.id,
                                 'lot_id': quant.lot_id.id or False,
                                 'location_id': quant.location_id.id,
                                 'company_id': move.company_id.id,
                                 'quantity': 1.0,
-                                'date_prod': move.date
+                                'date_prod': move.date,
+                                'location_partner': move.partner_id.id or move.picking_partner_id.id
                             })
                             i += 1
 

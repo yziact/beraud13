@@ -9,7 +9,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="partner_id"/>
+                            <field name="partner_id"  context="{'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
                             <field name="product_id"/>
                             <field name="lot_id"   context="{'default_product_id': product_id}"/>
                             <field name="quantity" invisible="1"/>
@@ -22,7 +22,7 @@
                         </group>
                     </group>
                     <group>
-                        <field name="location_partner"/>
+                        <field name="location_partner"  context="{'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
                         <field name="quant_id" groups="base.group_no_one"/>
                         <field name="location_id" groups="base.group_no_one"/>
                     </group>
@@ -45,7 +45,7 @@
                 <field name="date_guarantee"/>
                 <!--<field name="quant_id"/>-->
                 <!--<field name="location_id"/>-->
-                <field name="location_partner" />
+                <field name="location_partner" context="{'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
                 <field name="cm"/>
                 <field name="quantity" sum="Total"/>
             </tree>
