@@ -10,4 +10,25 @@
 
         </field>
     </record>
+
+    <record id="inherit_for_task" model="ir.ui.view">
+        <field name="name">project task</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='project_id']" position="after">
+                <field name="repair_state" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='description']" position="attributes">
+                <attribute name="attrs">{'readonly':[('repair_state','=',True)]}</attribute>
+            </xpath>
+
+           <!-- <xpath expr="//field[@name=timesheet_ids]" position="attributes">
+                <attribute name="attrs">{'readonly':[('repair_state','=',True)]}</attribute>
+            </xpath>-->
+
+        </field>
+    </record>
+
 </odoo>
