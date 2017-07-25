@@ -48,7 +48,7 @@
                 <xpath expr="//header" position="inside">
                     <button name="repair_validate" states="draft" string="Valider la Réparation" class="oe_highlight"/>
                     <button name="repair_sign" states="under_repair" string="Réparation à Signer" class="oe_highlight"/>
-                    <button name="cancel_sign" states="under_repair" string="Annulation de la Signature" class="oe_highlight"/>
+                    <button name="cancel_sign" states="to_sign" string="Annulation de la Signature" class="oe_highlight"/>
                 </xpath>
 
                 <xpath expr="//header//button[@name='repair_confirm']" position="replace">

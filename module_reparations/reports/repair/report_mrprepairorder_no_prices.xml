@@ -22,13 +22,7 @@
                                     <span t-if="o.state == 'draft'">Ordre d'Intervention # </span>
                                     <span t-field="o.name" />
                                 </h3>
-                                <h6>
-                                    <!--<div>
-                                      <span t-if="o.contact"><strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/> / <span t-field="o.contact.email"/> </span>
-                                    </div>
-                                    <strong>Ref. Client : </strong>
-                                    <span t-field="o.partner_id.ref"/>-->
-                                </h6>
+
 
                                 <table id="cart" class="table table-condensed table-bordered">
                                     <style>
@@ -72,7 +66,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <p t-field="o.date_start"/>
+                                                <p t-field="o.date_start" t-field-options='{"format":"dd/MM/y"}'/>
                                             </td>
                                             <td>
                                                 <span t-field="o.client_order_ref"/>
@@ -87,10 +81,12 @@
                                     </tbody>
                                 </table>
 
+                                <h4 style="font-weight: bold;">Liste des Pièces</h4>
+
                                 <table class="table table-condensed">
                                     <thead>
                                         <tr>
-                                            <th>Description</th>
+                                            <th></th>
                                             <th class="text-right">Quantité</th>
                                             <th class="text-right">Source</th>
                                         </tr>
@@ -142,20 +138,15 @@
                                 </p>
 
                                 <t t-if="o.task_id and o.state in ['to_sign','2binvoiced','done']">
+                                    <h4 style="font-weight: bold;">Détail des Opérations</h4>
                                     <p t-field="o.task_id.description"/>
 
-
-                                    <h4 style="font-weight: bold;">Détail des Opérations</h4>
                                     <br/>
                                     <table class="table table-condensed">
                                         <thead>
                                             <tr></tr>
                                             <tr>
-                                                <th>ID/Date</th>
-                                                <!-- <th>Contact</th>
-                                                  <th>Origine</th>-->
-                                                <th>Description</th>
-                                                <!--<th class="text-right">Déplacement</th>-->
+                                                <th>Date</th>
                                                 <th class="text-right">Durée</th>
                                             </tr>
                                         </thead>
@@ -166,22 +157,10 @@
                                                 </tr>
                                                 <tr t-foreach="o.get_dict_time()[l]" t-as="time">
                                                     <td style="width:10%;">
-                                                        <span t-esc="time.date"/>
+                                                        <span t-esc="time.date" t-field-options='{"format":"dd/MM/y"}'/>
                                                     </td>
-                                                    <!--    <td style="width:10%;">
-                                                            <span t-esc="time.nom_contact"/>
-                                                        </td>
-                                                        <td style="width:10%;">
-                                                            <span t-esc="time.moyen_contact"/>
-                                                        </td>
-                                                    -->    <td style="width:60%;">
-                                                    <span t-esc="time.name"/>
-                                                </td>
-                                                    <!--<td style="width:5%;" class="text-right">
-                                                        <span t-if="time.is_move">Oui</span>
-                                                    </td> -->
+
                                                     <td style="width:5%;" class="text-right">
-                                                        <!--<span t-esc="time.unit_amount" t-field-options='{"widget": "time"}'/>-->
                                                         <span t-esc="'%02d:%02d' % (int(str(time.unit_amount).split('.')[0]), int(float(str('%.2f' % time.unit_amount).split('.')[1])/100*60))"/>
                                                     </td>
                                                 </tr>
