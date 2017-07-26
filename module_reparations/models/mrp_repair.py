@@ -605,6 +605,7 @@ class MrpRepairInh(models.Model):
                     tech_quants = quants_obj.browse(cr, uid, t_quants)
                     qty_quants = sum([q.qty for q in tech_quants])
                     print 'tech_quants : ', tech_quants
+                    print 'tech_quants.id : ', tech_quants.ids
                     print 'qty_quants : ', qty_quants
 
                     # the move will be considered a sale if
@@ -622,23 +623,36 @@ class MrpRepairInh(models.Model):
 
                     # these moves should be from the technician the the client
                     move_id = move_obj.create(cr, uid, {
-                        'company_id': repair.tech.company_id.id,
+                        'quant_ids': [6,0,tech_quants.ids],
+                        'company_id': repair.company_id.id,
                         'origin': repair.name,
                         'name': op_line.name,
                         'product_uom': op_line.product_id.uom_id.id,
                         'product_id': op_line.product_id.id,
                         'product_uom_qty': op_line.product_uom_qty,
-
                         'location_id': orig_loc_id.id, # line location
                         'location_dest_id': dest_loc_id.id, #line location
-
                         'restrict_lot_id': op_line.lot_id.id,
-
-                        'isSale' : isSale,
+                        'isSale': isSale,
                     })
+                    move = move_obj.browse(cr, uid, move_id)
 
                     # make them done
-                    move_obj.action_done(cr, uid, move_id)
+                    loc_company_id = orig_loc_id.company_id.id
+                    orig_loc_id.sudo().write({'company_id':move.company_id.id})
+
+
+                    move.sudo().action_confirm()
+                    move.sudo().action_assign()
+                    move.sudo().action_done()
+
+                    orig_loc_id.sudo().write({'company_id':loc_company_id})
+
+                    # move_obj.action_confirm(cr, uid, move_id)
+                    # move_obj.action_assign(cr, uid, move_id)
+                    # import pudb;
+                    # pudb.set_trace()
+                    # move_obj.action_done(cr, uid, move_id)
 
                     print "move done, id : ", move_id
                     print "move was a sale ? : ", isSale
