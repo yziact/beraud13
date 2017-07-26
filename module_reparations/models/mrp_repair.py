@@ -20,6 +20,41 @@ no_tech_loc_error_default = "Tech has no assigned locations, field filled with d
 class MrpRepairInh(models.Model):
     _inherit = 'mrp.repair'
 
+
+    def get_dict_time(self):
+        # cette fonction à pour but de creer un dictionnaire regroupant les lines de temps par tache/incident commun
+        # les clefs de ce dictionnaire sont elles meme des records
+        list_time = self.task_id.timesheet_ids
+
+        values = set(map(lambda x: x.issue_id or x.task_id, list_time))
+        newdict = {}
+
+        for parent in values:
+            print parent
+            newdict[parent] = []
+            print newdict
+            for time_line in list_time:
+                if time_line.issue_id == parent or time_line.task_id == parent:
+                    newdict[parent].append(time_line)
+
+        print newdict
+        return newdict
+
+    @api.multi
+    def action_repair_sign(self):
+        for repair in self:
+            repair.write({'state': 'to_sign'})
+            repair.task_id.repair_state = True
+
+    def action_repair_start(self, cr, uid, ids, context=None):
+        for repair in self.browse(cr, uid, ids, context={}):
+            repair.task_id.repair_state = False
+
+        res = super(MrpRepairInh, self).action_repair_start(cr, uid, ids, context=context)
+
+        return res
+
+
     def _set_default_end_date(self):
         return (datetime.datetime.now()+datetime.timedelta(days=1)).strftime(DATETIME_FORMAT)
 
@@ -69,6 +104,7 @@ class MrpRepairInh(models.Model):
         ('valid', u'Bon de Commande'),
         ('confirmed', 'Confirmed'),
         ('ready', 'Ready to Repair'),
+        ('to_sign', 'A Signer'),
         ('under_repair', 'Under Repair'),
         ('2binvoiced', 'To be Invoiced'),
         ('invoice_except', 'Invoice Exception'),
@@ -89,16 +125,16 @@ class MrpRepairInh(models.Model):
                                  default=fields.Datetime.now, help="Date du début de la réparation")
 
     end_date = fields.Datetime(string="Date de fin", store=True, help="Date prévue de la fin de la réparation",
-                              default=_set_default_end_date)
+                               default=_set_default_end_date)
 
     invoice_method = fields.Selection(default='after_repair')
     clientsite = fields.Boolean(string="Réparation sur Site Client : ", default=False)
 
-    tech = fields.Many2one('res.users', string="Technicien", domain=[('company_id','in',[1,3])], company_dependent=False) 
+    tech = fields.Many2one('res.users', string="Technicien", domain=[('company_id','in',[1,3])], company_dependent=False)
 
     operations = fields.One2many('mrp.repair.line', 'repair_id', 'Operation Lines', readonly=False, copy=True)
 
-    location_id = fields.Many2one('stock.location', string='Current Location', 
+    location_id = fields.Many2one('stock.location', string='Current Location',
                                   select=True, required=True, readonly=True,
                                   states={'draft': [('readonly', True)], 'confirmed': [('readonly', True)]},
                                   default=_set_default_location)
@@ -160,14 +196,14 @@ class MrpRepairInh(models.Model):
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         return mask.fields_view_get_masked(res, self)
 
-    @api.onchange('clientsite') 
+    @api.onchange('clientsite')
     def clientsite_change(self):
         print "clientsite has changed !"
         if not self.clientsite:
             self.tech = None
 
 
-    @api.onchange('tech') 
+    @api.onchange('tech')
     def tech_change(self):
         print "tech has changed !"
         error = 0
@@ -287,7 +323,7 @@ class MrpRepairInh(models.Model):
             # create the task in project 'SAV'
             proj_name = 'REPARATIONS ATELIER'
             user = uid
-            if repair.clientsite : 
+            if repair.clientsite :
                 proj_name = 'SAV'
 
                 if repair.tech:
@@ -296,7 +332,7 @@ class MrpRepairInh(models.Model):
             p_id = proj_obj.search(cr, uid, [('name', 'ilike', proj_name)])
             project_id = proj_obj.browse(cr, uid, p_id)
 
-            if not project_id : 
+            if not project_id :
                 raise UserError("Aucun projet '%s' trouvé." % proj_name)
 
             task_id = task_obj.create(cr, uid, {
@@ -314,7 +350,7 @@ class MrpRepairInh(models.Model):
 
             v_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Partner Locations/Vendors')])
             vendeur_loc_id = loc_obj.browse(cr, uid, v_loc_id)
-### BERAUD SITE REPAIR CONFIRM CASE ###
+            ### BERAUD SITE REPAIR CONFIRM CASE ###
             if not repair.clientsite:
                 # the picking type is always incoming, but depends on the warehouse it comes from...
                 # this will determine the sequence of the generated stock picking
@@ -345,7 +381,7 @@ class MrpRepairInh(models.Model):
 
                 picking_id = sp_obj.create(cr, uid, {
                     'origin':repair.name,
-                    'partner_id': repair.partner_id.id, 
+                    'partner_id': repair.partner_id.id,
                     'picking_type_id': picking_type_in.id,
                     'move_type': 'direct',
                     #'location_id': repair.location_dest_id.id, # comes from the client location
@@ -394,7 +430,7 @@ class MrpRepairInh(models.Model):
                     'product_id': repair.product_id.id,
                     'partner_id': repair.address_id and repair.address_id.id or repair.partner_id.id,
                     'picking_type_id': picking_type_out.id,
-                    'location_id': repair.location_id.id, 
+                    'location_id': repair.location_id.id,
                     'location_dest_id': repair.location_dest_id.id,
                     'repair_id': repair.id,
                 })
@@ -443,7 +479,7 @@ class MrpRepairInh(models.Model):
 
                 print "*** LINKED MOVES : ", repair.linked_moves
 
-### CLIENT SITE REPAIR CONFIRM CASE ###
+            ### CLIENT SITE REPAIR CONFIRM CASE ###
             elif repair.clientsite:
 
                 if not repair.tech:
@@ -474,12 +510,12 @@ class MrpRepairInh(models.Model):
                     picking_id = sp_obj.create(cr, uid, {
                         'origin':repair.name,
                         'product_id': repair.product_id.id,
-                        'partner_id': repair.partner_id.id, 
+                        'partner_id': repair.partner_id.id,
                         'picking_type_id': picking_type_internal[0],
                         'location_id': stock_loc_id.id,
                         'location_dest_id': tech_loc_id.id,
                     })
-                    
+
                     for line in repair.operations:
                         print "creating move : %s" % line.name
                         # add move lines to the picking
@@ -534,7 +570,7 @@ class MrpRepairInh(models.Model):
         function did return the move_id.
         The moves will now be created for all the pieces used for the repair, and the move for the
         repaired piece will figure on a generated BL"""
-        
+
         print "Mrp_repair our action_repair_end"
 
         super(MrpRepairInh, self).action_repair_end(cr, uid, ids, context=context)
@@ -546,7 +582,7 @@ class MrpRepairInh(models.Model):
         quants_obj = self.pool.get('stock.quant')
 
         for repair in self.browse(cr, uid, ids, context=context):
-### BERAUD SITE REPAIR DONE CASE ###
+            ### BERAUD SITE REPAIR DONE CASE ###
             if not repair.clientsite:
 
                 # each repair line will go to where it was supposed to.
@@ -566,7 +602,7 @@ class MrpRepairInh(models.Model):
                         raise UserError(u"Il n'y a pas de stock réservable pour la pièce %s" % move.product_id.name)
                     move_obj.action_done(cr, uid, move.id)
 
-### CLIENT SITE REPAIR DONE CASE ###
+                ### CLIENT SITE REPAIR DONE CASE ###
             elif repair.clientsite:
                 # if the internal BL to the tech is not yet "done", we can't finish the repair.
                 if repair.bl_internal and repair.bl_internal.state != 'done' :
@@ -575,21 +611,21 @@ class MrpRepairInh(models.Model):
 
                 # go through lines of the OR, and do moves from tech loc to client loc for pieces to add,
                 # and from client loc to tech loc for pieces to remove.
-                
+
                 c_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Customers')])
                 customer_loc_id = loc_obj.browse(cr, uid, c_loc_id)
                 print "customer_loc_id : %s" % customer_loc_id
 
                 #r_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Physical Locations/DC/Stock')])
                 #if repair.partner_id.company_id.id == 3:
-                    #r_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Physical Locations/DAT/Stock')])
+                #r_loc_id = loc_obj.search(cr, uid, [('complete_name', 'ilike','Physical Locations/DAT/Stock')])
                 #remove_loc_id = loc_obj.browse(cr, uid, r_loc_id)
 
                 t_loc_id = loc_obj.search(cr, uid, [('tech', 'ilike', repair.tech.name)])
                 tech_loc_id = loc_obj.browse(cr, uid, t_loc_id)
-                if not tech_loc_id : 
+                if not tech_loc_id :
                     raise UserError("Un problème est survenu lors de la recherche de l'emplacement associé au technicien")
-                
+
                 processed_moves = []
                 for op_line in repair.operations :
                     print "=========////////=========////////// looping in op_line : ", op_line.product_id.name
@@ -605,6 +641,7 @@ class MrpRepairInh(models.Model):
                     tech_quants = quants_obj.browse(cr, uid, t_quants)
                     qty_quants = sum([q.qty for q in tech_quants])
                     print 'tech_quants : ', tech_quants
+                    print 'tech_quants.id : ', tech_quants.ids
                     print 'qty_quants : ', qty_quants
 
                     # the move will be considered a sale if
@@ -622,23 +659,36 @@ class MrpRepairInh(models.Model):
 
                     # these moves should be from the technician the the client
                     move_id = move_obj.create(cr, uid, {
-                        'company_id': repair.tech.company_id.id,
+                        'quant_ids': [6,0,tech_quants.ids],
+                        'company_id': repair.company_id.id,
                         'origin': repair.name,
                         'name': op_line.name,
                         'product_uom': op_line.product_id.uom_id.id,
                         'product_id': op_line.product_id.id,
                         'product_uom_qty': op_line.product_uom_qty,
-
                         'location_id': orig_loc_id.id, # line location
                         'location_dest_id': dest_loc_id.id, #line location
-
                         'restrict_lot_id': op_line.lot_id.id,
-
-                        'isSale' : isSale,
+                        'isSale': isSale,
                     })
+                    move = move_obj.browse(cr, uid, move_id)
 
                     # make them done
-                    move_obj.action_done(cr, uid, move_id)
+                    loc_company_id = orig_loc_id.company_id.id
+                    orig_loc_id.sudo().write({'company_id':move.company_id.id})
+
+
+                    move.sudo().action_confirm()
+                    move.sudo().action_assign()
+                    move.sudo().action_done()
+
+                    orig_loc_id.sudo().write({'company_id':loc_company_id})
+
+                    # move_obj.action_confirm(cr, uid, move_id)
+                    # move_obj.action_assign(cr, uid, move_id)
+                    # import pudb;
+                    # pudb.set_trace()
+                    # move_obj.action_done(cr, uid, move_id)
 
                     print "move done, id : ", move_id
                     print "move was a sale ? : ", isSale
