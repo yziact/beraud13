@@ -981,6 +981,12 @@ class MrpRepairLine(models.Model):
 
         return super(MrpRepairLine, self).unlink()
 
+    def onchange_operation_type(self, cr, uid, ids, type, guarantee_limit, company_id=False, context=None):
+        res = super(MrpRepairLine, self).onchange_operation_type(cr, uid, ids, type, guarantee_limit, company_id=company_id, context=context)
+        res['value']['to_invoice'] = True
+
+        return res
+
 
 class StockQuant(models.Model):
 
