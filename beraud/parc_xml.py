@@ -7,7 +7,7 @@ sys.setdefaultencoding("utf-8")
 
 username = "admin"
 pwd = "X200yziact"
-dbname = "BERAUD_05_05"
+dbname = "BERAUD_30_05"
 
 # Connexion Odoo
 sock_common = xmlrpclib.ServerProxy("http://beraud.yziact.fr/xmlrpc/common")
@@ -72,6 +72,7 @@ for row in csvreader:
                 'product_id': machine_id,
                 'lot_id': serial_id,
                 'partner_id': tier[0]['id'],
+                'location_partner': tier[0]['id'],
                 'location_id': 9,
                 'company_id': 1,
                 'date_prod': date_prod,
@@ -87,6 +88,7 @@ for row in csvreader:
                     'product_id': machine_id,
                     'lot_id': serial[0]['id'],
                     'partner_id': tier[0]['id'],
+                    'location_partner':tier[0]['id'],
                     'location_id': 9,
                     'company_id': 1,
                     'date_prod': date_prod,

@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_stock_view_logistique,access_stock_view_logistique,model_stock_view_logistique,,1,0,0,0
 access_beraud_invoice,access_beraud_invoice,model_beraud_invoice,,1,0,0,0
 access_stock_view_logistique,access_stock_view_logistique,model_stock_view_logistique,stock.group_stock_manager,1,0,0,0
+access_parc_machine,access_parc_machine,model_parc_machine,,1,0,0,0

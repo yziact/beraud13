@@ -62,14 +62,14 @@ class StockParcMachine(models.Model):
     )
     lot_id = fields.Many2one('stock.production.lot', 'Lot', domain="[('product_id', '=', product_id)]")
     partner_id = fields.Many2one('res.partner', 'Client', domain="[('customer','=', True)]")
-    location_id = fields.Many2one('stock.location', 'Emplacement', domain="[('usage', 'in', ('internal','customer'))]")
+    location_id = fields.Many2one('stock.location', 'Emplacement quant', domain="[('usage', 'in', ('internal','customer'))]")
     company_id = fields.Many2one('res.company', u'Société')
-    quant_id = fields.Many2one('stock.quant', domain="[('product_id', '=', product_id)]")
+    quant_id = fields.Many2one('stock.quant', string='Quant',domain="[('product_id', '=', product_id)]")
     date_prod = fields.Date('Date de mise en production', store=True)
     date_guarantee = fields.Date('Date de fin de garantie', compute="get_guarantee",inverse="get_prod", store=True)
     quantity = fields.Float(u'Quantité totale', digits=dp.get_precision('Product Unit of Measure'))
     cm = fields.Boolean(string="Contrat de maintenance")
-    location_partner = fields.Many2one('res.partner', domain="['|',('id', '=', partner_id), '&', ('type','=','delivery'), ('parent_id','=',partner_id)]")
+    location_partner = fields.Many2one('res.partner', string=u"Emplacement clients", domain="['|',('id', '=', partner_id), '&', ('type','=','delivery'), ('parent_id','=',partner_id)]")
 
     @api.model
     def create(self, vals):
@@ -105,7 +105,7 @@ class StockParcMachine(models.Model):
             if item.date_prod and item.product_id and not item.date_guarantee:
                 delta = item.product_id.warranty
                 date_mise_prod = datetime.strptime(item.date_prod, '%Y-%m-%d')
-                month = int(delta) + date_mise_prod.month
+                month = int(delta)
                 days = int(str(delta).split('.')[1])
 
                 # gestion des demi mois uniquement
@@ -119,39 +119,33 @@ class StockParcMachine(models.Model):
 
                 item.update({'date_guarantee': datetime.strftime(date_guarantee, '%Y-%m-%d')})
 
-    @api.multi
-    @api.depends('date_guarantee')
     def get_prod(self):
-        # return True
-        for item in self:
-            if item.date_guarantee and item.product_id and not item.date_prod:
-                delta = item.product_id.warranty
-                guarantee = datetime.strptime(item.date_guarantee, '%Y-%m-%d')
-                month = int(delta) + guarantee.month
-                days = int(str(delta).split('.')[1])
+        return True
 
-                # gestion des demi mois uniquement
-                if days == 5:
-                    days = 15
-                else:
-                    days = 0
-
-                relativedelta = rd(months=month, days=days)
-                date_prod = guarantee - relativedelta
-
-                item.update({'date_prod': datetime.strftime(date_prod, '%Y-%m-%d')})
 
     @api.one
     def fix_me(self):
+        cm_env = self.env['sale.subscription']
         move_env = self.env['stock.move']
         move_ids = move_env.search([('product_id.categ_id.is_machine', '=', True), ('location_dest_id', '=', 9), ('partner_id', '!=', False)])
 
         for move in move_ids:
+            cm = False
+            partner_mov = move.partner_id
+            parent_partner = partner_mov.parent_id.id
+
+            cm_obj = cm_env.search(['|', ('partner_id', '=', parent_partner), ('partner_id', '=', partner_mov.id)])
+
+            if cm_obj:
+                cm = True
+
             for quant in move.quant_ids:
                 i = 0
                 while i < quant.qty:
                     self.create({
-                        'partner_id':move.partner_id.id,
+                        'partner_id':parent_partner or partner_mov.id,
+                        'location_partner': partner_mov.id,
+                        'cm': cm,
                         'quant_id': quant.id,
                         'product_id': quant.product_id.id,
                         'lot_id': quant.lot_id.id or False,
@@ -162,46 +156,7 @@ class StockParcMachine(models.Model):
                     })
                     i += 1
 
-    # _sql_constraints = [
-    #     ('unique_quant',
-    #      'UNIQUE(quant_id)',
-    #      'Un quant ne peut être duplique')
-    # ]
 
-"""
-class StockQuant(models.Model):
-    _inherit = 'stock.quant'
-
-    @api.multi
-    @api.onchange('location_id')
-    def on_change_location_id(self):
-        print "LOCATION CHANGEEEEEEE !!!! "
-
-        parc_env = self.env['parc.machine']
-
-        for quant in self:
-            if quant.product_id.categ_id.is_machine:
-                parc_rec = parc_env.search([('quant_id', '=', quant.id)])
-                if parc_rec:
-                    parc_rec.update({'location_id': quant.location_id})
-
-                elif quant.location_id == 9:
-                    move_id = quant.latest_move()
-                    parc_env.create({
-                        'partner_id': move_id.partner_id.id,
-                        'quant_id': quant.id,
-                        'product_id': quant.product_id.id,
-                        'lot_id': quant.lot_id.id or False,
-                        'location_id': quant.location_id.id,
-                        'company_id': move_id.company_id.id,
-                        'quantity': 1.0,
-                        'date_prod': move_id.date
-                    })
-
-        res = super(StockQuant, self).onchange_location_id()
-
-        return res
-"""
 
 
 class StockMove(models.Model):
