@@ -49,6 +49,7 @@
         'views/export_tier.xml',
         'views/payment_term.xml',
         'views/product_view.xml',
+        'views/beraud_parc_machine.xml',
 
         'security/ir.model.access.csv',
 
