@@ -652,15 +652,17 @@ class MrpRepairInh(models.Model):
 
                     isSale = False
                     for quant in tech_quants :
+                        quant_company_id = quant.company_id.id
                         print "quant_origin : ", quant.origin
                         print "repair.partner_id.company_id.id : ", repair.partner_id.company_id.id
                         if (quant.origin.id != repair.partner_id.company_id.id) and op_line.type == 'add':
-                            isSale = True;
+                            isSale = True
 
                     # these moves should be from the technician the the client
                     move_id = move_obj.create(cr, uid, {
                         'quant_ids': [6,0,tech_quants.ids],
                         'company_id': repair.company_id.id,
+                        'partner_id':repair.partner_id.id,
                         'origin': repair.name,
                         'name': op_line.name,
                         'product_uom': op_line.product_id.uom_id.id,
@@ -675,7 +677,7 @@ class MrpRepairInh(models.Model):
 
                     # make them done
                     loc_company_id = orig_loc_id.company_id.id
-                    orig_loc_id.sudo().write({'company_id':move.company_id.id})
+                    orig_loc_id.sudo().write({'company_id':quant_company_id})
 
 
                     move.sudo().action_confirm()
