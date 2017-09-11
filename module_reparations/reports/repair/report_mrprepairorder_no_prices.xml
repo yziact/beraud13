@@ -178,7 +178,7 @@
                                 <p t-field="o.internal_notes"/>
                                 <div class="oe_structure"/>
 
-                                <div style="position:absolute;left:50%;top:1000px;">
+                                <div style="position:absolute;left:45%;top:1000px;">
                                     <div style="position:relative;left:-50%;">
                                         <p>Sur demande de votre part une copie de cet ordre d'intervention pourra être joint à la facture.</p>
                                     </div>

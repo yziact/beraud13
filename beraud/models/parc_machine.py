@@ -168,12 +168,12 @@ class StockMove(models.Model):
         parc_env = self.env['parc_machine']
 
         for move in self:
-            partner_id = move.partner_id.id or move.picking_partner_id.id
-            if move.partner_id.type == 'delivery':
-                partner_id = move.partner_id.parent_id.id
-
             if move.product_id.categ_id.is_machine:
                 parc_rec = parc_env.search([('quant_id', '=', move.quant_ids.id)])
+        
+                partner_id = move.partner_id.id or move.picking_partner_id.id
+                if move.partner_id.type == 'delivery':
+                    partner_id = move.partner_id.parent_id.id
 
                 if parc_rec:
                     print 'parc trouver'
