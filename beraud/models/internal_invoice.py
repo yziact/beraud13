@@ -348,6 +348,7 @@ class Internal_Invoice(models.Model):
 
             ### CAS FACTURE VENTE ATOM
         sale_line_ids = []
+        sale_invoice = False
         if len(list_atom) != 0:
             account_id = partner_env.browse([1]).with_context(company_id=3).property_account_receivable_id.id
             journal_id_sale = journal_env.search([('company_id', '=', 3), ('type', '=', 'sale')])[0].id

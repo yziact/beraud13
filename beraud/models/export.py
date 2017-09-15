@@ -27,7 +27,7 @@ class Export_Journal(models.Model):
     file_atm_achat = fields.Char(string='Filename', size=256, readonly=True)
     value_atm_achat = fields.Binary(readonly=True)
 
-    test = fields.Boolean('Test export', help=u"Si coché les lignes exportés ne seront pas marquées comme tel")
+    test = fields.Boolean('Test export', help=u"Si coche les lignes exportes ne seront pas marquees comme tel")
 
     def formatDate(self, dateEN):
         date = dateEN.split('-')

@@ -651,6 +651,7 @@ class MrpRepairInh(models.Model):
                     # is different than the company_id of the customer he used the product for.
 
                     isSale = False
+                    quant_company_id = repair.company_id.id
                     for quant in tech_quants :
                         quant_company_id = quant.company_id.id
                         print "quant_origin : ", quant.origin
@@ -663,6 +664,7 @@ class MrpRepairInh(models.Model):
                         'quant_ids': [6,0,tech_quants.ids],
                         'company_id': repair.company_id.id,
                         'partner_id':repair.partner_id.id,
+                        'date':repair.end_date,
                         'origin': repair.name,
                         'name': op_line.name,
                         'product_uom': op_line.product_id.uom_id.id,
@@ -682,6 +684,8 @@ class MrpRepairInh(models.Model):
 
                     move.sudo().action_confirm()
                     move.sudo().action_assign()
+                    if move.state != 'assigned':
+                        raise UserError(u"Il n'y a pas de stock réservable pour la pièce %s" % move.product_id.name)
                     move.sudo().action_done()
 
                     orig_loc_id.sudo().write({'company_id':loc_company_id})
