@@ -687,7 +687,8 @@ class MrpRepairInh(models.Model):
                     if move.state != 'assigned':
                         raise UserError(u"Il n'y a pas de stock réservable pour la pièce %s" % move.product_id.name)
                     move.sudo().action_done()
-
+                    move.sudo().write({'date':repair.end_date})
+                    
                     orig_loc_id.sudo().write({'company_id':loc_company_id})
 
                     # move_obj.action_confirm(cr, uid, move_id)
