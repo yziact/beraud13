@@ -170,32 +170,33 @@ class StockMove(models.Model):
         for move in self:
             if move.product_id.categ_id.is_machine:
                 parc_rec = parc_env.search([('quant_id', '=', move.quant_ids.id)])
-        
-                partner_id = move.partner_id.id or move.picking_partner_id.id
-                if move.partner_id.type == 'delivery':
-                    partner_id = move.partner_id.parent_id.id
 
-                if parc_rec:
-                    print 'parc trouver'
-                    parc_rec.update({
-                        'location_id': move.location_dest_id.id,
-                        'partner_id': move.partner_id.id or move.picking_partner_id.id
-                    })
-                elif move.location_dest_id.id == 9:
-                    for quant in move.quant_ids:
-                        i = 0
-                        while i < quant.qty:
-                            parc_env.create({
-                                'partner_id': partner_id,
-                                'quant_id': quant.id ,
-                                'product_id': quant.product_id.id,
-                                'lot_id': quant.lot_id.id or False,
-                                'location_id': quant.location_id.id,
-                                'company_id': move.company_id.id,
-                                'quantity': 1.0,
-                                'date_prod': move.date,
-                                'location_partner': move.partner_id.id or move.picking_partner_id.id
-                            })
-                            i += 1
+                if move.location_dest_id.id == 9:
+                    partner_id = move.partner_id.id or move.picking_partner_id.id
+                    if move.partner_id.type == 'delivery':
+                        partner_id = move.partner_id.parent_id.id
+
+                    if parc_rec:
+                        print 'parc trouver'
+                        parc_rec.update({
+                            'location_id': move.location_dest_id.id,
+                            'partner_id': move.partner_id.id or move.picking_partner_id.id
+                        })
+                    else:
+                        for quant in move.quant_ids:
+                            i = 0
+                            while i < quant.qty:
+                                parc_env.create({
+                                    'partner_id': partner_id,
+                                    'quant_id': quant.id ,
+                                    'product_id': quant.product_id.id,
+                                    'lot_id': quant.lot_id.id or False,
+                                    'location_id': quant.location_id.id,
+                                    'company_id': move.company_id.id,
+                                    'quantity': 1.0,
+                                    'date_prod': move.date,
+                                    'location_partner': move.partner_id.id or move.picking_partner_id.id
+                                })
+                                i += 1
 
         return res

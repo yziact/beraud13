@@ -2,19 +2,20 @@ import xmlrpclib
 import csv
 import sys
 from datetime import datetime
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
 username = "admin"
 pwd = "X200yziact"
-dbname = "BERAUD_24_07"
+dbname = "FACT_IS_TEST"
 
 # Connexion Odoo
-sock_common = xmlrpclib.ServerProxy("http://192.168.100.142:8069/xmlrpc/common")
+sock_common = xmlrpclib.ServerProxy("http://beraud.yziact.fr/xmlrpc/common")
 uid = sock_common.login(dbname, username, pwd)
-sock = xmlrpclib.ServerProxy("http://192.168.100.142:8069/xmlrpc/object")
+sock = xmlrpclib.ServerProxy("http://beraud.yziact.fr/xmlrpc/object")
 
-fich_ = open('BERAUD.csv', 'rb')
+fich_ = open('parcBERAUD.csv', 'rb')
 
 csvreader = csv.reader(fich_, delimiter=';')
 
@@ -27,10 +28,9 @@ row_machine = []
 row_machine_mult = []
 row_machine_ok = []
 
-
 for row in csvreader:
     machine_id = ""
-    # print i
+    print i
     if row[0] == 'Tiers':
         i += 1
         continue
@@ -45,9 +45,9 @@ for row in csvreader:
     date_prod = False
     fin_garantie = False
     if row[6]:
-        date_prod = datetime.strptime(row[6], "%d/%m/%Y")
+        date_prod = row[6]
     if row[7]:
-        fin_garantie = datetime.strptime(row[7], "%d/%m/%Y")
+        fin_garantie = row[7]
 
     tier = sock.execute(dbname, uid, pwd, 'res.partner', 'search_read', [('ref', '=', tiers)])
     if not tier:
@@ -55,8 +55,10 @@ for row in csvreader:
         # row_tier.append(i)
         continue
 
-    machine = sock.execute(dbname, uid, pwd, 'product.product', 'search_read', [('default_code', '=', type),('name', 'ilike', nom_machine)], ['id', 'name', 'default_code'])
-    if not machine or not date_prod:
+    machine = sock.execute(dbname, uid, pwd, 'product.product', 'search_read',
+                           [('default_code', '=', type), ('name', 'ilike', nom_machine)],
+                           ['id', 'name', 'default_code'])
+    if not machine:
         i += 1
         # row_machine.append(i)
         continue
@@ -64,37 +66,35 @@ for row in csvreader:
         i += 1
         # row_machine_mult.append(i)
         continue
-    else :
+    else:
         # row_machine_ok.append(i)
         machine_id = machine[0]["id"]
 
         serial = sock.execute(dbname, uid, pwd, 'stock.production.lot', 'search_read', [('name', '=', serial_num)])
         if not serial:
+            # row_serial.append(i)
+            serial_id = sock.execute(dbname, uid, pwd, 'stock.production.lot', 'create',
+                                     {'name': serial_num, 'product_id': machine_id})
+            parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
+                'product_id': machine_id,
+                'lot_id': serial_id,
+                'partner_id': tier[0]['id'],
+                'location_id': 9,
+                'company_id': 1,
+                'date_prod': date_prod,
 
-            if not fin_garantie:
-                # row_serial.append(i)
-                serial_id = sock.execute(dbname, uid, pwd, 'stock.production.lot', 'create', {'name': serial_num, 'product_id': machine_id})
+            })
+            tot += 1
+            print 'ligne cree nb : ', i
+            row_machine_ok.append(i)
+        else:
+            parc_machine = sock.execute(dbname, uid, pwd, 'parc_machine', 'search_read',
+                                        [('lot_id', '=', serial[0]['id'])])
+            if not parc_machine:
                 parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
                     'product_id': machine_id,
-                    'lot_id': serial_id,
+                    'lot_id': serial[0]['id'],
                     'partner_id': tier[0]['id'],
-                    'location_partner': tier[0]['id'],
-                    'location_id': 9,
-                    'company_id': 1,
-                    'date_prod': date_prod,
-                })
-                tot += 1
-                print 'ligne cree nb : ', i
-                row_machine_ok.append(i)
-
-            else:
-                # row_serial.append(i)
-                serial_id = sock.execute(dbname, uid, pwd, 'stock.production.lot', 'create', {'name': serial_num, 'product_id': machine_id})
-                parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
-                    'product_id': machine_id,
-                    'lot_id': serial_id,
-                    'partner_id': tier[0]['id'],
-                    'location_partner': tier[0]['id'],
                     'location_id': 9,
                     'company_id': 1,
                     'date_prod': date_prod,
@@ -104,49 +104,49 @@ for row in csvreader:
                 print 'ligne cree nb : ', i
                 row_machine_ok.append(i)
 
-        else:
-            parc_machine = sock.execute(dbname, uid, pwd, 'parc_machine', 'search_read', [('lot_id', '=', serial[0]['id'])])
-            if not parc_machine:
-                if not fin_garantie:
-                    parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
-                        'product_id': machine_id,
-                        'lot_id': serial[0]['id'],
-                        'partner_id': tier[0]['id'],
-                        'location_partner':tier[0]['id'],
-                        'location_id': 9,
-                        'company_id': 1,
-                        'date_prod': date_prod,
-                    })
-                    tot += 1
-                    print 'ligne cree nb : ', i
-                    row_machine_ok.append(i)
+            else:
+                parc_machine = sock.execute(dbname, uid, pwd, 'parc_machine', 'search_read',
+                                            [('lot_id', '=', serial[0]['id'])])
+                if not parc_machine:
+                    if not fin_garantie:
+                        parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
+                            'product_id': machine_id,
+                            'lot_id': serial[0]['id'],
+                            'partner_id': tier[0]['id'],
+                            'location_partner': tier[0]['id'],
+                            'location_id': 9,
+                            'company_id': 1,
+                            'date_prod': date_prod,
+                        })
+                        tot += 1
+                        print 'ligne cree nb : ', i
+                        row_machine_ok.append(i)
 
-                else:
-                    parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
-                        'product_id': machine_id,
-                        'lot_id': serial[0]['id'],
-                        'partner_id': tier[0]['id'],
-                        'location_partner':tier[0]['id'],
-                        'location_id': 9,
-                        'company_id': 1,
-                        'date_prod': date_prod,
-                    })
-                    tot += 1
-                    print 'ligne cree nb : ', i
-                    row_machine_ok.append(i)
+                    else:
+                        parc_machine_id = sock.execute(dbname, uid, pwd, 'parc_machine', 'create', {
+                            'product_id': machine_id,
+                            'lot_id': serial[0]['id'],
+                            'partner_id': tier[0]['id'],
+                            'location_partner': tier[0]['id'],
+                            'location_id': 9,
+                            'company_id': 1,
+                            'date_prod': date_prod,
+                            'date_guaranttee': fin_garantie,
+                        })
+                        tot += 1
+                        print 'ligne cree nb : ', i
+                        row_machine_ok.append(i)
 
     i += 1
-
 
 print 'tot ligne cree : ', tot
 print 'nb ligne csv : ', csvreader.line_num
 
 fich_.close()
 
-
 fich_ = open("/var/lib/odoo/log_parc.txt", 'wb')
 
 for machine in row_machine_ok:
-    fich_.write("ligne cree : " + str(i) + ' \n\b')
+    fich_.write("ligne cree : " + str(machine) + ' \n\b')
 
 fich_.write('total : ' + str(tot))
