@@ -169,21 +169,23 @@ class StockMove(models.Model):
 
         for move in self:
             if move.product_id.categ_id.is_machine:
-                parc_rec = parc_env.search([('quant_id', '=', move.quant_ids.id)])
-
                 if move.location_dest_id.id == 9:
                     partner_id = move.partner_id.id or move.picking_partner_id.id
+
                     if move.partner_id.type == 'delivery':
                         partner_id = move.partner_id.parent_id.id
 
-                    if parc_rec:
-                        print 'parc trouver'
-                        parc_rec.update({
-                            'location_id': move.location_dest_id.id,
-                            'partner_id': move.partner_id.id or move.picking_partner_id.id
-                        })
-                    else:
-                        for quant in move.quant_ids:
+                    for quant in move.quant_ids:
+                        parc_rec = parc_env.search([('quant_id', '=', quant)])
+
+                        if parc_rec:
+                            print 'parc trouver'
+                            parc_rec.update({
+                                'location_id': move.location_dest_id.id,
+                                'partner_id': move.partner_id.id or move.picking_partner_id.id
+                            })
+
+                        else:
                             i = 0
                             while i < quant.qty:
                                 parc_env.create({
