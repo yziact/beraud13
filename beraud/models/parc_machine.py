@@ -176,7 +176,7 @@ class StockMove(models.Model):
                         partner_id = move.partner_id.parent_id.id
 
                     for quant in move.quant_ids:
-                        parc_rec = parc_env.search([('quant_id', '=', quant)])
+                        parc_rec = parc_env.search([('quant_id', '=', quant.id)])
 
                         if parc_rec:
                             print 'parc trouver'
