@@ -336,6 +336,7 @@ class MrpRepairInh(models.Model):
                 raise UserError("Aucun projet '%s' trouvé." % proj_name)
 
             task_id = task_obj.create(cr, uid, {
+                'company_id': repair.company_id.id,
                 'project_id' : project_id.id,
                 'name' : repair.name,
                 'partner_id' : repair.partner_id.id,
