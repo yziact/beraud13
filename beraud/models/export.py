@@ -206,7 +206,7 @@ class Export_Journal(models.Model):
                             dict_sum_line[nbcompte]['Montant debit'] = 0.0
 
                         else:
-                            dict_sum_line[nbcompte]['Montant debit'] = dict_sum_line[nbcompte]['Montant debit'] + line.credit - dict_sum_line[nbcompte]['Montant credit']
+                            dict_sum_line[nbcompte]['Montant debit'] = dict_sum_line[nbcompte]['Montant debit'] + line.debit - dict_sum_line[nbcompte]['Montant credit']
                             dict_sum_line[nbcompte]['Montant credit'] = 0.0
 
                     else:
