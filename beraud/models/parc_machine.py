@@ -157,7 +157,70 @@ class StockParcMachine(models.Model):
                     i += 1
 
 
+    @api.multi
+    def action_issue(self):
+        self.ensure_one()
+        project_env = self.env['project.project']
+        user_env = self.env['res.users']
+        client = ''
+        company = ''
+        machine = ''
+        lot_id = ''
+        context = {}
 
+        if self.partner_id:
+            client = self.partner_id.id
+            company = self.partner_id.company_id.id
+
+        if self.product_id:
+            machine = self.product_id.id
+
+        if self.lot_id:
+            lot_id = self.lot_id.id
+
+        if not company:
+            user = user_env.browse(self._uid)
+            company = user.company_id.id
+
+        project = project_env.search([('name', '=', 'SAV'), ('company_id', '=', company)])
+
+        context={
+            'search_default_parc_rec': self.id,
+            'default_parc_rec': self.id,
+            'search_default_project_id': project.id,
+            'default_project_id': project.id,
+            'search_default_company_id': company,
+            'default_company_id': company,
+            'search_default_partner_id': client,
+            'default_partner_id':client,
+            'default_lot_id': lot_id,
+            'search_default_product_id': machine,
+            'default_product_id':machine
+        }
+
+        print context
+
+
+        action = {
+            'type': u'ir.actions.act_window',
+            'name': u'Historique des Incidents',
+            'res_model': u'project.issue',
+            'view_type': 'form',
+            'views': [[False, "kanban"],[False, "form"]],
+            'context': context,
+            'target': u'current',
+
+        }
+
+        return action
+
+
+class ProjectIssue(models.Model):
+    _inherit = 'project.issue'
+
+    parc_rec = fields.Many2one('parc_machine', string='Parc Machine')
+    lot_id = fields.Many2one('stock.production.lot', u'n°Série')
+    product_id = fields.Many2one('product.product', u'Machine', domain="[('categ_id','!=', False), ('categ_id.is_machine','=',True)]")
 
 class StockMove(models.Model):
     _inherit = 'stock.move'

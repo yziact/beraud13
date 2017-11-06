@@ -7,6 +7,9 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_issue" type="object" string="Incidents" class="oe_stat_button"  icon="fa-bug"/>
+                    </div>
                     <group>
                         <group>
                             <field name="partner_id"  context="{'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
@@ -92,5 +95,38 @@
 
     <!-- This Menu Item must have a parent and an action -->
     <menuitem id="parc_beraud_machine" name="Parc Machines" parent="base.menu_board_root" action="beraud_parc_machine_action"/>
+
+    <!-- LAISON INCIDENT -->
+    <!--<record id="beraud_parc_machine_incident_kanban" model="ir.ui.view">
+        <field name="name">Incidents Kanban</field>
+        <field name="model">project.issue</field>
+        <field name="inherit_id" ref="project_issue.project_issue_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="product_id" groups="no_one"/>
+                <field name="lot_id" groups="no_one"/>
+            </xpath>
+
+        </field>
+    </record>-->
+
+    <!-- Inherit Form View to Modify it -->
+    <record id="beraud_parc_machine_incident_form" model="ir.ui.view">
+        <field name="name">Incidents</field>
+        <field name="model">project.issue</field>
+        <field name="inherit_id" ref="project_issue.project_issue_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="product_id" options="{'no_create': True}"/>
+                <field name="lot_id" context="{'default_product_id': product_id}" options="{'no_create': True}"/>
+                <field name="parc_rec" options="{'no_create': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Inherit Form View to Modify it  options="{'no_create':True}"-->
+
 
 </odoo>
