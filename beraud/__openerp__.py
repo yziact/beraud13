@@ -50,6 +50,7 @@
         'views/payment_term.xml',
         'views/product_view.xml',
         'views/beraud_parc_machine.xml',
+        'views/res_users.xml',
 
         'security/ir.model.access.csv',
 

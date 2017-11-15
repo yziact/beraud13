@@ -197,12 +197,12 @@ class Internal_Invoice(models.Model):
             repair_env = self.env['mrp.repair']
             prod_env = self.env['product.product']
 
-            if line.user_id.company_id.id != line.task_id.company_id.id:
+            if line.user_id.main_company.id != line.task_id.company_id.id:
                 repair = repair_env.search([('task_id', '=', line.task_id.id)])
 
                 if repair:
                     if repair.clientsite:
-                        if line.user_id.company_id.id == 1:
+                        if line.user_id.main_company.id == 1:
                             product_time = prod_env.search([('default_code', '=', 'TBMOEX')])
 
                             time_ber.append({'quantity': line.unit_amount,
@@ -213,7 +213,7 @@ class Internal_Invoice(models.Model):
                                              'timesheet_id': line.id,
                                              })
 
-                        if line.user_id.company_id.id == 3:
+                        if line.user_id.main_company.id == 3:
                             product_time = prod_env.search([('default_code', '=', 'TAMOEX')])
 
                             time_atom.append({'quantity': line.unit_amount,
@@ -225,7 +225,7 @@ class Internal_Invoice(models.Model):
                                               })
                     else:
 
-                        if line.user_id.company_id.id == 1:
+                        if line.user_id.main_company.id == 1:
                             product_time = prod_env.search([('default_code', '=', 'TBMO')])
 
                             time_ber.append({'quantity': line.unit_amount,
@@ -236,7 +236,7 @@ class Internal_Invoice(models.Model):
                                              'timesheet_id': line.id,
                                              })
 
-                        if line.user_id.company_id.id == 3:
+                        if line.user_id.main_company.id == 3:
                             product_time = prod_env.search([('default_code', '=', 'TAMO')])
 
                             time_atom.append({'quantity': line.unit_amount,
@@ -248,7 +248,7 @@ class Internal_Invoice(models.Model):
                                               })
                 else:
 
-                    if line.user_id.company_id.id == 1:
+                    if line.user_id.main_company.id == 1:
                         product_time = prod_env.search([('default_code', '=', 'TBMO')])
 
                         time_ber.append({'quantity': line.unit_amount,
@@ -258,7 +258,7 @@ class Internal_Invoice(models.Model):
                                          'timesheet_id': line.id,
                                          })
 
-                    if line.user_id.company_id.id == 3:
+                    if line.user_id.main_company.id == 3:
                         product_time = prod_env.search([('default_code', '=', 'TAMO')])
 
                         time_atom.append({'quantity': line.unit_amount,

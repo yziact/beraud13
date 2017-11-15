@@ -7,4 +7,4 @@ import export
 import compta
 import report_sxw_rml_parse
 import calendar
-
+import res_users
