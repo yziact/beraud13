@@ -47,12 +47,14 @@ class StockParcMachine(models.Model):
     # @api.depends('partner_id', 'product_id')
     def _compute_name(self):
         print 'GET NAME'
-        name = ""
-        if self.partner_id and self.product_id :
-            name = self.partner_id.name + ' : ' + self.product_id.name
 
-        print name
-        self.name = name
+        for machine in self:
+            name = ""
+            if machine.sudo().partner_id and machine.product_id :
+                name = machine.sudo().partner_id.name + ' : ' + machine.product_id.name
+
+            print name
+            machine.name = name
 
     name = fields.Char(string="Name", compute='_compute_name')
     product_id = fields.Many2one(
