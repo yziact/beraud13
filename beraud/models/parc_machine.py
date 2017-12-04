@@ -53,7 +53,6 @@ class StockParcMachine(models.Model):
             if machine.sudo().partner_id and machine.product_id :
                 name = machine.sudo().partner_id.name + ' : ' + machine.product_id.name
 
-            print name
             machine.name = name
 
     name = fields.Char(string="Name", compute='_compute_name')
