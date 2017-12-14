@@ -249,45 +249,44 @@ class Export_Journal(models.Model):
                     tva = dict
                     montant_TVA += float("{0:.2f}".format(dict_sum_line[dict]['Montant signe']))
                 else:
-                    if str(montant_TVA) == '0.0':
-                        continue
+                    if not str(montant_TVA) == '0.0':
 
-                    total = float(dict_sum_line[dict]['Montant'])
-                    montant_test = math.fabs(montant) + math.fabs(montant_TVA)
+                        total = float(dict_sum_line[dict]['Montant'])
+                        montant_test = math.fabs(montant) + math.fabs(montant_TVA)
 
-                    print "montant : ", montant
-                    print "montant_TVA : ", montant_TVA
-                    print "montant_test : ", montant_test
-                    print "total : ", total
-
+                        print "montant : ", montant
+                        print "montant_TVA : ", montant_TVA
+                        print "montant_test : ", montant_test
+                        print "total : ", total
 
 
-                    # gestion de l erreur d arrondi, sois le total est superieur alors ajout du centime a la TVA, sois la tva est supeieur alors soustraction du centime a la TVA
-                    # TODO : il faudrait refactorer les if si-dessous avec des fonctions pour un code plus propre et lisible
 
-                    if "{0:.2f}".format(math.fabs(total)) != "{0:.2f}".format(math.fabs(montant_test)):
-                        if total > montant_test:
-                            dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) + 0.01)
-                            if '-' in dict_sum_line[tva]['Montant signe']:
-                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) - 0.01)).replace('.', ',')
+                        # gestion de l erreur d arrondi, sois le total est superieur alors ajout du centime a la TVA, sois la tva est supeieur alors soustraction du centime a la TVA
+                        # TODO : il faudrait refactorer les if si-dessous avec des fonctions pour un code plus propre et lisible
+
+                        if "{0:.2f}".format(math.fabs(total)) != "{0:.2f}".format(math.fabs(montant_test)):
+                            if total > montant_test:
+                                dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) + 0.01)
+                                if '-' in dict_sum_line[tva]['Montant signe']:
+                                    dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) - 0.01)).replace('.', ',')
+                                else:
+                                    dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
+
+                                if dict_sum_line[tva]['Sens'] == 'D':
+                                    dict_sum_line[tva]['Montant debit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) + 0.01)).replace('.', ',')
+                                else:
+                                    dict_sum_line[tva]['Montant credit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) + 0.01)).replace('.', ',')
                             else:
-                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
+                                dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) - 0.01)
+                                if '-' in dict_sum_line[tva]['Montant signe']:
+                                    dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
+                                else:
+                                    dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) - 0.01)).replace('.', ',')
 
-                            if dict_sum_line[tva]['Sens'] == 'D':
-                                dict_sum_line[tva]['Montant debit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) + 0.01)).replace('.', ',')
-                            else:
-                                dict_sum_line[tva]['Montant credit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) + 0.01)).replace('.', ',')
-                        else:
-                            dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) - 0.01)
-                            if '-' in dict_sum_line[tva]['Montant signe']:
-                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) + 0.01)).replace('.', ',')
-                            else:
-                                dict_sum_line[tva]['Montant signe'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant signe'].replace(',', '.')) - 0.01)).replace('.', ',')
-
-                            if dict_sum_line[tva]['Sens'] == 'D':
-                                dict_sum_line[tva]['Montant debit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) - 0.01)).replace('.', ',')
-                            else:
-                                dict_sum_line[tva]['Montant credit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) - 0.01)).replace('.', ',')
+                                if dict_sum_line[tva]['Sens'] == 'D':
+                                    dict_sum_line[tva]['Montant debit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant debit'].replace(',', '.')) - 0.01)).replace('.', ',')
+                                else:
+                                    dict_sum_line[tva]['Montant credit'] = ("{0:.2f}".format(float(dict_sum_line[tva]['Montant credit'].replace(',', '.')) - 0.01)).replace('.', ',')
 
                 dict_sum_line[dict]['Montant signe'] = ("{0:.2f}".format(dict_sum_line[dict]['Montant signe'])).replace('.', ',')
                 dict_sum_line[dict]['Montant debit'] = ("{0:.2f}".format(dict_sum_line[dict]['Montant debit'])).replace('.', ',')
