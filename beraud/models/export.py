@@ -249,6 +249,9 @@ class Export_Journal(models.Model):
                     tva = dict
                     montant_TVA += float("{0:.2f}".format(dict_sum_line[dict]['Montant signe']))
                 else:
+                    if str(montant_TVA) == '0.0':
+                        continue
+
                     total = float(dict_sum_line[dict]['Montant'])
                     montant_test = math.fabs(montant) + math.fabs(montant_TVA)
 
@@ -256,6 +259,8 @@ class Export_Journal(models.Model):
                     print "montant_TVA : ", montant_TVA
                     print "montant_test : ", montant_test
                     print "total : ", total
+
+
 
                     # gestion de l erreur d arrondi, sois le total est superieur alors ajout du centime a la TVA, sois la tva est supeieur alors soustraction du centime a la TVA
                     # TODO : il faudrait refactorer les if si-dessous avec des fonctions pour un code plus propre et lisible
