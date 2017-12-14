@@ -260,7 +260,7 @@ class Export_Journal(models.Model):
                     # gestion de l erreur d arrondi, sois le total est superieur alors ajout du centime a la TVA, sois la tva est supeieur alors soustraction du centime a la TVA
                     # TODO : il faudrait refactorer les if si-dessous avec des fonctions pour un code plus propre et lisible
 
-                    if "{0:.2f}".format(total) != "{0:.2f}".format(montant_test):
+                    if "{0:.2f}".format(math.fabs(total)) != "{0:.2f}".format(math.fabs(montant_test)):
                         if total > montant_test:
                             dict_sum_line[tva]['Montant'] = "{0:.2f}".format(float(dict_sum_line[tva]['Montant']) + 0.01)
                             if '-' in dict_sum_line[tva]['Montant signe']:
