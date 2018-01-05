@@ -123,7 +123,6 @@ class StockParcMachine(models.Model):
     def get_prod(self):
         return True
 
-
     @api.one
     def fix_me(self):
         cm_env = self.env['sale.subscription']
@@ -156,7 +155,6 @@ class StockParcMachine(models.Model):
                         'date_prod': move.date
                     })
                     i += 1
-
 
     @api.multi
     def action_issue(self):
@@ -215,6 +213,58 @@ class StockParcMachine(models.Model):
 
         return action
 
+    @api.multi
+    def action_repair(self):
+        self.ensure_one()
+        user_env = self.env['res.users']
+        client = ''
+        company = ''
+        machine = ''
+        lot_id = ''
+        context = {}
+
+        if self.partner_id:
+            client = self.partner_id.id
+            company = self.partner_id.company_id.id
+
+        if self.product_id:
+            machine = self.product_id.id
+
+        if self.lot_id:
+            lot_id = self.lot_id.id
+
+        if not company:
+            user = user_env.browse(self._uid)
+            company = user.company_id.id
+
+        context = {
+            'search_default_parc_rec': self.id,
+            'default_parc_rec': self.id,
+            'search_default_company_id': company,
+            'default_company_id': company,
+            'search_default_partner_id': client,
+            'default_partner_id': client,
+            'search_default_product_id': machine,
+            'default_lot_id': lot_id,
+            'default_product_id': machine,
+
+        }
+
+        print context
+
+        action = {
+            'type': u'ir.actions.act_window',
+            'name': u'Historique des Interventions',
+            'res_model': u'mrp.repair',
+            'view_type': 'form',
+            'views': [[False, "tree"], [False, "form"]],
+            'context': context,
+            'target': u'current',
+
+        }
+
+        return action
+
 
 class ProjectIssue(models.Model):
     _inherit = 'project.issue'
@@ -222,6 +272,36 @@ class ProjectIssue(models.Model):
     parc_rec = fields.Many2one('parc_machine', string='Parc Machine')
     lot_id = fields.Many2one('stock.production.lot', u'n°Série')
     product_id = fields.Many2one('product.product', u'Machine', domain="[('categ_id','!=', False), ('categ_id.is_machine','=',True)]")
+
+
+class MrpRepair(models.Model):
+    _inherit = 'mrp.repair'
+
+    parc_rec = fields.Many2one('parc_machine', string='Parc Machine')
+
+    @api.multi
+    def onchange_product_id(self, product_id=None):
+        """
+        if you try to create a repair with a lot_id set in the context, the onchange come after and empty the field and we don't want that.
+        :param product_id:
+        :return: dict
+        """
+
+        context = self._context or {}
+        lot = self.lot_id.id or context.get('default_lot_id', False)
+        res = super(MrpRepair, self).onchange_product_id(product_id)
+
+        lot_id = self.env['stock.production.lot'].browse(lot)
+
+        print(lot_id, product_id)
+        if lot_id and product_id:
+            if lot_id.product_id.id == product_id:
+                res['value']['lot_id']=lot_id
+
+
+        return res
+
+
 
 class StockMove(models.Model):
     _inherit = 'stock.move'

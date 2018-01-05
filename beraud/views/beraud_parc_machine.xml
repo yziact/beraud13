@@ -9,6 +9,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_issue" type="object" string="Incidents" class="oe_stat_button"  icon="fa-bug"/>
+                        <button name="action_repair" type="object" string="Interventions" class="oe_stat_button"  icon="fa-wrench"/>
                     </div>
                     <group>
                         <group>
@@ -126,7 +127,19 @@
         </field>
     </record>
 
-    <!-- Inherit Form View to Modify it  options="{'no_create':True}"-->
+    <!-- Inherit Form View to Modify it -->
+    <record id="beraud_parc_mmachine_repiar_form" model="ir.ui.view">
+        <field name="name">Interventions</field>
+        <field name="model">mrp.repair</field>
+        <field name="inherit_id" ref="mrp_repair.view_repair_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='lot_id']" position="after">
+                <field name="parc_rec"/>
+            </xpath>
+
+        </field>
+    </record>
 
 
 </odoo>
