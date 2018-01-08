@@ -8,8 +8,25 @@
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_issue" type="object" string="Incidents" class="oe_stat_button"  icon="fa-bug"/>
-                        <button name="action_repair" type="object" string="Interventions" class="oe_stat_button"  icon="fa-wrench"/>
+
+                        <button name="action_issue" type="object"  class="oe_stat_button"  icon="fa-bug">
+                            <div class="o_form_field o_stat_info">
+                                <label for="count_issue_tot" string="Incidents"/>
+                                <span class="o_stat_value">
+                                    <field name="count_issue_act" widget="integer" />
+                                    (<field name="count_issue_tot" widget="integer" />)
+                                </span>
+                            </div>
+                        </button>
+
+                        <button name="action_repair" type="object"  class="oe_stat_button"  icon="fa-wrench">
+                            <div class="o_form_field o_stat_info">
+                                <label for="count_repair_tot" string="Interventions"/>
+                                <span class="o_stat_value">
+                                    <field name="count_repair_tot" widget="integer"/>
+                                </span>
+                            </div>
+                        </button>
                     </div>
                     <group>
                         <group>
@@ -95,7 +112,8 @@
     </record>
 
     <!-- This Menu Item must have a parent and an action -->
-    <menuitem id="parc_beraud_machine" name="Parc Machines" parent="base.menu_board_root" action="beraud_parc_machine_action"/>
+    <!--<menuitem id="parc_beraud_machine" name="Parc Machines" parent="base.menu_board_root" action="beraud_parc_machine_action"/>-->
+    <menuitem id="parc_beraud_machine" name="Parc Machines" web_icon="beraud,static/description/icon.png" action="beraud_parc_machine_action"/>
 
     <!-- LAISON INCIDENT -->
     <!--<record id="beraud_parc_machine_incident_kanban" model="ir.ui.view">
@@ -127,8 +145,21 @@
         </field>
     </record>
 
+    <record id="beraud_parc_issue_filter" model="ir.ui.view">
+        <field name="name">Project Issue Tracker Search</field>
+        <field name="model">project.issue</field>
+        <field name="inherit_id" ref="project_issue.view_project_issue_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="after">
+                <field name="parc_rec" />
+                <field name="lot_id" />
+                <field name="product_id" />
+            </xpath>
+        </field>
+    </record>
+
     <!-- Inherit Form View to Modify it -->
-    <record id="beraud_parc_mmachine_repiar_form" model="ir.ui.view">
+    <record id="beraud_parc_mmachine_repair_form" model="ir.ui.view">
         <field name="name">Interventions</field>
         <field name="model">mrp.repair</field>
         <field name="inherit_id" ref="mrp_repair.view_repair_order_form"/>
@@ -141,5 +172,16 @@
         </field>
     </record>
 
+    <record id="beraud_parc_repair_filter" model="ir.ui.view">
+        <field name="name">Repair Search</field>
+        <field name="model">mrp.repair</field>
+        <field name="inherit_id" ref="mrp_repair.view_repair_order_form_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="parc_rec" />
+                <field name="lot_id" />
+            </xpath>
+        </field>
+    </record>
 
 </odoo>

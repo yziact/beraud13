@@ -72,6 +72,13 @@ class StockParcMachine(models.Model):
     cm = fields.Boolean(string="Contrat de maintenance")
     location_partner = fields.Many2one('res.partner', string=u"Emplacement clients", domain="['|',('id', '=', partner_id), '&', ('type','=','delivery'), ('parent_id','=',partner_id)]")
 
+    ##### INTEGER ####
+    count_issue_tot = fields.Integer(compute='_compute_nb_issues')
+    count_issue_act = fields.Integer(compute='_compute_nb_issues')
+    count_repair_tot = fields.Integer(compute='_compute_nb_repair')
+
+
+
     @api.model
     def create(self, vals):
         print vals.keys()
@@ -122,6 +129,24 @@ class StockParcMachine(models.Model):
 
     def get_prod(self):
         return True
+
+    @api.multi
+    def _compute_nb_issues(self):
+        issue_env = self.env['project.issue']
+        for machine in self:
+            issues = issue_env.search([('parc_rec', '=',machine.id)])
+            act_issues = issue_env.search([('parc_rec', '=',machine.id), ('active','=', True), ('stage_id.closed', '=',False)])
+
+            machine.count_issue_tot = len(issues)
+            machine.count_issue_act = len(act_issues)
+
+    @api.multi
+    def _compute_nb_repair(self):
+        repair_env = self.env['mrp.repair']
+        for machine in self:
+            repairs = repair_env.search([('parc_rec','=',machine.id)])
+
+            machine.count_repair_tot = len(repairs)
 
     @api.one
     def fix_me(self):
