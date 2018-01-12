@@ -156,8 +156,9 @@ class StockPicking(models.Model):
 
             #print "pick.picking_type_id.name : ", pick.picking_type_id.name
             # if the picking is a reception, we don't do anything
-            if pick.picking_type_id.name == u'Réceptions' or\
-               pick.picking_type_id.name == u'Receipts':
+            print(pick.picking_type_id.name)
+
+            if u'Réceptions'in pick.picking_type_id.name  or u'Receipts' in pick.picking_type_id.name:
                 print "[action_assign] reception, calling super"
                 super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
