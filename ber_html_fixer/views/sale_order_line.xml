@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="so_line_tree_inh" model="ir.ui.view">
+        <field name="name">SO Line Tree</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="widget">html_fixer</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
