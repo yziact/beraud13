@@ -6,13 +6,14 @@ import sys
 sys.path.insert(0, '..')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
+sys.path.insert(0, '/mnt/extra-addons/')
 from utilsmod import utilsmod
 
 from openerp.exceptions import UserError
 
 from lxml import etree
 
-import logging 
+import logging
 _logger = logging.getLogger(__name__)
 
 class StockPicking(models.Model):
@@ -40,13 +41,13 @@ class StockPicking(models.Model):
         print "loc_src_id : ", loc_src_id
         print "loc_dst_id : ", loc_dst_id
 
-        if c_dst_id == 3: # dest is Beraud 
+        if c_dst_id == 3: # dest is Beraud
             loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
             loc_dst_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
 
         loc_src_obj = loc_obj.browse(cr, uid, loc_src_id)
         loc_dst_obj = loc_obj.browse(cr, uid, loc_dst_id)
-        
+
         wizard_id = self.pool.get('wizard.transfer.stock.intercompany').create(cr, uid, {
             'company_src_id':c_src_id, # Beraud
             #'location_src_id':move.product_id.location_id.id, # is NULL...

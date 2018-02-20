@@ -7,12 +7,13 @@ import sys
 sys.path.insert(0, '..')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
+sys.path.insert(0, '/mnt/extra-addons/')
 from utilsmod import utilsmod
 from openerp.exceptions import UserError
 
 import datetime
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
-import logging 
+import logging
 _logger = logging.getLogger(__name__)
 
 no_tech_loc_error_default = "Tech has no assigned locations, field filled with default values"
@@ -151,7 +152,7 @@ class MrpRepairInh(models.Model):
     # internal bl, from stock to tech stock, for client site repairs
     bl_internal = fields.Many2one('stock.picking')
 
-    # task associated to 
+    # task associated to
     task_id = fields.Many2one('project.task')
 
     # moves generated linked to our OR
@@ -689,7 +690,7 @@ class MrpRepairInh(models.Model):
                         raise UserError(u"Il n'y a pas de stock réservable pour la pièce %s" % move.product_id.name)
                     move.sudo().action_done()
                     move.sudo().write({'date':repair.end_date})
-                    
+
                     orig_loc_id.sudo().write({'company_id':loc_company_id})
 
                     # move_obj.action_confirm(cr, uid, move_id)
@@ -817,7 +818,7 @@ class MrpRepairLine(models.Model):
             # check for errors getting the tech loc id
             if not tech_loc_id:
                 raise UserError("Problem while finding the tech location. He probably has no location assigned.")
-            # line from tech stock to client stock 
+            # line from tech stock to client stock
             repair_line.location_id = tech_loc_id.id
             repair_line.location_dest_id = repair_line.repair_id.location_dest_id.id
             return repair_line
@@ -964,7 +965,7 @@ class MrpRepairLine(models.Model):
         print "[%s] mrp_repair_line WRITE_LINE_WITH_MOVE" % __name__
         # if there is an associated move, unreserve it, modify it, reserve it again
 
-        if line.associated_move : 
+        if line.associated_move :
             line.associated_move.do_unreserve()
 
             line.associated_move.write({
@@ -991,7 +992,7 @@ class MrpRepairLine(models.Model):
             if repair_line.associated_move :
                 # first we remove the move from repair_id.linked_moves
                 for move in repair_line.repair_id.linked_moves:
-                    if move.id == repair_line.associated_move.id : 
+                    if move.id == repair_line.associated_move.id :
                         print "repair_id.linked_moves before ", repair_line.repair_id.linked_moves
                         repair_line.repair_id.write({'linked_moves' : [(3, move.id)] })
                         print "repair_id.linked_moves after ", repair_line.repair_id.linked_moves
@@ -1030,7 +1031,7 @@ class StockMove(models.Model):
         # call super
         # get all quants with our move_id, and set their origin to
         # the company_id of the stock_location they come from.
-        # It will be the company stock their belonged to "originally", 
+        # It will be the company stock their belonged to "originally",
         # before they were used for a repair.
 
         print "STOCK_MOVE our action_done"
@@ -1040,7 +1041,7 @@ class StockMove(models.Model):
 
         for move in self.browse(cr, uid, ids, context=context):
 
-            for quant in move.quant_ids : 
+            for quant in move.quant_ids :
                 quant.sudo().origin = quant.sudo().company_id
                 print "*** quant origin in move id _%s_ set to _%s_ ***" % (move.id, move.origin)
 

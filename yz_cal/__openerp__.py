@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "beraud",
+    'name': "Yz Calendar Beraud",
 
     'summary': """
         Module beraud """,
 
     'description': """
-        Module beraud
-    """,
+        Module beraud """,
 
     'author': "Yziact",
     'website': "http://www.yziact.fr",

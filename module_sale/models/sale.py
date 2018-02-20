@@ -10,12 +10,10 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-
 sys.path.insert(0, '..')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud/')
 sys.path.insert(0, '/var/lib/odoo/odoo-beraud2')
-
-
+sys.path.insert(0, '/mnt/extra-addons/')
 
 
 class SaleOrderLine(models.Model):
@@ -275,7 +273,7 @@ class ReportInherited(models.Model):
             # second_header.append(header)
 
         res = super(ReportInherited, self).get_pdf(cr, uid, ids, report_name, html, data, context)
-        
+
         # if the report isn't the sale report, we don't need to further modify it.
         if report_name != "module_sale.report_mysaleorder":
             return res
@@ -309,7 +307,7 @@ class ReportInherited(models.Model):
             wmark = PageMerge().add(wmark_page, viewrect=(0, 0.1, 1, 0.1))[0]
             wmark.scale(0.6, 0.6)
             # (0,0) is bottom left
-            wmark.x = 15 
+            wmark.x = 15
             wmark.y = 725
             # Add the watermark to the page
             PageMerge(page).add(wmark).render()
