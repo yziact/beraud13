@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<openerp>
+	<data>
+
+        <record id="figures_view_yzi" model="ir.ui.view">
+            <field name="name">sale.report.figures</field>
+            <field name="model">sale.report</field>
+            <field name="type">kanban</field>
+            <!--field name="inherit_id" ref=""/-->
+            <field name="arch" type="xml">
+                <kanban create="false" default_group_by="">
+                    <field name="display_name"/>
+                    <!--<field name="date_order"/>
+                    <field name="state"/>-->
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="o_primary">
+                                <p>Heyyyyy hoooo!</p>
+                                <field name="display_name"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+
+            </field>
+        </record>
+
+
+        <record id="display_figures_view_yzi" model="ir.actions.act_window">
+            <field name="name">Chiffres clefs</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.report</field>
+            <!--<field name="view_mode">tree,form</field>-->
+            <field name="view_mode">kanban,tree</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                ♫ - This is just the tribute,[...] the greatest in the wolrd... - ♪
+              </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="menu_figures" name="Chiffres clAIENTfs" parent="base.menu_sale_report" action="display_figures_view_yzi" />
+    </data>
+</openerp>
