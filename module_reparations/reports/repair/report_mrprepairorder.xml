@@ -31,6 +31,10 @@
                                     <span t-field="o.partner_id.ref"/>
                                 </h6>
 
+                                <h4>
+                                    <span t-if="o.titre" t-field="o.titre"/>
+                                </h4>
+
                                 <table id="cart" class="table table-condensed table-bordered">
                                     <style>
                                         #cart {

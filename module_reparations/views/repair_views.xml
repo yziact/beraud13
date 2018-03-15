@@ -4,14 +4,6 @@
 
         <!-- WORKFLOW STUFF -->
         <!-- activity -->
-        <!--
-        <record id="act_confirm" model="workflow.activity">
-          <field name="wkf_id" ref="wkf_repair"/>
-          <field name="name">confirm</field>
-          <field name="kind">function</field>
-          <field name="action">action_confirm()</field>
-          <field name="split_mode">OR</field>
-        </record> -->
         <record id="act_valid" model="workflow.activity">
             <field name="wkf_id" ref="mrp_repair.wkf_repair"/>
             <field name="name">validate</field>
@@ -20,12 +12,7 @@
             <field name="split_mode">OR</field>
         </record>
         <!-- transition -->
-        <!--
-        <record id="trans_draft_confirm" model="workflow.transition">
-          <field name="act_from" ref="act_draft"/>
-          <field name="act_to" ref="act_confirm"/>
-          <field name="signal">repair_confirm</field>
-        </record> -->
+
         <record id="trans_draft_valid" model="workflow.transition">
             <field name="act_from" ref="mrp_repair.act_draft"/>
             <field name="act_to" ref="module_reparations.act_valid"/>
@@ -125,30 +112,14 @@
                     <field name="client_order_ref" string="Référence client"/>
                 </xpath>
 
+                <xpath expr="//field[@name='name']" position="after">
+                    <div>
+                        <field name="titre"/>
+                    </div>
+                </xpath>
+
             </field>
         </record>
-
-
-
-        <!-- CALENDAR POPUP VIEW -->
-        <!-- important to set the priority to 2 so it doesn't override the view_repair_form_inherited -->
-        <!--
-                      <field name="tech" attrs="{'invisible': [('clientsite', '!=', False)]}" />
-          <div name="button_box" position="inside">
-          <button name="106" type="action" icon="fa-sitemap" class="oe_stat_button" attrs="{'invisible': [('product_variant_count', '&lt;=', 1)]}" groups="product.group_product_variant">
-          <field string="Variants" name="product_variant_count" widget="statinfo"/>
-          </button>
-          </div>
-          <record model="ir.ui.view" id="calendar_popup">
-          <field name="name">Beraud Calendar Popup</field>
-          <field name="model">mrp.repair</field>
-          <field name="arch" type="xml">
-            <form string="Reparation">
-              <field name="date_start" />
-            </form>
-          </field>
-          </record>
-          -->
 
         <!-- CALENDAR VIEW -->
         <record model="ir.ui.view" id="view_repair_calendar_inherited">
@@ -165,20 +136,6 @@
                 </calendar>
             </field>
         </record>
-
-        <!-- TREE VIEW -->
-        <!-- works fine, but not needed
-        <record model="ir.ui.view" id="view_tree_inherited">
-          <field name="name">Repair Tree View</field>
-          <field name="model">mrp.repair</field>
-          <field name="inherit_id" ref="mrp_repair.view_repair_order_tree" />
-          <field name="type">form</field>
-          <field name="arch" type="xml">
-            <tree position="attributes">
-              <attribute name="colors">red:state=='draft'</attribute>
-            </tree>
-          </field>
-        </record> -->
 
         <!-- ACTION -->
         <!-- id format important to override mrp.repair original action.. -->

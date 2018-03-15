@@ -158,6 +158,10 @@ class MrpRepairInh(models.Model):
     # moves generated linked to our OR
     linked_moves = fields.Many2many('stock.move')
 
+    internal_notes = fields.Html()
+    quotation_notes = fields.Html()
+    titre = fields.Char()
+
     def open_task_line(self, cr, uid, ids, context=None):
         print "open_task_like button clicked"
 
