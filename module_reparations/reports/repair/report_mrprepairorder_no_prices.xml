@@ -23,6 +23,14 @@
                                     <span t-field="o.name" />
                                 </h3>
 
+                                <h6>
+                                    <div>
+                                        <span t-if="o.contact"> <strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/>, tel: <span t-field="o.contact.phone"/> / <span t-field="o.contact.email"/> </span>
+                                    </div>
+                                    <!--<strong>Ref. Client : </strong>
+                                    <span t-field="o.partner_id.ref"/>-->
+                                </h6>
+
 
                                 <table id="cart" class="table table-condensed table-bordered">
                                     <style>
@@ -169,14 +177,15 @@
                                         </tbody>
                                     </table>
                                 </t>
-                                <div class="row">
-                                    <div class="col-xs-2 col-xs-offset-8">
-                                        <p> Signature du client : </p>
-                                    </div>
-                                </div>
 
                                 <p t-field="o.internal_notes"/>
                                 <div class="oe_structure"/>
+
+                                <div class="row">
+                                    <div class="col-xs-3 col-xs-offset-8" style="margin-top: 50px;">
+                                        <p> Date et signature du client : </p>
+                                    </div>
+                                </div>
 
                                 <div style="position:absolute;left:45%;top:1000px;">
                                     <div style="position:relative;left:-50%;">

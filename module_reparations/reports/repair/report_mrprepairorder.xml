@@ -25,7 +25,7 @@
                                 </h3>
                                 <h6>
                                     <div>
-                                        <span t-if="o.contact"><strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/> / <span t-field="o.contact.email"/> </span>
+                                        <span t-if="o.contact"> <strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/>, tel: <span t-field="o.contact.phone"/> / <span t-field="o.contact.email"/> </span>
                                     </div>
                                     <strong>Ref. Client : </strong>
                                     <span t-field="o.partner_id.ref"/>
@@ -217,6 +217,7 @@
                                     </div>
                                 </div>
 
+
                                 <p t-if="o.state == 'draft'">Toutes les pièces supplémentaires utilisées suite au
                                     démontage seront facturées en plus, ainsi que les heures de main d'oeuvre
                                     supplémentaires.
@@ -224,6 +225,11 @@
 
                                 <p t-field="o.quotation_notes"/>
                                 <div class="oe_structure"/>
+                                <div class="row">
+                                    <div class="col-xs-3 col-xs-offset-8" style="margin-top: 50px;">
+                                        <p> Date et signature du client : </p>
+                                    </div>
+                                </div>
                             </div>
                         </t>
                     </t>
