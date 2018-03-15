@@ -25,7 +25,7 @@
                                 </h3>
                                 <h6>
                                     <div>
-                                        <span t-if="o.contact"> <strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/>, tel: <span t-field="o.contact.phone"/> / <span t-field="o.contact.email"/> </span>
+                                        <span t-if="o.contact"> <strong>A l'attention de :</strong> <span t-field="o.contact.title.shortcut"/> <span t-field="o.contact.name"/> / <span t-field="o.contact.phone"/> / <span t-field="o.contact.email"/> </span>
                                     </div>
                                     <strong>Ref. Client : </strong>
                                     <span t-field="o.partner_id.ref"/>
