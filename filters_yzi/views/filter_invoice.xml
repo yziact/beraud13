@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<openerp>
+	<data>
+
+        <!-- Filtres Factures -->
+        <record id="_custom_filters_invoice" model="ir.ui.view">
+            <field name="name">Filtres temporels</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//search" position="inside">
+                    <field name="date_invoice"/>
+
+                    <filter string="Aujourd'hui" name="current_day" domain="[('date_invoice','=',context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Mois précédent" name="previous_month" domain="[('date_invoice','&lt;=',(context_today()-relativedelta(months=1, day=31)).strftime('%Y-%m-%d')),('date_invoice','&gt;=',(context_today()-relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                    <filter string="Mois en cours" name="current_month" domain="[('date_invoice','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-%d')),('date_invoice','&lt;=',time.strftime('%Y-%m-%d'))]"/>
+                    <filter string="Année précédente" name="previous_year" domain="[('date_invoice','&lt;=',(context_today()-relativedelta(years=1)).strftime('%Y-12-31')),('date_invoice','&gt;=',(context_today()-relativedelta(years=1)).strftime('%Y-01-01'))]"/>
+                    <filter string="Année en cours" name="current_year" domain="[('date_invoice','&lt;=',context_today().strftime('%Y-12-31')),('date_invoice','&gt;',time.strftime('%Y-01-01'))]"/>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>
