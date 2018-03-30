@@ -23,7 +23,7 @@ class SaleOrderLine(models.Model):
 
     @api.multi
     def _prepare_invoice_line(self, qty):
-        print "[%s] sale.order.line our _prepare_invoice_line" % __name__
+        # print "[%s] sale.order.line our _prepare_invoice_line" % __name__
 
         account_env = self.env['account.account']
         partner_company_id = self.order_id.partner_id.company_id.id
@@ -47,7 +47,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
     @api.multi
     def create_invoices(self):
-        print "[%s] sale.advance.payment.inv our create_invoices" % __name__
+        # print "[%s] sale.advance.payment.inv our create_invoices" % __name__
 
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
         ret = {}
@@ -140,7 +140,6 @@ class SaleOrderInherit(models.Model):
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
-
 
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"

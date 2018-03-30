@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<openerp>
+	<data>
+
+        <!-- Filtre Bons de commandes -->
+        <record id="custom_filters_order" model="ir.ui.view">
+            <field name="name">Filtres temporels</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <!--field name="search_view_id" ref="filters_yzi.custom_filters_order"/-->
+            <field name="arch" type="xml">
+
+                <xpath expr="//search" position="inside">
+                    <field name="date_order"/>
+                    <field name="state"/>
+
+                    <!-- ToCheck D'après la tâche : remplacer date_order /=> create_order -->
+
+                    <filter string="Aujourd'hui" name="current_day" domain="[('date_order','&lt;=',context_today().strftime('%Y-%m-%d')),('date_order','&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Mois précédent" name="previous_month" domain="[('date_order','&lt;=',(context_today()-relativedelta(months=1, day=31)).strftime('%Y-%m-%d')),('date_order','&gt;=',(context_today()-relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                    <filter string="Mois en cours" name="current_month" domain="[('date_order','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-%d')),('date_order','&lt;=',time.strftime('%Y-%m-%d'))]"/>
+                    <filter string="Mois prochain" name="next_month" domain="[('date_order','&lt;=',(context_today()+relativedelta(months=1)).strftime('%Y-%m-%d')),('date_order','&gt;',time.strftime('%Y-%m-%d'))]"/>
+                    <filter string="3 prochains mois" name="next_three_months" domain="[('date_order','&lt;',(context_today()+relativedelta(months=4)).strftime('%Y-%m-%d')),('date_order','&gt;',time.strftime('%Y-%m-%d'))]"/>
+                    <filter string="Année précédente" name="previous_year" domain="[('date_order','&lt;=',(context_today()-relativedelta(years=1)).strftime('%Y-12-31')),('date_order','&gt;=',(context_today()-relativedelta(years=1)).strftime('%Y-01-01'))]"/>
+                    <filter string="Année en cours" name="current_year" domain="[('date_order','&lt;=',context_today().strftime('%Y-12-31')),('date_order','&gt;',time.strftime('%Y-01-01'))]"/>
+                    <filter string="Année prochaine" name="next_year" domain="[('date_order','&lt;=',(context_today()+relativedelta(years=1)).strftime('%Y-12-31')),('date_order','&gt;=',(context_today()+relativedelta(years=1)).strftime('%Y-01-01'))]"/>
+
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="display_filters_order" model="ir.actions.act_window">
+            <field name="name">Devis &amp; bons de commande</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">tree,form</field>
+            <field name="inherit_id" ref="sale.action_orders"/>
+            <field name="search_view_id" ref="filters_yzi.custom_filters_order"/>
+        </record>
+
+    </data>
+</openerp>
