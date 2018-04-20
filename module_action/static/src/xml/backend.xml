@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <template id="assets_backend" name="yz_action_crm" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/module_action/static/src/js/sales_team_dashboard.js"></script>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>

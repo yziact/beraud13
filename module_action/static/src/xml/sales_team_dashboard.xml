@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-extend="sales_team.SalesDashboard">
+        <t t-jquery="td[title='To Activities'] a[data-extra='today']" t-operation="replace">
+            <!--<name value="module_action.action_list_actions"/>-->
+            <a href="#" class="o_dashboard_action" name="module_action.crm_lead_action_activities" data-extra="today">
+                <span class="o_highlight">
+                    <t t-if="!show_demo">
+                        <t t-esc="values['activity']['today']"/>
+                    </t>
+                </span>
+                <br/>
+                Next Actions
+            </a>
+        </t>
+        <t t-jquery="td[title='To Activities'] a[data-extra='this_week']" t-operation="replace">
+            <a href="#" class="o_dashboard_action" name="module_action.crm_lead_action_activities" data-extra="this_week">
+                <span class="o_highlight">
+                    <t t-if="!show_demo">
+                        <t t-esc="values['activity']['next_7_days']"/>
+                    </t>
+                </span>
+            </a>
+        </t>
+        <!--<t t-jquery="td[title='To Activities'] a[data-extra='overdue']" t-operation="replace">
+            <a href="#" class="o_dashboard_action" name="module_action.action_list_actions" data-extra="overdue">
+                <span class="o_highlight">
+                    <t t-if="!show_demo">
+                        <t t-esc="values['activity']['overdue']"/> overdue
+                    </t>
+                </span>
+            </a>
+        </t>-->
+
+        <t t-jquery="td[class='o_warning']:first" t-operation="replace">
+            <td title="To Activities" t-if="values and values['activity']['overdue'] == 0">
+            </td>
+            <td title="To Activities" t-if="show_demo or (values and values['activity']['overdue'] != 0)" class="o_warning">
+                <a href="#" class="o_dashboard_action" name="module_action.crm_lead_action_activities" data-extra="overdue">
+                    <span class="o_highlight">
+                        <t t-if="!show_demo">
+                            <t t-esc="values['activity']['overdue']"/> overdue
+                        </t>
+                    </span>
+                </a>
+            </td>
+
+        </t>
+    </t>
+</templates>
+

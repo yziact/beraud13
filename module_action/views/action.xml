@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="action_com_tree" model="ir.ui.view">
+        <field name="name">Action Commerciale</field>
+        <field name="model">crm_yziact.action</field>
+        <field name="arch" type="xml">
+            <tree name="action_tree">
+                <field name="date"/>
+                <field name="type"/>
+                <field name="company_id" string="Société"/>
+                <field name="contact_id" string="Contact"/>
+                <field name="lead_id"/>
+                <field name="date_filter" invisible="1"/>
+                <!--<field name="description"/>-->
+                <field name="name"/>
+                 <field name="sale_id"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_com_form" model="ir.ui.view">
+        <field name="name">Action Commerciale</field>
+        <field name="model">crm_yziact.action</field>
+        <field name="arch" type="xml">
+            <form name="action_form">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="planned,running,done" clickable="True" />
+                </header>
+                <sheet options="{'no_quick_create': True}">
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h2>
+                            <field name="name" class="no_label"/>
+                        </h2>
+                    </div>
+                    <group name="parent">
+                        <group name="child_one">
+                            <field name="company_id" string="Société" options="{'no_create': True}"/>
+                            <field name="contact_id" string="Contact"/>
+                            <field name="sale_id"/>
+                            <field name="lead_id"/>
+                        </group>
+                        <group name="child_two">
+                            <field name="user_id" attrs="{'required':[('synchro','=',True)]}"/>
+                            <field name="type"/>
+                            <field name="synchro" invisible="1"/>
+                            <!--<field name="event_id" attrs="{'invisible':[('synchro','!=',True)]}"/>-->
+                            <field name="event_id" attrs="{'invisible':True}"/>
+                            <field name="date" required="1"/>
+                            <field name="date_debut" groups="base.group_no_one"/>
+                            <field name="date_end" attrs="{'invisible':[('synchro','!=',True)]}"/>
+                            <field name="date_filter" invisible="1"/>
+                        </group>
+                        <separator/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread" options="{'thread_level': 1}"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="action_com_search">
+        <field name="name">Recherche Actions Commerciales</field>
+        <field name="model">crm_yziact.action</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id" string="Assigné à"/>
+                <field name="company_id" string="Société"/>
+                <field name="contact_id" string="Contact"/>
+                <field name="date_filter"/>
+                <field name="type"/>
+                <field name="description"/>
+                <field name="sale_id"/>
+                <field name="lead_id"/>
+
+                <filter name="my_actions" string="Mes Actions" domain="[('user_id','=', uid)]"/>
+                <filter string="Ce mois" name="current_month" domain="[('status','!=','done'),('date_filter','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('date_filter','>=',time.strftime('%%Y-%%m-01'))]"/>
+                <filter name="type_lead" string="Piste / Opp" domain="[('regarding','=','lead')]"/>
+                <filter name="type_company" string="Compte" domain="[('regarding','=','company')]"/>
+                <filter name="type_contact" string="Contact" domain="[('regarding','=','contact')]"/>
+                <filter name="type_sale" string="Vente" domain="[('regarding','=','sale')]"/>
+                <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                <filter string="Action du jour" name="today"
+                            domain="[('status','!=','done'), ('date_filter', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Action de la semaines" name="this_week"
+                            domain="['&#38;',('status','!=','done'),
+                            '&#38;', ('date_filter', '&gt;=', context_today().strftime('%Y-%m-%d')),('date_filter', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
+                            ]"/>
+
+                <group string="regrouper par :" name="group_by">
+                    <filter name="group_by_company" string="Société" context="{'group_by': 'company_id'}"/>
+                    <filter name="group_by_contact" string="Contact" context="{'group_by': 'contact_id'}"/>
+                    <filter name="group_by_date" string="Date" context="{'group_by': 'date_filter'}"/>
+                    <filter name="group_by_type" string="Type" context="{'group_by': 'type'}"/>
+                         <filter name="group_by_vente" string="Ventes" context="{'group_by': 'sale_id'}"/>
+                    <filter name="group_by_regarde" string="Concernant" context="{'group_by': 'regarding'}" />
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_list_actions">
+        <field name="name">Actions Commerciales</field>
+        <field name="res_model">crm_yziact.action</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{
+            'search_default_group_by_regarde': 1,
+            'search_default_status':['planned', 'running']
+            }
+        </field>
+    </record>
+
+    <menuitem id="menu_action_com" parent="base.menu_base_partner" name="Actions Commerciales" sequence="10" action="action_list_actions" groups="base.group_user" />
+
+
+    <!--Inherit Mail Activity Type-->
+
+    <!-- Inherit Form View to Modify it -->
+    <record id="action_com_mail_type_inherit" model="ir.ui.view">
+        <field name="name">Action com Mail TYPE</field>
+        <field name="model">crm.activity</field>
+        <field name="inherit_id" ref="crm.crm_activity_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='default']" position="after">
+                <field name="synchro"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+</odoo>
