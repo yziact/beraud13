@@ -680,6 +680,7 @@ class MrpRepairInh(models.Model):
                         'location_dest_id': dest_loc_id.id, #line location
                         'restrict_lot_id': op_line.lot_id.id,
                         'isSale': isSale,
+                        'created_from_repair':True,
                     })
                     move = move_obj.browse(cr, uid, move_id)
 

@@ -218,6 +218,8 @@ class StockMove(models.Model):
     stock_qty_ber_reserved = fields.Float(compute='_compute_stock_nums', string=u"Quantité Réservée Stock Beraud")
     stock_qty_atom_reserved = fields.Float(compute='_compute_stock_nums', string=u"Quantité Réservée Stock Atom")
 
+    created_from_repair = fields.Boolean()
+
     @api.multi
     def _compute_stock_nums(self):
         ''' function called to fill all four fields of the stock_move.
@@ -312,13 +314,13 @@ class StockQuants(models.Model):
         :product: browse record of the product to find
         :qty in UoM of product
         """
-        #print ">>>>>>>>>>>>> our quants_get <<<<<<<<<<<<<<<<"
-        domain = domain or [('qty', '>', 0.0)]
-        domain = [d for d in domain if d[0] != 'company_id']
-        if move.location_id.company_id.id :
-            domain.append(('company_id', '=', move.location_id.company_id.id))
-        print "[our_quants_get] new domain : ", domain
-        # set company_id to move.location_id.company_id.
+        if not move.created_from_repair:
+            if move.picking_type_id and move.picking_type_id.id not in [18,19]:
+                domain = domain or [('qty', '>', 0.0)]
+                domain = [d for d in domain if d[0] != 'company_id']
+                if move.location_id.company_id.id :
+                    domain.append(('company_id', '=', move.location_id.company_id.id))
+
         return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain, removal_strategy=removal_strategy, context=context)
 
 
