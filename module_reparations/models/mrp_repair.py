@@ -520,6 +520,7 @@ class MrpRepairInh(models.Model):
                         'picking_type_id': picking_type_internal[0],
                         'location_id': stock_loc_id.id,
                         'location_dest_id': tech_loc_id.id,
+                        'repair_id':repair.id,
                     })
 
                     for line in repair.operations:
