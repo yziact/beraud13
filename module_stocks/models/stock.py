@@ -314,13 +314,16 @@ class StockQuants(models.Model):
         :product: browse record of the product to find
         :qty in UoM of product
         """
-        if not move.created_from_repair:
-            if move.picking_type_id and move.picking_type_id.id not in [18,19]:
-                domain = domain or [('qty', '>', 0.0)]
-                domain = [d for d in domain if d[0] != 'company_id']
-                if move.location_id.company_id.id :
-                    domain.append(('company_id', '=', move.location_id.company_id.id))
+        if move.picking_type_id.id not in [18, 19]:
 
-        return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain, removal_strategy=removal_strategy, context=context)
+            domain = domain or [('qty', '>', 0.0)]
+            domain = [d for d in domain if d[0] != 'company_id']
+            if move.location_id.company_id.id:
+                domain.append(('company_id', '=', move.location_id.company_id.id))
+
+        print "[our_quants_get] new domain : ", domain
+
+        return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain,
+                                           removal_strategy=removal_strategy, context=context)
 
 
