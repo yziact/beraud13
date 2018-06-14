@@ -173,6 +173,10 @@ class StockPicking(models.Model):
                 super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
 
+            if 'REP' in pick.location_id.name :
+                super(StockPicking, self).action_assign(cr, uid, pick.id, context)
+                continue
+
             if pick.reliquat:
                 super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
