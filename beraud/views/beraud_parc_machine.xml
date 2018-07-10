@@ -180,6 +180,7 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="parc_rec" />
                 <field name="lot_id" />
+                <field name="address_id"/>
             </xpath>
         </field>
     </record>

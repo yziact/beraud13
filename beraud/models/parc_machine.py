@@ -152,9 +152,9 @@ class StockParcMachine(models.Model):
     def fix_me(self):
         cm_env = self.env['sale.subscription']
         move_env = self.env['stock.move']
-        move_ids = move_env.search([('product_id.categ_id.is_machine', '=', True), ('location_dest_id', '=', 9), ('partner_id', '!=', False)])
+        move_id = move_env.search([('product_id.categ_id.is_machine', '=', True), ('location_dest_id', '=', 9), ('partner_id', '!=', False)])
 
-        for move in move_ids:
+        for move in move_id:
             cm = False
             partner_mov = move.partner_id
             parent_partner = partner_mov.parent_id.id
@@ -164,7 +164,7 @@ class StockParcMachine(models.Model):
             if cm_obj:
                 cm = True
 
-            for quant in move.quant_ids:
+            for quant in move.quant_id:
                 i = 0
                 while i < quant.qty:
                     self.create({
@@ -243,6 +243,7 @@ class StockParcMachine(models.Model):
         self.ensure_one()
         user_env = self.env['res.users']
         client = ''
+        livraison = ''
         company = ''
         machine = ''
         lot_id = ''
@@ -251,6 +252,9 @@ class StockParcMachine(models.Model):
         if self.partner_id:
             client = self.partner_id.id
             company = self.partner_id.company_id.id
+
+        if self.location_partner:
+            livraison = self.location_partner.id
 
         if self.product_id:
             machine = self.product_id.id
@@ -269,6 +273,8 @@ class StockParcMachine(models.Model):
             'default_company_id': company,
             'search_default_partner_id': client,
             'default_partner_id': client,
+            # 'search_default_address_id': livraison,
+            'default_address_id': livraison,
             'search_default_product_id': machine,
             'default_lot_id': lot_id,
             'default_product_id': machine,
@@ -326,7 +332,15 @@ class MrpRepair(models.Model):
 
         return res
 
+    def onchange_partner_id(self, cr, uid, ids, part, address_id):
+        address_id = address_id
+        partner_id = part
+        res = super(MrpRepair, self).onchange_partner_id(cr, uid, ids, part, address_id)
+        address = self.pool.get('res.partner').browse(cr, uid, address_id)
+        if address.parent_id.id == partner_id :
+            res['value']['address_id'] = address
 
+        return res
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
@@ -344,7 +358,7 @@ class StockMove(models.Model):
                     if move.partner_id.type == 'delivery':
                         partner_id = move.partner_id.parent_id.id
 
-                    for quant in move.quant_ids:
+                    for quant in move.quant_id:
                         parc_rec = parc_env.search([('quant_id', '=', quant.id)])
 
                         if parc_rec:
@@ -371,3 +385,4 @@ class StockMove(models.Model):
                                 i += 1
 
         return res
+
