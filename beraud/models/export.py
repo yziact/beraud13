@@ -466,7 +466,7 @@ class Export_Tiers(models.Model):
             email = ""
             comment = ""
 
-            if partner.company_type == "company":
+            if partner.company_type == "company"and partner.type == 'contact':
                 partner_fils = partner_env.search([('type', '=', 'invoice'), ('parent_id', '=', partner.id), ('is_principal', '=', True)], limit=1)
 
                 sale = sale_env.search([('partner_id', '=', partner.id), ('state', 'in', ['sale', 'done'])])
