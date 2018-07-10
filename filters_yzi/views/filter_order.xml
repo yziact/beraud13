@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <openerp>
-	<data>
+    <data>
 
         <!-- Filtre Bons de commandes -->
         <record id="custom_filters_order" model="ir.ui.view">
@@ -17,15 +17,16 @@
 
                     <!-- ToCheck D'après la tâche : remplacer date_order /=> create_order -->
 
+                    <separator />
                     <filter string="Aujourd'hui" name="current_day" domain="[('date_order','&lt;=',context_today().strftime('%Y-%m-%d')),('date_order','&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
                     <filter string="Mois précédent" name="previous_month" domain="[('date_order','&lt;=',(context_today()-relativedelta(months=1, day=31)).strftime('%Y-%m-%d')),('date_order','&gt;=',(context_today()-relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
-                    <filter string="Mois en cours" name="current_month" domain="[('date_order','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-%d')),('date_order','&lt;=',time.strftime('%Y-%m-%d'))]"/>
-                    <filter string="Mois prochain" name="next_month" domain="[('date_order','&lt;=',(context_today()+relativedelta(months=1)).strftime('%Y-%m-%d')),('date_order','&gt;',time.strftime('%Y-%m-%d'))]"/>
+                    <filter string="Mois en cours" name="current_month" domain="[('date_order','&gt;=',((context_today()+relativedelta(day=1)).strftime('%Y-%m-%d'))),('date_order','&lt;=',((context_today()+relativedelta(day=31)).strftime('%Y-%m-%d')))]"/>
+                    <filter string="Mois prochain" name="next_month" domain="[('date_order','&lt;=',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')),('date_order','&gt;',context_today().relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
                     <filter string="3 prochains mois" name="next_three_months" domain="[('date_order','&lt;',(context_today()+relativedelta(months=4)).strftime('%Y-%m-%d')),('date_order','&gt;',time.strftime('%Y-%m-%d'))]"/>
                     <filter string="Année précédente" name="previous_year" domain="[('date_order','&lt;=',(context_today()-relativedelta(years=1)).strftime('%Y-12-31')),('date_order','&gt;=',(context_today()-relativedelta(years=1)).strftime('%Y-01-01'))]"/>
                     <filter string="Année en cours" name="current_year" domain="[('date_order','&lt;=',context_today().strftime('%Y-12-31')),('date_order','&gt;',time.strftime('%Y-01-01'))]"/>
                     <filter string="Année prochaine" name="next_year" domain="[('date_order','&lt;=',(context_today()+relativedelta(years=1)).strftime('%Y-12-31')),('date_order','&gt;=',(context_today()+relativedelta(years=1)).strftime('%Y-01-01'))]"/>
-
+                    <separator />
                 </xpath>
 
             </field>
