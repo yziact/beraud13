@@ -358,7 +358,7 @@ class StockMove(models.Model):
                     if move.partner_id.type == 'delivery':
                         partner_id = move.partner_id.parent_id.id
 
-                    for quant in move.quant_id:
+                    for quant in move.quant_ids:
                         parc_rec = parc_env.search([('quant_id', '=', quant.id)])
 
                         if parc_rec:
