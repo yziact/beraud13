@@ -127,21 +127,26 @@ class our_inventory_line(osv.osv):
     _order = 'emplacement, emplacement_atom'
 
     def _get_quants(self, cr, uid, line, context=None):
-        # quant_obj = self.pool["stock.quant"]
-        # dom = [('company_id', '=', line.company_id.id), ('location_id', '=', line.location_id.id),
-        #        ('lot_id', '=', line.prod_lot_id.id),
-        #        ('product_id', '=', line.product_id.id), ('owner_id', '=', line.partner_id.id),
-        #        ('package_id', '=', line.package_id.id), ('location_id', '=', line.location_id.id)]
-        # quants = quant_obj.search(cr, uid, dom, context=context)
-
+        print("_GET_QUANTS")
+        quant_obj = self.pool["stock.quant"]
         quants = []
+
         if line.quant_id:
             quants = [line.quant_id.id]
+
+        if not quants:
+            """
+            dom = [('company_id', '=', line.company_id.id), ('location_id', '=', line.location_id.id),
+                   ('lot_id', '=', line.prod_lot_id.id),
+                   ('product_id', '=', line.product_id.id), ('owner_id', '=', line.partner_id.id),
+                   ('package_id', '=', line.package_id.id), ('location_id', '=', line.location_id.id)]
+            quants = quant_obj.search(cr, uid, dom, context=context)
+            """
+
+            dom = [('product_id', '=', line.product_id.id), ('location_id', '=', line.location_id.id)]
+            quants = quant_obj.search(cr, uid, dom, context=context)
+
         return quants
-
-        dom = [('product_id', '=', line.product_id.id), ('location_id', '=', line.location_id.id)]
-        quants = quant_obj.search(cr, uid, dom, context=context)
-
 
     @api.depends('product_id', 'product_qty')
     def _compute_cout(self):
