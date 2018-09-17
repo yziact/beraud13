@@ -38,8 +38,8 @@ class StockPicking(models.Model):
 
         loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
         loc_dst_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
-        print "loc_src_id : ", loc_src_id
-        print "loc_dst_id : ", loc_dst_id
+        #print "loc_src_id : ", loc_src_id
+        #print "loc_dst_id : ", loc_dst_id
 
         if c_dst_id == 3: # dest is Beraud
             loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
@@ -58,8 +58,8 @@ class StockPicking(models.Model):
             'location_dst_id':loc_dst_obj.id,
         }, context)
 
-        print "wizard_id : ", wizard_id
-        print "moves : ", moves
+        #print "wizard_id : ", wizard_id
+        #print "moves : ", moves
 
         for move in moves:
 
@@ -92,7 +92,7 @@ class StockPicking(models.Model):
                 'date': move.date,
             }, context)
 
-        print "returning"
+        #print "returning"
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'wizard.transfer.stock.intercompany',
@@ -121,27 +121,27 @@ class StockPicking(models.Model):
             stock_qty_other_dispo = move.stock_qty_ber_dispo
 
         if stock_qty_dispo == 0 and stock_qty_other_dispo == 0:
-            print "both at zero, returning"
+            #print "both at zero, returning"
             return
 
         if stock_qty_dispo + stock_qty_other_dispo <= 0:
-            print "both stocks not enough to make more than zero, returning"
+            #print "both stocks not enough to make more than zero, returning"
             return
 
         if stock_qty_dispo < move.product_uom_qty:
             if stock_qty_other_dispo > 0:
                 #open tsis src -> dest
-                print "client belongs to %s but their stock is too low and stocks from %s disponible, opening tsis" % (comp_rels[src_comp], comp_rels[dst_comp])
+                #print "client belongs to %s but their stock is too low and stocks from %s disponible, opening tsis" % (comp_rels[src_comp], comp_rels[dst_comp])
                 return move
             elif stock_qty_other_dispo == 0:
                 #if other company doesnt have anymore stock, and we have 0 quantity, do nothing
                 # call the normal function, that will also do nothing
-                print "We (%s) don't have anymore stock, and the other company doesn't neither." % comp_rels[src_comp]
+                #print "We (%s) don't have anymore stock, and the other company doesn't neither." % comp_rels[src_comp]
             else:
                 #just reserve normally even if not enough
-                print "reserving normally for %s , even if not enough." % comp_rels[src_comp]
+                #print "reserving normally for %s , even if not enough." % comp_rels[src_comp]
         else:
-            print "client belongs to %s, stocks OK, not opening tsis" % comp_rels[src_comp]
+            #print "client belongs to %s, stocks OK, not opening tsis" % comp_rels[src_comp]
 
         return
 
@@ -151,21 +151,21 @@ class StockPicking(models.Model):
         move_obj = self.pool.get('stock.move')
         loc_obj = self.pool.get('stock.location')
 
-        print "[module_stock action_assign] our action assign"
+        #print "[module_stock action_assign] our action assign"
 
         for pick in self.browse(cr, uid, ids, context=context):
 
-            #print "pick.picking_type_id.name : ", pick.picking_type_id.name
+            ##print "pick.picking_type_id.name : ", pick.picking_type_id.name
             # if the picking is a reception, we don't do anything
-            print(pick.picking_type_id.name)
+            #print(pick.picking_type_id.name)
 
             if u'Réceptions'in pick.picking_type_id.name  or u'Receipts' in pick.picking_type_id.name:
-                print "[action_assign] reception, calling super"
+                #print "[action_assign] reception, calling super"
                 super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
 
             if 'SAV' in pick.picking_type_id.name :
-                print "[action_assign] SAV, calling super"
+                #print "[action_assign] SAV, calling super"
                 super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 continue
 
@@ -184,8 +184,8 @@ class StockPicking(models.Model):
             r = []
             src = 1
             dst = 3
-            #print "[module_stock action_assign] pick.partner_id : ", pick.partner_id
-            #print "[module_stock action_assign] pick.partner_id.company_id.id : ", pick.partner_id.company_id.id
+            ##print "[module_stock action_assign] pick.partner_id : ", pick.partner_id
+            ##print "[module_stock action_assign] pick.partner_id.company_id.id : ", pick.partner_id.company_id.id
             if not pick.partner_id:
                 if pick.location_dest_id.company_id.id == 3:
                     src = 3
@@ -201,10 +201,10 @@ class StockPicking(models.Model):
                 if m :
                     r.append(m)
             if r :
-                print "opening tsis"
+                #print "opening tsis"
                 return self._open_tsis(cr, uid, ids, dst, src, r)
             else :
-                print "calling super.action_assign()"
+                #print "calling super.action_assign()"
                 #super(StockPicking, pick).action_assign(cr, uid, ids, context=context)
                 super(StockPicking, self).action_assign(cr, uid, pick.id, context)
                 move._compute_stock_nums()
@@ -231,10 +231,10 @@ class StockMove(models.Model):
         '''
 
         start = time.clock()
-        print "in _compute_stock_nums"
+        #print "in _compute_stock_nums"
         for move in self:
 
-            print "product : %s" % move.product_id
+            #print "product : %s" % move.product_id
             #ber_loc_recs = self.env['stock.location'].search(['|', ('complete_name','ilike','Physical Locations/DC/Stock'),
             #                                                 ('complete_name','ilike','Emplacements Physiques/DC/REP')
             #                                                ])
@@ -244,31 +244,31 @@ class StockMove(models.Model):
             ber_loc_recs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/Stock')])
             atom_loc_recs = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/Stock')])
 
-            print "ber_loc_recs : ", ber_loc_recs
-            print "ber_loc_recs.ids : ", ber_loc_recs.ids
-            print "atom_loc_recs : ", atom_loc_recs
-            print "atom_loc_recs.ids : ", atom_loc_recs.ids
+            #print "ber_loc_recs : ", ber_loc_recs
+            #print "ber_loc_recs.ids : ", ber_loc_recs.ids
+            #print "atom_loc_recs : ", atom_loc_recs
+            #print "atom_loc_recs.ids : ", atom_loc_recs.ids
             ber_loc_ids = ber_loc_recs.ids
             atom_loc_ids = atom_loc_recs.ids
 
-            print "[csn] move.product_id.name : ", move.product_id.name
-            print "[csn] move.product_id.location_id : ", move.location_id
-            print "[csn] move.product_id.location_dest_id : ", move.location_dest_id
+            #print "[csn] move.product_id.name : ", move.product_id.name
+            #print "[csn] move.product_id.location_id : ", move.location_id
+            #print "[csn] move.product_id.location_dest_id : ", move.location_dest_id
 
             sq_ids_beraud = self.env['stock.quant'].sudo().search([('product_id','=',move.product_id.id),('location_id.id','in',ber_loc_ids)])
             sq_ids_atom = self.env['stock.quant'].sudo().search([('product_id','=',move.product_id.id),('location_id.id','in',atom_loc_ids)])
 
             # stock.quant(1,2,3...)
-            print "sq_ids_beraud : ", sq_ids_beraud
-            print "sq_ids_atom : ", sq_ids_atom
+            #print "sq_ids_beraud : ", sq_ids_beraud
+            #print "sq_ids_atom : ", sq_ids_atom
 
             qt = 0.0
             qr = 0.0
             move.stock_qty_ber_dispo = 0.0
             move.stock_qty_ber_reserved = 0.0
             for i in sq_ids_beraud:
-                #print "name : %s " % self.env['product.product'].browse(i.product_id.id).name_template
-                #print "location : %s " % self.env['stock.location'].browse(i.location_id.id).complete_name
+                ##print "name : %s " % self.env['product.product'].browse(i.product_id.id).name_template
+                ##print "location : %s " % self.env['stock.location'].browse(i.location_id.id).complete_name
                 if i.reservation_id :
                     qr+=i.qty
                 else:
@@ -276,17 +276,17 @@ class StockMove(models.Model):
 
             move.stock_qty_ber_dispo = qt
             move.stock_qty_ber_reserved = qr
-            #print "[csn]move.stock_qty_ber_dispo : ", move.stock_qty_ber_dispo
-            #print "[csn]move.stock_qty_ber_reserved : ", move.stock_qty_ber_reserved
+            ##print "[csn]move.stock_qty_ber_dispo : ", move.stock_qty_ber_dispo
+            ##print "[csn]move.stock_qty_ber_reserved : ", move.stock_qty_ber_reserved
 
             qt = 0.0
             qr = 0.0
             move.stock_qty_atom_dispo = 0.0
             move.stock_qty_atom_reserved = 0.0
             for i in sq_ids_atom:
-                #print "name : %s " % self.env['product.product'].browse(i.product_id.id).name_template
-                #print "location : %s " % self.env['stock.location'].browse(i.location_id.id).complete_name
-                #print "reservation_id : %s " % self.env['stock.move'].browse(i.reservation_id.id).name
+                ##print "name : %s " % self.env['product.product'].browse(i.product_id.id).name_template
+                ##print "location : %s " % self.env['stock.location'].browse(i.location_id.id).complete_name
+                ##print "reservation_id : %s " % self.env['stock.move'].browse(i.reservation_id.id).name
                 if i.reservation_id :
                     qr+=i.qty
                 else:
@@ -294,10 +294,10 @@ class StockMove(models.Model):
 
             move.stock_qty_atom_dispo = qt
             move.stock_qty_atom_reserved = qr
-            #print "[csn]move.stock_qty_atom_dispo : ", move.stock_qty_atom_dispo
-            #print "[csn]move.stock_qty_atom_reserved : ", move.stock_qty_atom_reserved
+            ##print "[csn]move.stock_qty_atom_dispo : ", move.stock_qty_atom_dispo
+            ##print "[csn]move.stock_qty_atom_reserved : ", move.stock_qty_atom_reserved
 
-        print "time taken by _compute_stock_nums : %s" % (time.clock()-start)
+        #print "time taken by _compute_stock_nums : %s" % (time.clock()-start)
 
 
 class StockLocation(models.Model):
@@ -325,7 +325,7 @@ class StockQuants(models.Model):
             if move.location_id.company_id.id:
                 domain.append(('company_id', '=', move.location_id.company_id.id))
 
-        print "[our_quants_get] new domain : ", domain
+        #print "[our_quants_get] new domain : ", domain
 
         return self.apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain,
                                            removal_strategy=removal_strategy, context=context)
