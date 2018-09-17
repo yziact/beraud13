@@ -133,16 +133,7 @@ class StockPicking(models.Model):
                 #open tsis src -> dest
                 #print "client belongs to %s but their stock is too low and stocks from %s disponible, opening tsis" % (comp_rels[src_comp], comp_rels[dst_comp])
                 return move
-            elif stock_qty_other_dispo == 0:
-                #if other company doesnt have anymore stock, and we have 0 quantity, do nothing
-                # call the normal function, that will also do nothing
-                #print "We (%s) don't have anymore stock, and the other company doesn't neither." % comp_rels[src_comp]
-            else:
-                #just reserve normally even if not enough
-                #print "reserving normally for %s , even if not enough." % comp_rels[src_comp]
-        else:
-            #print "client belongs to %s, stocks OK, not opening tsis" % comp_rels[src_comp]
-
+            
         return
 
 
