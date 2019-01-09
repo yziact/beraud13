@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <template id="report_invoice_document" inherit_id="account.report_invoice_document">
+            <xpath expr="//div[@t-if='o.last_bl_from_bc']" position="replace">
+                <div t-if="o.bl_line_ids">
+                    <table class="table">
+                        <thead>
+                            <th>Bon de livraison</th>
+                            <th>Date</th>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="o.bl_line_ids" t-as="bl">
+                                <tr t-if="bl.to_print == True">
+                                    <td><span t-field="bl.bl_id.name"/></td>
+                                    <td><span t-field="bl.bl_id.date_done" t-field-options='{"widget": "date"}'/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>

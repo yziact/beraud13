@@ -6,10 +6,6 @@ class AccountInvoiceInherit(models.Model):
     _inherit = 'account.invoice'
 
     def _default_commercial(self):
-        print "OUR DEFAULT COMMERCIAL"
-        print self.env.context
-        print self.env.user
-
         if not self.contact_affaire:
             return self.env.user
 
@@ -28,7 +24,6 @@ class AccountInvoiceInherit(models.Model):
     def _compute_amount(self):
         self.amount_untaxed = "{0:.2f}".format(sum(line.price_subtotal for line in self.invoice_line_ids))
         self.amount_tax = "{0:.2f}".format(sum(line.amount for line in self.tax_line_ids))
-        print self.amount_tax
         self.amount_total = self.amount_untaxed + self.amount_tax
         amount_total_company_signed = self.amount_total
         amount_untaxed_signed = self.amount_untaxed
@@ -45,8 +40,6 @@ class AccountInvoiceInherit(models.Model):
     @api.multi
     @api.onchange('partner_id')
     def onchange_partner_id(self):
-        print "[%s] account.invoice our _onchange_partner_id" % __name__
-
         """
         Update the following fields when the partner is changed:
         - Delivery address
@@ -71,7 +64,6 @@ class AccountInvoiceInherit(models.Model):
     @api.multi
     @api.returns('self')
     def refund(self, date_invoice=None, date=None, description=None, journal_id=None):
-        print "[%s] account.invoice our refund" % __name__
 
         res = super(AccountInvoiceInherit, self).refund(date_invoice, date, description, journal_id)
 
@@ -126,9 +118,6 @@ class AccountInvoiceInherit(models.Model):
 
                 invoice._compute_amount()
                 invoice.action_move_create()
-
-                print TVA
-                print TTHT
 
 
 class inherit_AccountInvoiceLine(models.Model):

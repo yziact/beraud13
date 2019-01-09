@@ -29,13 +29,18 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
+
         'views/res_partner.xml',
         'views/sale_order.xml',
         'views/sale_order_line.xml',
+        'views/account_invoice.xml',
 
         'sale_reports.xml',
+
         'reports/report_sale.xml',
+        'reports/report_invoice.xml',
+
 
     ],
 }

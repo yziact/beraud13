@@ -46,9 +46,76 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
     advance_payment_method = fields.Selection(selection_add=[('proforma', 'Proforma')])
 
     @api.multi
-    def create_invoices(self):
-        # print "[%s] sale.advance.payment.inv our create_invoices" % __name__
+    def _create_invoice(self, order, so_line, amount):
+        """
+        override the function is necessary because we need to add the bl lines before the creation of the invoice
+        """
+        inv_obj = self.env['account.invoice']
+        ir_property_obj = self.env['ir.property']
 
+        account_id = False
+        if self.product_id.id:
+            account_id = self.product_id.property_account_income_id.id
+        if not account_id:
+            prop = ir_property_obj.get('property_account_income_categ_id', 'product.category')
+            prop_id = prop and prop.id or False
+            account_id = order.fiscal_position_id.map_account(prop_id)
+        if not account_id:
+            raise UserError(
+                _(
+                    'There is no income account defined for this product: "%s". You may have to install a chart of account from Accounting app, settings menu.') % \
+                (self.product_id.name,))
+
+        if self.amount <= 0.00:
+            raise UserError(_('The value of the down payment amount must be positive.'))
+        if self.advance_payment_method == 'percentage':
+            amount = order.amount_untaxed * self.amount / 100
+            name = _("Down payment of %s%%") % (self.amount,)
+        else:
+            amount = self.amount
+            name = _('Down Payment')
+
+        bl_lines = []
+
+        invoice = inv_obj.create({
+            'name': order.client_order_ref or order.name,
+            'origin': order.name,
+            'type': 'out_invoice',
+            'reference': False,
+            'account_id': order.partner_id.property_account_receivable_id.id,
+            'partner_id': order.partner_invoice_id.id,
+            'invoice_line_ids': [(0, 0, {
+                'name': name,
+                'origin': order.name,
+                'account_id': account_id,
+                'price_unit': amount,
+                'quantity': 1.0,
+                'discount': 0.0,
+                'uom_id': self.product_id.uom_id.id,
+                'product_id': self.product_id.id,
+                'sale_line_ids': [(6, 0, [so_line.id])],
+                'invoice_line_tax_ids': [(6, 0, [x.id for x in self.product_id.taxes_id])],
+                'account_analytic_id': order.project_id.id or False,
+            })],
+            'currency_id': order.pricelist_id.currency_id.id,
+            'payment_term_id': order.payment_term_id.id,
+            'fiscal_position_id': order.fiscal_position_id.id or order.partner_id.property_account_position_id.id,
+            'team_id': order.team_id.id,
+        })
+        invoice.compute_taxes()
+
+        for bl_line in order.picking_ids:
+            bl_lines.append(self.env['bl.line'].create({'invoice_id': order.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+
+        invoice.update({'bl_line_ids': [(6, 0, bl_lines)]})
+
+        return invoice
+
+    @api.multi
+    def create_invoices(self):
+        """
+            override the function is necessary because we need to change the bl lines before the return in some cases
+        """
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
         ret = {}
 
@@ -60,20 +127,74 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
             inv_ids = sale_orders.action_invoice_create(final=True)
             for invoice in self.env['account.invoice'].browse( inv_ids ):
                 invoice.state = 'proforma2'
+        if self.advance_payment_method == 'delivered':
+            created_invoices = sale_orders.action_invoice_create()
 
-            if self._context.get('open_invoices', False):
-                return sale_orders.action_view_invoice()
+            invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
 
-            return {'type': 'ir.actions.act_window_close'}
+            for inv in invs:
+                bl_lines = []
+                sos_name = inv.origin.split(", ")
+                sos = self.env["sale.order"].search([('name', '=', sos_name)])
 
+                for so in sos:
+                    for bl_line in so.picking_ids:
+                        bl_lines.append(self.env['bl.line'].create({'invoice_id': so.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+                inv.update({'bl_line_ids': [(6, 0, bl_lines)]})
+        elif self.advance_payment_method == 'all':
+            created_invoices = sale_orders.action_invoice_create(final=True)
+
+            invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
+
+            invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
+
+            for inv in invs:
+                bl_lines = []
+                sos_name = inv.origin.split(", ")
+                sos = self.env["sale.order"].search([('name', '=', sos_name)])
+
+                for so in sos:
+                    for bl_line in so.picking_ids:
+                        bl_lines.append(
+                            self.env['bl.line'].create({'invoice_id': so.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+                inv.update({'bl_line_ids': [(6, 0, bl_lines)]})
         else:
-            ret = super(SaleAdvancePaymentInvoice, self).create_invoices()
-            return ret
+            # Create deposit product if necessary
+            if not self.product_id:
+                vals = self._prepare_deposit_product()
+                self.product_id = self.env['product.product'].create(vals)
+                self.env['ir.values'].sudo().set_default('sale.config.settings', 'deposit_product_id_setting',
+                                                         self.product_id.id)
+
+            sale_line_obj = self.env['sale.order.line']
+            for order in sale_orders:
+                if self.advance_payment_method == 'percentage':
+                    amount = order.amount_untaxed * self.amount / 100
+                else:
+                    amount = self.amount
+                if self.product_id.invoice_policy != 'order':
+                    raise UserError(_(
+                        'The product used to invoice a down payment should have an invoice policy set to "Ordered quantities". Please update your deposit product to be able to create a deposit invoice.'))
+                if self.product_id.type != 'service':
+                    raise UserError(_(
+                        "The product used to invoice a down payment should be of type 'Service'. Please use another product or update this product."))
+                so_line = sale_line_obj.create({
+                    'name': _('Advance: %s') % (time.strftime('%m %Y'),),
+                    'price_unit': amount,
+                    'product_uom_qty': 0.0,
+                    'order_id': order.id,
+                    'discount': 0.0,
+                    'product_uom': self.product_id.uom_id.id,
+                    'product_id': self.product_id.id,
+                    'tax_id': [(6, 0, self.product_id.taxes_id.ids)],
+                })
+                self._create_invoice(order, so_line, amount)
+        if self._context.get('open_invoices', False):
+            return sale_orders.action_view_invoice()
+        return {'type': 'ir.actions.act_window_close'}
 
     @api.multi
     def create_invoice(self, order, so_line, amount):
-        print "[%s] sale.advance.payment.inv our _create_invoices" % __name__
-
         fpos = order.fiscal_position_id or order.partner_id.property_account_position_id
         account_env = self.env['account.account']
         partner_company_id = order.partner_id.company_id.id
@@ -85,13 +206,12 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
         res = super(SaleAdvancePaymentInvoice, self)._create_invoice(order, so_line, amount)
         res["invoice_line_ids"].account_id = account_id
-        print so_line
+
         for line in res.invoice_line_ids:
-            print 'Line    ', line.invoice_line_tax_ids
             ids = fpos.map_tax(order.so_line.taxes_id).ids
-            print 'IDS    ', ids
             line.invoice_line_tax_ids = ids
             line._set_taxes()
+
         return res
 
 
@@ -107,10 +227,6 @@ class SaleOrderInherit(models.Model):
     _inherit = "sale.order"
 
     def _default_commercial(self):
-        print "OUR DEFAULT COMMERCIAL"
-        print self.env.context
-        print self.env.user
-
         if not self.contact_affaire:
             return self.env.user
 
@@ -134,9 +250,8 @@ class SaleOrderInherit(models.Model):
     @api.onchange('partner_id')
     def onchange_partner_id_2(self):
         super(SaleOrderInherit, self).onchange_partner_id()
-        print "[%s] our onchange" % __name__
+
         if self.partner_id.blocked:
-            print "partner is blocked"
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
@@ -144,12 +259,13 @@ class SaleOrderInherit(models.Model):
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"
 
+    bl_line_ids = fields.One2many("bl.line", "invoice_id", string="Bons de livraison")
+
     @api.onchange('partner_id')
     def onchange_partner_id_2(self):
         super(AccountInvoiceInherited, self)._onchange_partner_id()
-        print "[%s] our onchange" % __name__
+
         if self.partner_id.blocked :
-            print "partner is blocked"
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }

@@ -34,7 +34,6 @@ from openerp.report.report_sxw import rml_tag
 class bom_structure_inherited(bom_structure):
 
     def __init__(self, cr, uid, name, context):
-        print "[%s] our bom_structure_inherited __init__" % __name__
         if not context:
             context={}
         self.cr = cr

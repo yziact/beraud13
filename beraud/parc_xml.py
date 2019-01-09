@@ -30,7 +30,7 @@ row_machine_ok = []
 
 for row in csvreader:
     machine_id = ""
-    print i
+
     if row[0] == 'Tiers':
         i += 1
         continue
@@ -85,7 +85,7 @@ for row in csvreader:
 
             })
             tot += 1
-            print 'ligne cree nb : ', i
+
             row_machine_ok.append(i)
         else:
             parc_machine = sock.execute(dbname, uid, pwd, 'parc_machine', 'search_read',
@@ -101,7 +101,7 @@ for row in csvreader:
                     'date_guaranttee': fin_garantie,
                 })
                 tot += 1
-                print 'ligne cree nb : ', i
+
                 row_machine_ok.append(i)
 
             else:
@@ -119,7 +119,7 @@ for row in csvreader:
                             'date_prod': date_prod,
                         })
                         tot += 1
-                        print 'ligne cree nb : ', i
+
                         row_machine_ok.append(i)
 
                     else:
@@ -134,13 +134,10 @@ for row in csvreader:
                             'date_guaranttee': fin_garantie,
                         })
                         tot += 1
-                        print 'ligne cree nb : ', i
+
                         row_machine_ok.append(i)
 
     i += 1
-
-print 'tot ligne cree : ', tot
-print 'nb ligne csv : ', csvreader.line_num
 
 fich_.close()
 

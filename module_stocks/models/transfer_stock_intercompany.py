@@ -188,11 +188,8 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                     ('company_id', '=', wizard.company_src_id.id),
                 ])
                 total_qty = sum([quant.qty for quant in quants])
-                print "[__TSIS__] quantity of product available : ", total_qty
-                print "[__TSIS__] going to transfer: ", line.quantity
 
                 if line.origin:
-                    print line.origin
                     origin = line.origin
                 else:
                     origin = self.origin
@@ -232,31 +229,27 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
                 move1.action_confirm()
                 if move1.state != 'confirmed':
                     raise UserError(_("The first movement could not be confirmed!"))
-                print "[__TSIS__] move1 confirm OK"
 
                 move1.action_assign()
                 if move1.state != 'assigned':
                     raise UserError(_("Vous ne pouvez pas réserver, car il n'y a pas assez de stock."))
-                print "[__TSIS__] move1 assign OK"
 
                 move1.action_done()
                 if move1.state != 'done':
                     raise UserError(_("The first movement could not be terminated!"))
-                print "[__TSIS__] move1 done OK"
 
-                print "MOVE 1 QUANT IDS : ",move1.sudo().quant_ids
                 # set owner of quant to company that received the move
                 move1.sudo().quant_ids.write({'company_id': wizard.company_dst_id.id})
 
                 move2.action_confirm()
                 if move2.state != 'confirmed':
                     raise UserError(_("The second movement could not be confirmed!"))
-                print "[__TSIS__] move2 confirm OK"
+
 
                 move2.action_done()
                 if move2.state != 'done':
                     raise UserError(_("The second movement could not be terminated!"))
-                print "[__TSIS__] move2 done OK"
+
 
                 #print "MOVE 2 QUANT IDS : ",move2.sudo().quant_ids
                 moves.append((move1, move2))
@@ -313,7 +306,6 @@ class wizard_transfer_stock_intercompany(models.TransientModel):
 
     @api.onchange('line_ids')
     def onchange_line_ids(self):
-        print self.line_ids, len(self.line_ids)
         self.is_ok = len(self.line_ids) > 0 and (self.company_src_id != self.company_dst_id) and self.company_src_id and self.company_dst_id
 
 

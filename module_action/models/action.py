@@ -195,7 +195,6 @@ class PartnerActions(models.Model):
 
     @api.multi
     def get_nb_action(self):
-        print( "[%s] our res.partner get_nb_action" % __name__)
         action_env = self.env['crm_yziact.action']
         for partner in self:
             action_count = action_env.search([('company_id', '=', partner.id)])

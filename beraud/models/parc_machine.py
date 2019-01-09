@@ -46,7 +46,6 @@ class StockParcMachine(models.Model):
 
     # @api.depends('partner_id', 'product_id')
     def _compute_name(self):
-        print 'GET NAME'
 
         for machine in self:
             name = ""
@@ -81,7 +80,6 @@ class StockParcMachine(models.Model):
 
     @api.model
     def create(self, vals):
-        print vals.keys()
         quant_obj = self.env['stock.quant']
 
         #par defaut la localisation est celle du client pour la reprise de donnees
@@ -222,8 +220,6 @@ class StockParcMachine(models.Model):
             'default_product_id':machine
         }
 
-        print context
-
 
         action = {
             'type': u'ir.actions.act_window',
@@ -281,8 +277,6 @@ class StockParcMachine(models.Model):
 
         }
 
-        print context
-
         action = {
             'type': u'ir.actions.act_window',
             'name': u'Historique des Interventions',
@@ -324,7 +318,6 @@ class MrpRepair(models.Model):
 
         lot_id = self.env['stock.production.lot'].browse(lot)
 
-        print(lot_id, product_id)
         if lot_id and product_id:
             if lot_id.product_id.id == product_id:
                 res['value']['lot_id']=lot_id
@@ -362,7 +355,6 @@ class StockMove(models.Model):
                         parc_rec = parc_env.search([('quant_id', '=', quant.id)])
 
                         if parc_rec:
-                            print 'parc trouver'
                             parc_rec.update({
                                 'location_id': move.location_dest_id.id,
                                 'partner_id': move.partner_id.id or move.picking_partner_id.id

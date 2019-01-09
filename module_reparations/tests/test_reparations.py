@@ -36,7 +36,6 @@ class TestsReparations(common.TestsCommon):
         user_group_employee = self.env.ref('base.group_user')
         group_obj = self.env['res.groups']
         groupe_technique = group_obj.search([('name','ilike','TECHNIQUE')])
-        print "groupe_technique : ", groupe_technique
 
         # Test users to use through the various tests
         Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
@@ -89,12 +88,6 @@ class TestsReparations(common.TestsCommon):
         self.productC = self.ProductObj.search([('id','=','59006')])
         self.productD = self.ProductObj.search([('id','=','59007')])
         self.productE = self.ProductObj.search([('id','=','59008')])
-
-        print "productA : ", self.productA.name
-        print "productB : ", self.productB.name
-        print "productC : ", self.productC.name
-        print "productD : ", self.productD.name
-        print "productE : ", self.productE.name
  
         self.QuantObj.create({
             'product_id': self.productA.id,
@@ -133,12 +126,9 @@ class TestsReparations(common.TestsCommon):
         Repair for a customer of Beraud in Beraud site. Invoice method after repair.
         """
 
-        print "test00_repair_no_tech" 
-
         return
 
         # repair and repair line
-        print "self.partner_ber_id : ", self.partner_ber_id
         repair_id = self.RepairObj.create({
             'partner_id': self.partner_ber_id.id,
             'product_id': self.productA.id,

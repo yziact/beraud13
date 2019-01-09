@@ -55,15 +55,12 @@ class ProductTemplate(models.Model):
     def atom_cout_multi(self):
         prod_obj = self.pool.get('product.template')
         product_ids = prod_obj.search(self._cr, 13, [('standard_price', '=', 0.0)])
-        print len(product_ids)
 
         for id in product_ids:
             prod = prod_obj.browse(self._cr, 13, [id])
             tarif = prod.tarif
-            print tarif
 
             if tarif != 0.0 and not prod.standard_price:
-                print "write : ", tarif
                 prod.write({'standard_price': tarif})
 
     @api.multi
@@ -72,10 +69,8 @@ class ProductTemplate(models.Model):
         product_id = prod_obj.search(self._cr, 13, [('id', '=', self.id)])
         prod = prod_obj.browse(self._cr, 13, product_id)
         tarif = prod.tarif
-        print tarif
 
         if tarif != 0.0:
-            print "write : ", tarif
             prod.write({'standard_price': tarif})
 
 
@@ -91,7 +86,6 @@ class ProductProduct(models.Model):
     default_code = fields.Char('Internal Reference', select=True, required=True)
 
     def get_formview_id(self, cr, uid, id, context=None):
-	print context
         try :
             view_id = self.pool.get('ir.ui.view').get_view_id(cr, uid,'beraud.product_template_inherit_form_view')
         except Exception:

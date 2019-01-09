@@ -9,8 +9,6 @@ class CalendarInherit(models.Model):
 
     @api.model
     def create(self, vals, context):
-        print vals
-        print context
         res = super(CalendarInherit, self).create(vals, context)
 
         # return res

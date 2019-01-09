@@ -42,7 +42,6 @@ class Internal_Invoice(models.Model):
             serial = ''
 
             origin_move = item.origin
-            print origin_move
 
             if not item.origin == 'TSIS move':
                 # Si le mouvement a un BL lier on recupere ses info
@@ -73,7 +72,6 @@ class Internal_Invoice(models.Model):
                         if picking.picking_type_id.code == 'outgoing':
                             pick_date = picking.date
                             if picking.name != '':
-                                print picking.name
                                 origin_move = picking.name
                             date_bl = datetime.strptime(picking.date.split(' ')[0], '%Y-%m-%d').strftime('%d-%m-%Y')
 
@@ -170,7 +168,6 @@ class Internal_Invoice(models.Model):
 
             if move.location_dest_id.id not in [18,17,32,10] and 'Intercompany transit' not in move.name :
                 # LE MOVE N' EST PAS UN TSIS MOVE !!
-                print 'C est pas un TSIS MOVE'
 
                 if move.partner_id.company_id.id == 3:
                     list_ber.append(move)
@@ -178,7 +175,6 @@ class Internal_Invoice(models.Model):
                     list_atom.append(move)
             else:
                 # LE MOVE EST UN TSIS MOVE !!
-                print 'TSIS MOVE'
 
                 if move.partner_id.id == 6:
                     list_ber.append(move)
@@ -189,7 +185,6 @@ class Internal_Invoice(models.Model):
         return list_ber, list_atom
 
     def get_task(self, projet_line_task):
-        print 'IN GET TASK'
         time_ber = []
         time_atom = []
 
@@ -423,9 +418,7 @@ class inherit_AccountInvoice(models.Model):
 
     @api.multi
     def fix_me_is(self):
-        for invoice in self :
-            print 'INVOICE NAME : ', invoice.name, 'INVOICE ID : ', invoice.id
-
+        for invoice in self:
             for invoice_line in invoice.invoice_line_ids:
                 if invoice_line.move_id.id:
                     invoice_line.move_id.billed = False

@@ -20,16 +20,10 @@ class OurStockPicking(models.Model):
 
     # set saled_id.last_picking_id
     def do_transfer(self, cr, uid, ids, context=None):
-
-        print "[%s] do_transfer" % (__name__)
-
         for picking in self.browse(cr, uid, ids, context=context):
             if not picking.sale_id :
                 continue
 
-            print "setting sale_id.last_picking_id to our id (we're the last validated one)"
-            print "picking.sale_id : ", picking.sale_id
-            print "picking : ", picking
             picking.sale_id.last_picking_id = picking
 
         return super(OurStockPicking, self).do_transfer(cr, uid, ids, context)
