@@ -44,6 +44,8 @@ class stock_view_parc(models.Model):
 class StockParcMachine(models.Model):
     _name = 'parc_machine'
 
+    comments = fields.Html(string='Commentaires')
+
     # @api.depends('partner_id', 'product_id')
     def _compute_name(self):
 
