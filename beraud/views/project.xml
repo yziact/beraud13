@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="act_project_project_2_project_issue_ongoing" model="ir.actions.act_window">
+        <field name="res_model">project.issue</field>
+        <field name="view_type">form</field>
+        <field name="name">Issues</field>
+        <field name="view_mode">kanban,tree,form,calendar,graph,pivot</field>
+        <field name="context">{
+            'search_default_project_id': [active_id],
+            'default_project_id': active_id,
+            }
+        </field>
+        <field name="help" type="html">
+            <p>
+                The Odoo issues tacker allows you to efficiently manage things
+                like internal requests, software development bugs, customer
+                complaints, project troubles, material breakdowns, etc.
+            </p>
+        </field>
+         <field name="domain">[('stage_id.id', 'in', [52,53])]</field>
+    </record>
+
+    <record id="act_project_project_2_project_task_actions_to_do" model="ir.actions.act_window">
+        <field name="name">Tasks</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,tree,form,calendar,pivot,graph</field>
+        <field name="context">{
+            'search_default_project_id': [active_id],
+            'default_project_id': active_id,
+            }</field>
+        <field name="search_view_id" ref="project.view_task_search_form"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Here, you can create new tasks
+            </p>
+            <p>
+                You can now manage your tasks in order to get things done efficiently. Track progress, discuss, attach documents, etc.
+            </p>
+        </field>
+        <field name="domain">[('stage_id.id', 'in', [47,48])]</field>
+    </record>
+
+    <record id="view_project_kanban_links" model="ir.ui.view">
+        <field name="name">Projets liens sur kanaban</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='o_kanban_primary_left']" postion="after">
+                <div class="row">
+                    <a class="col-xs-9" type="action" name="%(act_project_project_2_project_issue_ongoing)d">Incidents en cours</a>
+                    <field class="col-xs-3" name="issue_ongoing_count"/>
+                </div>
+                <div class="row">
+                    <a class="col-xs-9" type="action" name="%(act_project_project_2_project_task_actions_to_do)d">Actions à mener</a>
+                    <field class="col-xs-3" name="task_todo_count"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
