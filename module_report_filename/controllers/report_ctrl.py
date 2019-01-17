@@ -11,7 +11,6 @@ class PTReportController(ReportController):
 
     @route(['/report/download'], type='http', auth="user")
     def report_download(self, data, token):
-        print "[%s] our report_download"
         #order_obj = http.request.env['sale.order']
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
 
@@ -43,7 +42,6 @@ class PTReportController(ReportController):
 
         # doc_obj.name is Sequence
         filename = report.name.replace(' ','-') + '-' + doc_obj.name
-        print "filename of downloaded report will be : ", filename
         #_logger.error("Filename is : %s", filename)
 
         response = ReportController().report_download(data, token)
