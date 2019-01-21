@@ -105,7 +105,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         invoice.compute_taxes()
 
         for bl_line in order.picking_ids:
-            bl_lines.append(self.env['bl.line'].create({'invoice_id': order.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+            bl_lines.append(self.env['bl.line'].create({'invoice_id': invoice.id, 'bl_id': bl_line.id, 'to_print': True}).id)
 
         invoice.update({'bl_line_ids': [(6, 0, bl_lines)]})
 
@@ -120,14 +120,15 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         ret = {}
 
         if self.advance_payment_method == 'proforma':
+            print('COIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIN')
             for order in sale_orders:
                 for line in order.order_line:
                     line.qty_to_invoice = line.product_uom_qty
 
             inv_ids = sale_orders.action_invoice_create(final=True)
-            for invoice in self.env['account.invoice'].browse( inv_ids ):
+            for invoice in self.env['account.invoice'].browse(inv_ids):
                 invoice.state = 'proforma2'
-        if self.advance_payment_method == 'delivered':
+        elif self.advance_payment_method == 'delivered':
             created_invoices = sale_orders.action_invoice_create()
 
             invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
@@ -139,12 +140,10 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
                 for so in sos:
                     for bl_line in so.picking_ids:
-                        bl_lines.append(self.env['bl.line'].create({'invoice_id': so.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+                        bl_lines.append(self.env['bl.line'].create({'invoice_id': inv.id, 'bl_id': bl_line.id, 'to_print': True}).id)
                 inv.update({'bl_line_ids': [(6, 0, bl_lines)]})
         elif self.advance_payment_method == 'all':
             created_invoices = sale_orders.action_invoice_create(final=True)
-
-            invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
 
             invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
 
@@ -155,8 +154,7 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
                 for so in sos:
                     for bl_line in so.picking_ids:
-                        bl_lines.append(
-                            self.env['bl.line'].create({'invoice_id': so.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+                        bl_lines.append(self.env['bl.line'].create({'invoice_id': inv.id, 'bl_id': bl_line.id, 'to_print': True}).id)
                 inv.update({'bl_line_ids': [(6, 0, bl_lines)]})
         else:
             # Create deposit product if necessary
