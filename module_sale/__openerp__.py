@@ -34,7 +34,6 @@
         'views/res_partner.xml',
         'views/sale_order.xml',
         'views/sale_order_line.xml',
-        'views/account_invoice.xml',
 
         'sale_reports.xml',
 

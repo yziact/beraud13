@@ -105,7 +105,21 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         invoice.compute_taxes()
 
         for bl_line in order.picking_ids:
-            bl_lines.append(self.env['bl.line'].create({'invoice_id': invoice.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+            # we list all the product user in the invoice and the current bl
+            bl_line_products = [y.id for y in [z.product_id for z in bl_line.pack_operation_product_ids]]
+            inv_line_products = [x.id for x in [w.product_id for w in invoice.invoice_line_ids]]
+
+            same_product = False
+
+            # if one of the bl product matches one from invoice, we add the bl to the bl list
+            for bl_product in bl_line_products:
+                if bl_product in inv_line_products:
+                    same_product = True
+                    break
+
+            if same_product and bl_line.picking_type_id.code == 'outgoing':
+                bl_lines.append(
+                    self.env['bl.line'].create({'invoice_id': invoice.id, 'bl_id': bl_line.id, 'to_print': True}).id)
 
         invoice.update({'bl_line_ids': [(6, 0, bl_lines)]})
 
@@ -120,7 +134,6 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
         ret = {}
 
         if self.advance_payment_method == 'proforma':
-            print('COIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIN')
             for order in sale_orders:
                 for line in order.order_line:
                     line.qty_to_invoice = line.product_uom_qty
@@ -133,28 +146,61 @@ class SaleAdvancePaymentInvoice(models.TransientModel):
 
             invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
 
+            # for each new invoice, we get sale orders of origin
             for inv in invs:
                 bl_lines = []
                 sos_name = inv.origin.split(", ")
                 sos = self.env["sale.order"].search([('name', '=', sos_name)])
 
+                # for each sale order of origin, we get related bls
                 for so in sos:
                     for bl_line in so.picking_ids:
-                        bl_lines.append(self.env['bl.line'].create({'invoice_id': inv.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+                        # we list all the product user in the invoice and the current bl
+                        bl_line_products = [y.id for y in [z.product_id for z in bl_line.pack_operation_product_ids]]
+                        inv_line_products = [x.id for x in [w.product_id for w in inv.invoice_line_ids]]
+
+                        same_product = False
+
+                        # if one of the bl product matches one from invoice, we add the bl to the bl list
+                        for bl_product in bl_line_products:
+                            if bl_product in inv_line_products:
+                                same_product = True
+                                break
+
+                        if same_product and bl_line.picking_type_id.code == 'outgoing':
+                            bl_lines.append(self.env['bl.line'].create({'invoice_id': inv.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+
                 inv.update({'bl_line_ids': [(6, 0, bl_lines)]})
+
         elif self.advance_payment_method == 'all':
             created_invoices = sale_orders.action_invoice_create(final=True)
 
             invs = self.env["account.invoice"].search([('id', 'in', created_invoices)])
 
+            # for each new invoice, we get sale orders of origin
             for inv in invs:
                 bl_lines = []
                 sos_name = inv.origin.split(", ")
                 sos = self.env["sale.order"].search([('name', '=', sos_name)])
 
+                # for each sale order of origin, we get related bls
                 for so in sos:
                     for bl_line in so.picking_ids:
-                        bl_lines.append(self.env['bl.line'].create({'invoice_id': inv.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+                        # we list all the product user in the invoice and the current bl
+                        bl_line_products = [y.id for y in [z.product_id for z in bl_line.pack_operation_product_ids]]
+                        inv_line_products = [x.id for x in [w.product_id for w in inv.invoice_line_ids]]
+
+                        same_product = False
+
+                        # if one of the bl product matches one from invoice, we add the bl to the bl list
+                        for bl_product in bl_line_products:
+                            if bl_product in inv_line_products:
+                                same_product = True
+                                break
+
+                        if same_product and bl_line.picking_type_id.code == 'outgoing':
+                            bl_lines.append(self.env['bl.line'].create({'invoice_id': inv.id, 'bl_id': bl_line.id, 'to_print': True}).id)
+
                 inv.update({'bl_line_ids': [(6, 0, bl_lines)]})
         else:
             # Create deposit product if necessary
@@ -267,6 +313,111 @@ class AccountInvoiceInherited(models.Model):
             return {
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
+
+    def get_lines(self):
+        lines = []
+        ever_used = []
+        use_ongoing = []
+
+        # for each invoice line
+        for invoice_line in self.invoice_line_ids:
+            # adding the current invoice
+            current_line = [invoice_line, []]
+
+            # quantity staying, recompute after each bl
+            quantity_needed = invoice_line.quantity
+
+            # for each bl of the invoice
+            for bl in self.bl_line_ids:
+                # if we finished to get all bl for this line, we go to next line
+                if quantity_needed == 0:
+                    break
+
+                if bl.bl_id.state != 'done' or invoice_line.product_id.id not in [y.id for y in [z.product_id for z in bl.bl_id.pack_operation_product_ids]]:
+                    continue
+
+                # lines of the current bl
+                bl_lines = [z for z in bl.bl_id.pack_operation_product_ids]
+                # quantity of the current product of the invoice_line on all the bl
+                bl_quantity = 0
+
+                for bl_line in bl_lines: bl_quantity += bl_line.qty_done
+
+                # if we ever used a part of the quantity of the product on the bl
+                if [bl.bl_id, invoice_line.product_id.id] in [x[0] for x in use_ongoing]:
+                    # getting the quantity ever used of the product on the bl
+                    index = -1
+
+                    for y in use_ongoing:
+                        index += 1
+                        if y[0] == [bl.bl_id, invoice_line.product_id.id]:
+                            break
+
+                    # if the staying quantity of the product on the bl is equal to the staying quantity
+                    if (bl_quantity - use_ongoing[index][1]) == quantity_needed:
+                        # we note that we must display this bl in the line
+                        current_line[1].append(bl.bl_id)
+                        # all the quantity of the current product has been used on this bl
+                        use_ongoing.pop(index)
+                        # we note that for the product, that bl should not be taken
+                        ever_used.append([bl.bl_id, invoice_line.product_id.id])
+
+                        # no quantity staying
+                        quantity_needed = 0
+                    # if there less staying quantity on the bl that needed
+                    elif (bl_quantity - use_ongoing[index][1]) < quantity_needed:
+                        # the bl will be displayed
+                        current_line[1].append(bl.bl_id)
+                        # there is no more quantity staying for this product on this bl, we should not use
+                        use_ongoing.pop(index)
+                        ever_used.append([bl.bl_id, invoice_line.product_id.id])
+
+                        # we need to find a bl to complte the quantity needed
+                        quantity_needed = quantity_needed - (bl_quantity - use_ongoing[index][1])
+                    # if there is more quantity that necessary in the bl
+                    elif (bl_quantity - use_ongoing[index][1]) > quantity_needed:
+                        # we must display the bl
+                        current_line[1].append(bl.bl_id)
+                        # we increase the used quantity of the product on this bl
+                        use_ongoing[index][1] += quantity_needed
+
+                        # there is no more staying quantity
+                        quantity_needed = 0
+                else:
+                    # if the staying quantity of the product on the bl is equal to the staying quantity
+                    if bl_quantity == quantity_needed:
+                        # if the quantity for this product has not been completely used
+                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
+                            # we display the bl and indicate we don't use more this bl for the current product
+                            current_line[1].append(bl.bl_id)
+                            ever_used.append([bl.bl_id, invoice_line.product_id.id])
+
+                            quantity_needed = 0
+                    # if there less staying quantity on the bl that needed
+                    elif bl_quantity < quantity_needed:
+                        # if the quantity for this product has not been completely used
+                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
+                            # we display the bl and indicate we don't use more this bl for the current product
+                            current_line[1].append(bl.bl_id)
+                            ever_used.append([bl.bl_id, invoice_line.product_id.id])
+
+                            quantity_needed = quantity_needed - bl_quantity
+                    # if there is more quantity that necessary in the bl
+                    elif bl_quantity > quantity_needed:
+                        # if the quantity for this product has not been completely used
+                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
+                            # we display the bl and indicate what quantity has been used
+                            current_line[1].append(bl.bl_id)
+                            use_ongoing.append([[bl.bl_id, invoice_line.product_id.id], quantity_needed])
+
+                            quantity_needed = 0
+
+            lines.append(current_line)
+
+        print lines
+
+        return lines
+
 
 
 class Reglement(models.Model):
