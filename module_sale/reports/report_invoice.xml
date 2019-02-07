@@ -3,23 +3,64 @@
     <data>
 
         <template id="report_invoice_document" inherit_id="account.report_invoice_document">
+
+            <xpath expr="//table[2]" position="replace">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th t-if="o.origin == 'Internal'">Date Mouvement</th>
+                            <th>Description</th>
+                            <th>N° BL / Date</th>
+                            <th t-if="o.origin == 'Internal'">N°série</th>
+                            <th class="text-right">Qté</th>
+                            <th class="text-right">PU HT</th>
+                            <th t-if="display_discount" class="text-right">Disc.(%)</th>
+                            <th class="text-right">TVA</th>
+                            <th class="text-right">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody class="invoice_tbody">
+                        <tr t-foreach="o.get_lines()" t-as="l">
+                            <td t-if="o.origin == 'Internal'">
+                                <span t-field="l[0].date_move" t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
+                            </td>
+                            <td class="col-xs-5">
+                                <span t-field="l[0].name"/>
+                            </td>
+                            <td>
+                                <t t-foreach="l[1]" t-as="bl">
+
+                                    <span t-field="bl.name"/>
+                                       -
+                                    <span t-field="bl.date_done" t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
+                                    <br />
+                                </t>
+                            </td>
+                            <td t-if="o.origin == 'Internal'">
+                                <span t-field="l[0].serial"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="l[0].quantity"/>
+                                <span t-field="l[0].uom_id" groups="product.group_uom"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="l[0].price_unit"/>
+                            </td>
+                            <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
+                                <span t-field="l[0].discount"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="', '.join(map(lambda x: (x.description or x.name), l[0].invoice_line_tax_ids))"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="l[0].price_subtotal" t-field-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.currency_id&quot;}"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </xpath>
+
             <xpath expr="//div[@t-if='o.last_bl_from_bc']" position="replace">
-                <div t-if="o.bl_line_ids">
-                    <table class="table">
-                        <thead>
-                            <th>Bon de livraison</th>
-                            <th>Date</th>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="o.bl_line_ids" t-as="bl">
-                                <tr t-if="bl.to_print == True">
-                                    <td><span t-field="bl.bl_id.name"/></td>
-                                    <td><span t-field="bl.bl_id.date_done" t-field-options='{"widget": "date"}'/></td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
-                </div>
             </xpath>
         </template>
 
