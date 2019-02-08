@@ -414,9 +414,111 @@ class AccountInvoiceInherited(models.Model):
 
             lines.append(current_line)
 
-        print lines
-
         return lines
+#######################################################################################################################
+# START ////////////////////////////////////////////// Remi's trying to adapt by delivery note
+#######################################################################################################################
+    def get_lines_by_remi(self):
+        involved_deliveries = []
+        delivery_lines_unfiltered = []
+        kind_delivery_item_list = []
+        kind_invoice_item_list = []
+        usable_list = []
+
+        # We first make sure some deliveries are linked to this invoice
+        if self.bl_line_ids:
+            # if we found some delivery in the invoice header we collect the object.
+            for delivery in self.bl_line_ids:
+                involved_deliveries.append(delivery.bl_id)
+            # and then we look at their lines
+            for delivery in involved_deliveries:
+                for record in delivery.pack_operation_product_ids:
+                    delivery_lines_unfiltered.append([delivery, record])
+
+            # Now we can build a kind of invoice lines based on those delivery lines. But we'll have to make sure
+            # that all the invoice lines and only the invoice lines are in or add/remove what's necessary
+            for delivery_line in delivery_lines_unfiltered:
+                kind_delivery_item_list.append({
+                                                'invoice_line': 'is coming later',
+                                                'delivery': delivery_line[0],
+                                                'delivery_line': delivery_line[1],
+                                                'product': delivery_line[1].product_id,
+                                                'qty': delivery_line[1].qty_done,
+                                                'uom': delivery_line[1].product_uom_id
+                })
+
+#######################################################################################################################
+            print('\n####### kind_delivery_item_list')
+            for kind_of_line in kind_delivery_item_list:
+                print(kind_of_line)
+#######################################################################################################################
+
+        # we gonna now make a list of the real invoice lines
+        for invoice_line in self.invoice_line_ids:
+            kind_invoice_item_list.append({'invoice_line': invoice_line,
+                                           'delivery': 'no delivery related',
+                                           'delivery_line': 'no delivery related',
+                                           'product': invoice_line.product_id,
+                                           'qty': invoice_line.quantity,
+                                           'uom': invoice_line.uom_id})
+
+#######################################################################################################################
+        print('\n####### kind_invoice_item_list')
+        for kind_of_line in kind_invoice_item_list:
+            print(kind_of_line)
+#######################################################################################################################
+
+        # And now, ladies and gentlemen, the goal is to compare the two lists.
+        # Most important is that all invoice lines arrive on the report, and only them.
+        # by consequence that we be our starting point.
+
+        for invoice_item in kind_invoice_item_list:
+            if invoice_item['qty'] > 0:
+                for delivery_item in kind_delivery_item_list:
+                    if 0 < delivery_item['qty']:
+                        if invoice_item['product'] == delivery_item['product']:
+                            temp_best_of_both = {
+                                                'invoice_line': invoice_item['invoice_line'],
+                                                'delivery': delivery_item['delivery'],
+                                                'delivery_line': delivery_item['delivery_line'],
+                                                'product': delivery_item['product'],
+                                                'qty': delivery_item['qty'],
+                                                'uom':  delivery_item['uom']}
+                            usable_list.append(temp_best_of_both)
+
+                            if delivery_item['qty'] <= invoice_item['qty']:
+                                invoice_item['qty'] -= delivery_item['qty']
+                                delivery_item['qty'] = 0
+
+                            else:
+                                delivery_item['qty'] -= invoice_item['qty']
+                                invoice_item['qty'] = 0
+
+#######################################################################################################################
+            print('\n####### kind_delivery_item_list')
+            for kind_of_line in kind_delivery_item_list:
+                print(kind_of_line)
+            print('\n####### kind_invoice_item_list')
+            for kind_of_line in kind_invoice_item_list:
+                print(kind_of_line)
+#######################################################################################################################
+
+        # and finally add potential remaining invoice lines that have not been matched to a delivery
+        for invoice_item in kind_invoice_item_list:
+            if invoice_item['qty'] > 0:
+                usable_list.append(invoice_item)
+
+#######################################################################################################################
+        print('\n################################ LOOK AT THAT BODY !!! ##############################################')
+        for line in usable_list:
+            print(line)
+        print('################################ WAS NICE ISN\'T IT ??? ##############################################\n')
+        return usable_list
+#######################################################################################################################
+
+
+# END //////////////////////////////////////////////// Remi's trying to adapt by delivery note
+
 
 
 
