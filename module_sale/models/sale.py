@@ -300,6 +300,7 @@ class SaleOrderInherit(models.Model):
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
 
+
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"
 
@@ -315,117 +316,13 @@ class AccountInvoiceInherited(models.Model):
             }
 
     def get_lines(self):
-        lines = []
-        ever_used = []
-        use_ongoing = []
-
-        # for each invoice line
-        for invoice_line in self.invoice_line_ids:
-            # adding the current invoice
-            current_line = [invoice_line, []]
-
-            # quantity staying, recompute after each bl
-            quantity_needed = invoice_line.quantity
-
-            # for each bl of the invoice
-            for bl in self.bl_line_ids:
-                # if we finished to get all bl for this line, we go to next line
-                if quantity_needed == 0:
-                    break
-
-                if bl.bl_id.state != 'done' or invoice_line.product_id.id not in [y.id for y in [z.product_id for z in bl.bl_id.pack_operation_product_ids]]:
-                    continue
-
-                # lines of the current bl
-                bl_lines = [z for z in bl.bl_id.pack_operation_product_ids]
-                # quantity of the current product of the invoice_line on all the bl
-                bl_quantity = 0
-
-                for bl_line in bl_lines: bl_quantity += bl_line.qty_done
-
-                # if we ever used a part of the quantity of the product on the bl
-                if [bl.bl_id, invoice_line.product_id.id] in [x[0] for x in use_ongoing]:
-                    # getting the quantity ever used of the product on the bl
-                    index = -1
-
-                    for y in use_ongoing:
-                        index += 1
-                        if y[0] == [bl.bl_id, invoice_line.product_id.id]:
-                            break
-
-                    # if the staying quantity of the product on the bl is equal to the staying quantity
-                    if (bl_quantity - use_ongoing[index][1]) == quantity_needed:
-                        # we note that we must display this bl in the line
-                        current_line[1].append(bl.bl_id)
-                        # all the quantity of the current product has been used on this bl
-                        use_ongoing.pop(index)
-                        # we note that for the product, that bl should not be taken
-                        ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                        # no quantity staying
-                        quantity_needed = 0
-                    # if there less staying quantity on the bl that needed
-                    elif (bl_quantity - use_ongoing[index][1]) < quantity_needed:
-                        # the bl will be displayed
-                        current_line[1].append(bl.bl_id)
-                        # there is no more quantity staying for this product on this bl, we should not use
-                        use_ongoing.pop(index)
-                        ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                        # we need to find a bl to complte the quantity needed
-                        quantity_needed = quantity_needed - (bl_quantity - use_ongoing[index][1])
-                    # if there is more quantity that necessary in the bl
-                    elif (bl_quantity - use_ongoing[index][1]) > quantity_needed:
-                        # we must display the bl
-                        current_line[1].append(bl.bl_id)
-                        # we increase the used quantity of the product on this bl
-                        use_ongoing[index][1] += quantity_needed
-
-                        # there is no more staying quantity
-                        quantity_needed = 0
-                else:
-                    # if the staying quantity of the product on the bl is equal to the staying quantity
-                    if bl_quantity == quantity_needed:
-                        # if the quantity for this product has not been completely used
-                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
-                            # we display the bl and indicate we don't use more this bl for the current product
-                            current_line[1].append(bl.bl_id)
-                            ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                            quantity_needed = 0
-                    # if there less staying quantity on the bl that needed
-                    elif bl_quantity < quantity_needed:
-                        # if the quantity for this product has not been completely used
-                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
-                            # we display the bl and indicate we don't use more this bl for the current product
-                            current_line[1].append(bl.bl_id)
-                            ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                            quantity_needed = quantity_needed - bl_quantity
-                    # if there is more quantity that necessary in the bl
-                    elif bl_quantity > quantity_needed:
-                        # if the quantity for this product has not been completely used
-                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
-                            # we display the bl and indicate what quantity has been used
-                            current_line[1].append(bl.bl_id)
-                            use_ongoing.append([[bl.bl_id, invoice_line.product_id.id], quantity_needed])
-
-                            quantity_needed = 0
-
-            lines.append(current_line)
-
-        return lines
-#######################################################################################################################
-# START ////////////////////////////////////////////// Remi's trying to adapt by delivery note
-#######################################################################################################################
-    def get_lines_by_remi(self):
         involved_deliveries = []
         delivery_lines_unfiltered = []
         delivery_lines_formated = []
         invoice_lines_formated = []
-        usable_list = []
+        combined_list = []
 
-        # We first make sure some deliveries are linked to this invoice
+        # We need to make sure some deliveries are linked to this invoice
         if self.bl_line_ids:
             # if we found some delivery in the invoice header we collect the object.
             for delivery in self.bl_line_ids:
@@ -436,11 +333,13 @@ class AccountInvoiceInherited(models.Model):
                     delivery_lines_unfiltered.append([delivery, record])
 
             # Now we can build a kind of invoice lines based on those delivery lines. But we'll have to make sure
-            # that all the invoice lines and only the invoice lines are in or add/remove what's necessary
+            # that all the invoice lines and only the invoice lines are in, or add/remove what's necessary
+
             # step 1: format the delivery lines in an exploitable format
             for delivery_line in delivery_lines_unfiltered:
                 delivery_lines_formated.append({
-                                                'invoice_line': 'is coming later',
+                                                'my_key': delivery_line[0].id,
+                                                'invoice_line': '',
                                                 'delivery': delivery_line[0],
                                                 'delivery_line': delivery_line[1],
                                                 'product': delivery_line[1].product_id,
@@ -448,210 +347,86 @@ class AccountInvoiceInherited(models.Model):
                                                 'uom': delivery_line[1].product_uom_id
                 })
 
-#######################################################################################################################
-            # print('\n####### kind_delivery_item_list')
-            # for kind_of_line in kind_delivery_item_list:
-            #     print(kind_of_line)
-#######################################################################################################################
-
         # step 2:  format the invoice lines in an exploitable format
         for invoice_line in self.invoice_line_ids:
-            invoice_lines_formated.append({'invoice_line': invoice_line,
-                                           'delivery': 'no delivery related',
-                                           'delivery_line': 'no delivery related',
+            invoice_lines_formated.append({
+                                           'my_key': 999999999,
+                                           'invoice_line': invoice_line,
+                                           'delivery': '',
+                                           'delivery_line': '',
                                            'product': invoice_line.product_id,
                                            'qty': invoice_line.quantity,
                                            'uom': invoice_line.uom_id})
 
-#######################################################################################################################
-        # print('\n####### kind_invoice_item_list')
-        # for kind_of_line in kind_invoice_item_list:
-        #     print(kind_of_line)
-#######################################################################################################################
-
-        # And now, ladies and gentlemen, the goal is to compare the two lists.
-        # Most important is that all invoice lines arrive on the report, and only them.
-        # by consequence that we be our starting point.
-
+        # And now, the goal is to compare the two lists. Most important is that all invoice lines arrive on the report,
+        # and only them,  by consequence that will be our starting point.
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
                     if 0 < delivery_item['qty']:
                         if invoice_item['product'] == delivery_item['product']:
                             temp_best_of_both = {
+                                                'my_key': delivery_item['my_key'],
                                                 'invoice_line': invoice_item['invoice_line'],
                                                 'delivery': delivery_item['delivery'],
                                                 'delivery_line': delivery_item['delivery_line'],
                                                 'product': delivery_item['product'],
                                                 'qty': delivery_item['qty'],
                                                 'uom':  delivery_item['uom']}
-                            usable_list.append(temp_best_of_both)
-
+                            combined_list.append(temp_best_of_both)
+                            # and we adjust the remaining quantities in the lists
                             if delivery_item['qty'] <= invoice_item['qty']:
                                 invoice_item['qty'] -= delivery_item['qty']
                                 delivery_item['qty'] = 0
-
                             else:
                                 delivery_item['qty'] -= invoice_item['qty']
                                 invoice_item['qty'] = 0
 
-#######################################################################################################################
-            # print('\n####### kind_delivery_item_list')
-            # for kind_of_line in kind_delivery_item_list:
-            #     print(kind_of_line)
-            # print('\n####### kind_invoice_item_list')
-            # for kind_of_line in kind_invoice_item_list:
-            #     print(kind_of_line)
-#######################################################################################################################
+        print('\n//////////////// list B4 sorting (only delivery in) //////////////////')
+        for line in combined_list:
+            print(line)
 
-        # and finally add potential remaining invoice lines that have not been matched to a delivery
+        # and finally add potential remaining invoice lines that have not been matched to any delivery
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0:
-                usable_list.append(invoice_item)
+                combined_list.append(invoice_item)
 
-#######################################################################################################################
-        print('\n################################ LOOK AT THAT BODY !!! ##############################################')
-        for line in usable_list:
+        print('\n//////////////// COMBINED LIST ///////////////////////////////////////')
+        for line in combined_list:
             print(line)
-            # {'delivery_line': stock.pack.operation(21743, ), 'product': product.product(58981, ), 'qty': 1.0,
-            #  'delivery': u'DAT\\OUT\\01577', 'invoice_line': account.invoice.line(44537, ), 'uom': product.uom(1, )}
-            # {'delivery_line': stock.pack.operation(21742, ), 'product': product.product(58981, ), 'qty': 1.0,
-            #  'delivery': u'DAT\\OUT\\01576', 'invoice_line': account.invoice.line(44537, ), 'uom': product.uom(1, )}
-            # {'delivery_line': stock.pack.operation(21741, ), 'product': product.product(58981, ), 'qty': 1.0,
-            #  'delivery': u'DAT\\OUT\\01575', 'invoice_line': account.invoice.line(44537, ), 'uom': product.uom(1, )}
-            # {'delivery_line': stock.pack.operation(21737, ), 'product': product.product(58981, ), 'qty': 2.0,
-            #  'delivery': u'DAT\\OUT\\01574', 'invoice_line': account.invoice.line(44537, ), 'uom': product.uom(1, )}
-            # {'delivery_line': stock.pack.operation(21738, ), 'product': product.product(59027, ), 'qty': 1.0,
-            #  'delivery': u'DAT\\OUT\\01574', 'invoice_line': account.invoice.line(44538, ), 'uom': product.uom(1, )}
-            # {'delivery_line': stock.pack.operation(21740, ), 'product': product.product(58983, ), 'qty': 1.0,
-            #  'delivery': u'DAT\\OUT\\01575', 'invoice_line': account.invoice.line(44539, ), 'uom': product.uom(1, )}
 
-        print('################################ WAS NICE ISN\'T IT ??? #############################################\n')
-
-#######################################################################################################################
-
-        # This step is only made to make the qWeb step easier by grouping item lines by delivery:
+        # But before returning the list, to make the qWeb step easier,  we reformat it
+        # by grouping item lines by delivery:
         the_list = []
-        temp1 = []
-        # step 1: make a list of deliveries (including 'no delivery related') and remove duplicates
-        for record in usable_list:
-            temp1.append(record['delivery'])
-        deliveries = list(set(temp1))
-        print('\n################################ deliveries !!! ##############################################')
-        for line in deliveries:
-            print(line)
+        unique_keys = []
+
+        # step 1: make a list of deliveries header (including 'no delivery related') and remove duplicates
+        for record in combined_list:
+            unique_keys.append(record['my_key'])
+        unique_keys = list(set(unique_keys))
+        unique_keys.sort(reverse=False)
+
+        print('\n//////////////// UNIQUE KEY DELIVERY LIST ////////////////////////////')
+        for one_key in unique_keys:
+            print(one_key)
 
         # step 2: using the unique delivery number as key, push the item details related:
-        for delivery in deliveries:
+        for one_key in unique_keys:
             temp2 = []
             pool_of_delivery = []
-            for record in usable_list:
-                if record['delivery'] == delivery:
+            for record in combined_list:
+                if record['my_key'] == one_key:
                     pool_of_delivery.append(record)
-            temp2.append(delivery)
+            temp2.append(one_key)
             temp2.append(pool_of_delivery)
             the_list.append(temp2)
 
-
-#######################################################################################################################
-
-        print('\n################################ LOOK AT THAT BODY !!! ##############################################')
+        print('\n//////////////////////////// LOOK AT THAT BODY !!! //////////////////////')
         for line in the_list:
             print(line)
-            # [u'DAT\\OUT\\01575', [
-            #     {'delivery_line': stock.pack.operation(21741, ), 'product': product.product(58981, ), 'qty': 1.0,
-            #      'delivery': u'DAT\\OUT\\01575', 'invoice_line': account.invoice.line(44537, ),
-            #      'uom': product.uom(1, )},
-            #     {'delivery_line': stock.pack.operation(21740, ), 'product': product.product(58983, ), 'qty': 1.0,
-            #      'delivery': u'DAT\\OUT\\01575', 'invoice_line': account.invoice.line(44539, ),
-            #      'uom': product.uom(1, )}]]
-            # [u'DAT\\OUT\\01574', [
-            #     {'delivery_line': stock.pack.operation(21737, ), 'product': product.product(58981, ), 'qty': 2.0,
-            #      'delivery': u'DAT\\OUT\\01574', 'invoice_line': account.invoice.line(44537, ),
-            #      'uom': product.uom(1, )},
-            #     {'delivery_line': stock.pack.operation(21738, ), 'product': product.product(59027, ), 'qty': 1.0,
-            #      'delivery': u'DAT\\OUT\\01574', 'invoice_line': account.invoice.line(44538, ),
-            #      'uom': product.uom(1, )}]]
-            # [u'DAT\\OUT\\01577', [
-            #     {'delivery_line': stock.pack.operation(21743, ), 'product': product.product(58981, ), 'qty': 1.0,
-            #      'delivery': u'DAT\\OUT\\01577', 'invoice_line': account.invoice.line(44537, ),
-            #      'uom': product.uom(1, )}]]
-            # [u'DAT\\OUT\\01576', [
-            #     {'delivery_line': stock.pack.operation(21742, ), 'product': product.product(58981, ), 'qty': 1.0,
-            #      'delivery': u'DAT\\OUT\\01576', 'invoice_line': account.invoice.line(44537, ),
-            #      'uom': product.uom(1, )}]]
-
-        print('################################ WAS NICE ISN\'T IT ??? #############################################\n')
+            print('\n')
 
         return the_list
-#######################################################################################################################
-
-
-    def list_ready(self):
-        pool_of_delivery = []
-        the_list = []
-        items_collection = self.get_lines_by_remi
-        print('/////////////////////////////////////////////////////////////////////////////////////////////////////')
-        print(items_collection)
-        temp = []
-        for record in items_collection:
-            temp.append(record['delivery'])
-        deliveries = list(set(temp))
-        for delivery in deliveries:
-            for record in items_collection:
-                if record['delivery'] == delivery:
-                    pool_of_delivery.append(record)
-                    the_list.append(delivery, pool_of_delivery)
-
-    # this might be a list like:
-    #     [delivery1,
-    #         [
-    #             {
-    #                 'invoice_line': invoice_line,
-    #                 'delivery': 'no delivery related',
-    #                 'delivery_line': 'no delivery related',
-    #                 'product': invoice_line.product_id,
-    #                 'qty': invoice_line.quantity,
-    #                 'uom': invoice_line.uom_id
-    #             },
-    #             {
-    #                 'invoice_line': invoice_line,
-    #                 'delivery': 'no delivery related',
-    #                 'delivery_line': 'no delivery related',
-    #                 'product': invoice_line.product_id,
-    #                 'qty': invoice_line.quantity,
-    #                 'uom': invoice_line.uom_id
-    #             }
-    #         ],
-    #     delivery2,
-    #         [
-    #             {
-    #                 'invoice_line': invoice_line,
-    #                 'delivery': 'no delivery related',
-    #                 'delivery_line': 'no delivery related',
-    #                 'product': invoice_line.product_id,
-    #                 'qty': invoice_line.quantity,
-    #                 'uom': invoice_line.uom_id
-    #             },
-    #             {
-    #                 'invoice_line': invoice_line,
-    #                 'delivery': 'no delivery related',
-    #                 'delivery_line': 'no delivery related',
-    #                 'product': invoice_line.product_id,
-    #                 'qty': invoice_line.quantity,
-    #                 'uom': invoice_line.uom_id
-    #             }
-    #         ]
-    # ]
-
-        for delivery in the_list:
-            print(delivery)
-
-        return the_list
-
-# END //////////////////////////////////////////////// Remi's trying to adapt by delivery note
-
-
 
 
 class Reglement(models.Model):
