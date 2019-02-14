@@ -382,18 +382,18 @@ class AccountInvoiceInherited(models.Model):
                                 delivery_item['qty'] -= invoice_item['qty']
                                 invoice_item['qty'] = 0
 
-        print('\n//////////////// list B4 sorting (only delivery in) //////////////////')
-        for line in combined_list:
-            print(line)
+        # print('\n//////////////// list B4 sorting (only delivery in) //////////////////')
+        # for line in combined_list:
+        #     print(line)
 
         # and finally add potential remaining invoice lines that have not been matched to any delivery
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0:
                 combined_list.append(invoice_item)
 
-        print('\n//////////////// COMBINED LIST ///////////////////////////////////////')
-        for line in combined_list:
-            print(line)
+        # print('\n//////////////// COMBINED LIST ///////////////////////////////////////')
+        # for line in combined_list:
+        #     print(line)
 
         # But before returning the list, to make the qWeb step easier,  we reformat it
         # by grouping item lines by delivery:
@@ -406,9 +406,9 @@ class AccountInvoiceInherited(models.Model):
         unique_keys = list(set(unique_keys))
         unique_keys.sort(reverse=False)
 
-        print('\n//////////////// UNIQUE KEY DELIVERY LIST ////////////////////////////')
-        for one_key in unique_keys:
-            print(one_key)
+        # print('\n//////////////// UNIQUE KEY DELIVERY LIST ////////////////////////////')
+        # for one_key in unique_keys:
+        #     print(one_key)
 
         # step 2: using the unique delivery number as key, push the item details related:
         for one_key in unique_keys:
@@ -421,10 +421,10 @@ class AccountInvoiceInherited(models.Model):
             temp2.append(pool_of_delivery)
             the_list.append(temp2)
 
-        print('\n//////////////////////////// LOOK AT THAT BODY !!! //////////////////////')
-        for line in the_list:
-            print(line)
-            print('\n')
+        # print('\n//////////////////////////// LOOK AT THAT BODY !!! //////////////////////')
+        # for line in the_list:
+        #     print(line)
+        #     print('\n')
 
         return the_list
 
