@@ -8,11 +8,14 @@
                 <table class="table table-condensed">
                     <thead>
                         <tr>
+                            <!-- triky pading -->
+                            <th class="text-right"></th>
                             <th t-if="o.origin == 'Internal'">Date Mouvement</th>
                             <th>Description</th>
-                            <th>N° BL / Date</th>
-                            <th t-if="o.origin == 'Internal'">N°série</th>
+                            <th class="text-center">N°série</th>
                             <th class="text-right">Qté</th>
+                            <!-- UoM column without header text -->
+                            <th class="text-right"></th>
                             <th class="text-right">PU HT</th>
                             <th t-if="display_discount" class="text-right">Disc.(%)</th>
                             <th class="text-right">TVA</th>
@@ -20,42 +23,79 @@
                         </tr>
                     </thead>
                     <tbody class="invoice_tbody">
-                        <tr t-foreach="o.get_lines()" t-as="l">
-                            <td t-if="o.origin == 'Internal'">
-                                <span t-field="l[0].date_move" t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
-                            </td>
-                            <td class="col-xs-5">
-                                <span t-field="l[0].name"/>
-                            </td>
-                            <td>
-                                <t t-foreach="l[1]" t-as="bl">
-
-                                    <span t-field="bl.name"/>
-                                       -
-                                    <span t-field="bl.date_done" t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
-                                    <br />
-                                </t>
-                            </td>
-                            <td t-if="o.origin == 'Internal'">
-                                <span t-field="l[0].serial"/>
-                            </td>
-                            <td class="text-right">
-                                <span t-field="l[0].quantity"/>
-                                <span t-field="l[0].uom_id" groups="product.group_uom"/>
-                            </td>
-                            <td class="text-right">
-                                <span t-field="l[0].price_unit"/>
-                            </td>
-                            <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
-                                <span t-field="l[0].discount"/>
-                            </td>
-                            <td class="text-right">
-                                <span t-esc="', '.join(map(lambda x: (x.description or x.name), l[0].invoice_line_tax_ids))"/>
-                            </td>
-                            <td class="text-right">
-                                <span t-field="l[0].price_subtotal" t-field-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.currency_id&quot;}"/>
-                            </td>
-                        </tr>
+                        <t t-foreach="o.get_lines()" t-as="deliveryGroup">
+                            <!--Livraison-->
+                            <tr>
+                                <td colspan="8">
+                                    <strong>
+                                        <t t-if="deliveryGroup[1][0]['delivery']">Livraison :
+                                            <span t-esc="deliveryGroup[1][0]['delivery'].name"/> du
+                                            <span t-field="deliveryGroup[1][0]['delivery'].date"
+                                                  t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/> :
+                                        </t>
+                                        <!--those are invoice lines not linked to a delivery (like services)-->
+                                        <t t-if="deliveryGroup[0] >= 999999999">
+                                            &lt;br/&gt;
+                                        </t>
+                                    </strong>
+                                </td>
+                            </tr>
+                            <tr t-foreach="deliveryGroup[1]" t-as="itemLine">
+                                <!--tricky padding-->
+                                <td>
+                                    <span></span>
+                                </td>
+                                <!--Date Mouvement-->
+                                <td t-if="o.origin == 'Internal'">
+                                    <span t-esc="deliveryGroup[1][0]['delivery'].date_move"
+                                          t-esc-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
+                                </td>
+                                <!--Description-->
+                                <td>
+                                    <span t-field="itemLine['invoice_line'].name"/>
+                                </td>
+                                <!--N°série-->
+                                <td>
+                                    <t t-if="itemLine['delivery_line']">
+                                        <ul class="list-unstyled" t-foreach="itemLine['delivery_line'].pack_lot_ids" t-as="lot" >
+                                            <li>
+                                                <span t-esc="lot.lot_id.name"/>
+                                            </li>
+                                        </ul>
+                                    </t>
+                                </td>
+                                <!--Qté-->
+                                <td class="text-right">
+                                    <span t-esc="itemLine['qty']"/>
+                                </td>
+                                <!--Unité-->
+                                <td class="text-right">
+                                    <span t-esc="itemLine['uom'].name"/>
+                                </td>
+                                <!--PU HT-->
+                                <td class="text-right">
+                                    <span t-esc="itemLine['invoice_line'].price_unit"
+                                          t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.currency_id&quot;}"
+                                    />
+                                </td>
+                                <!--Disc.(%)-->
+                                <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
+                                    <span t-esc="itemLine['invoice_line'].discount"/>
+                                </td>
+                                <!--TVA-->
+                                <td class="text-right">
+                                    <span t-esc="', '.join(map(lambda x: (x.description or x.name), itemLine['invoice_line'].invoice_line_tax_ids))"/>
+                                </td>
+                                <!--Price (calculation based on line qty-->
+                                <td class="text-right">
+                                    <t t-set="disc_fact" t-value="(itemLine['invoice_line'].discount /100)"/>
+                                    <span
+                                            t-esc="(itemLine['invoice_line'].price_unit - (itemLine['invoice_line'].price_unit * disc_fact)) * itemLine['qty'] "
+                                            t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.currency_id&quot;}"
+                                    />
+                                </td>
+                            </tr>
+                        </t>
                     </tbody>
                 </table>
             </xpath>

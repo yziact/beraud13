@@ -300,6 +300,7 @@ class SaleOrderInherit(models.Model):
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
 
+
 class AccountInvoiceInherited(models.Model):
     _inherit = "account.invoice"
 
@@ -314,110 +315,106 @@ class AccountInvoiceInherited(models.Model):
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
 
+    # This method is preparing lines to be shown on the printed invoice. The only goal is to be able to link the
+    # invoice lines to the related delivery and display them grouped by deliveries (which means to split some
+    # invoice lines sometimes
     def get_lines(self):
-        lines = []
-        ever_used = []
-        use_ongoing = []
+        involved_deliveries = []
+        delivery_lines_unfiltered = []
+        delivery_lines_formated = []
+        invoice_lines_formated = []
+        combined_list = []
 
-        # for each invoice line
+        # We need to make sure some deliveries are linked to this invoice
+        if self.bl_line_ids:
+            # if we found some delivery in the invoice header we collect the object.
+            for delivery in self.bl_line_ids:
+                involved_deliveries.append(delivery.bl_id)
+            # and then we look at their lines
+            for delivery in involved_deliveries:
+                for record in delivery.pack_operation_product_ids:
+                    delivery_lines_unfiltered.append([delivery, record])
+
+            # Now we can build a kind of invoice lines using on those delivery lines. But we'll have to make sure
+            # that all the invoice lines and only the invoice lines are in, or add/remove what's necessary
+
+            # step 1: format the delivery lines in an exploitable format
+            for delivery_line in delivery_lines_unfiltered:
+                delivery_lines_formated.append({
+                                                'my_key': delivery_line[0].id,
+                                                'invoice_line': '',
+                                                'delivery': delivery_line[0],
+                                                'delivery_line': delivery_line[1],
+                                                'product': delivery_line[1].product_id,
+                                                'qty': delivery_line[1].qty_done,
+                                                'uom': delivery_line[1].product_uom_id
+                })
+
+        # step 2:  format the invoice lines in an exploitable format
         for invoice_line in self.invoice_line_ids:
-            # adding the current invoice
-            current_line = [invoice_line, []]
+            invoice_lines_formated.append({
+                                           'my_key': 999999999,
+                                           'invoice_line': invoice_line,
+                                           'delivery': '',
+                                           'delivery_line': '',
+                                           'product': invoice_line.product_id,
+                                           'qty': invoice_line.quantity,
+                                           'uom': invoice_line.uom_id})
 
-            # quantity staying, recompute after each bl
-            quantity_needed = invoice_line.quantity
+        # And now, the goal is to compare and merge the two lists. Most important is that all invoice lines arrive
+        # on the report, and only them. By consequence that will be our starting point.
+        for invoice_item in invoice_lines_formated:
+            if invoice_item['qty'] > 0:
+                for delivery_item in delivery_lines_formated:
+                    if 0 < delivery_item['qty']:
+                        if invoice_item['product'] == delivery_item['product']:
+                            # We keep the most interesting field's value from both lines
+                            temp_best_of_both = {
+                                                'my_key': delivery_item['my_key'],
+                                                'invoice_line': invoice_item['invoice_line'],
+                                                'delivery': delivery_item['delivery'],
+                                                'delivery_line': delivery_item['delivery_line'],
+                                                'product': delivery_item['product'],
+                                                'qty': delivery_item['qty'],
+                                                'uom':  delivery_item['uom']}
+                            combined_list.append(temp_best_of_both)
+                            # and we adjust the remaining quantities in both lists
+                            if delivery_item['qty'] <= invoice_item['qty']:
+                                invoice_item['qty'] -= delivery_item['qty']
+                                delivery_item['qty'] = 0
+                            else:
+                                delivery_item['qty'] -= invoice_item['qty']
+                                invoice_item['qty'] = 0
 
-            # for each bl of the invoice
-            for bl in self.bl_line_ids:
-                # if we finished to get all bl for this line, we go to next line
-                if quantity_needed == 0:
-                    break
+        # and finally we add potential remaining invoice lines that have not been matched to any delivery.
+        # This can be all if no delivery at all was found.
+        for invoice_item in invoice_lines_formated:
+            if invoice_item['qty'] > 0:
+                combined_list.append(invoice_item)
 
-                if bl.bl_id.state != 'done' or invoice_line.product_id.id not in [y.id for y in [z.product_id for z in bl.bl_id.pack_operation_product_ids]]:
-                    continue
+        # But before returning the list, to make the qWeb step easier,  we reformat it
+        # by grouping item lines by delivery:
+        the_list = []
+        unique_keys = []
 
-                # lines of the current bl
-                bl_lines = [z for z in bl.bl_id.pack_operation_product_ids]
-                # quantity of the current product of the invoice_line on all the bl
-                bl_quantity = 0
+        # step 1: make a list of delivery's header (including no delivery related key 999999999) and remove duplicates
+        for record in combined_list:
+            unique_keys.append(record['my_key'])
+        unique_keys = list(set(unique_keys))
+        unique_keys.sort(reverse=False)
 
-                for bl_line in bl_lines: bl_quantity += bl_line.qty_done
+        # step 2: using the unique delivery number as key, push the related item details lists:
+        for one_key in unique_keys:
+            temp2 = []
+            pool_of_delivery = []
+            for record in combined_list:
+                if record['my_key'] == one_key:
+                    pool_of_delivery.append(record)
+            temp2.append(one_key)
+            temp2.append(pool_of_delivery)
+            the_list.append(temp2)
 
-                # if we ever used a part of the quantity of the product on the bl
-                if [bl.bl_id, invoice_line.product_id.id] in [x[0] for x in use_ongoing]:
-                    # getting the quantity ever used of the product on the bl
-                    index = -1
-
-                    for y in use_ongoing:
-                        index += 1
-                        if y[0] == [bl.bl_id, invoice_line.product_id.id]:
-                            break
-
-                    # if the staying quantity of the product on the bl is equal to the staying quantity
-                    if (bl_quantity - use_ongoing[index][1]) == quantity_needed:
-                        # we note that we must display this bl in the line
-                        current_line[1].append(bl.bl_id)
-                        # all the quantity of the current product has been used on this bl
-                        use_ongoing.pop(index)
-                        # we note that for the product, that bl should not be taken
-                        ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                        # no quantity staying
-                        quantity_needed = 0
-                    # if there less staying quantity on the bl that needed
-                    elif (bl_quantity - use_ongoing[index][1]) < quantity_needed:
-                        # the bl will be displayed
-                        current_line[1].append(bl.bl_id)
-                        # there is no more quantity staying for this product on this bl, we should not use
-                        use_ongoing.pop(index)
-                        ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                        # we need to find a bl to complte the quantity needed
-                        quantity_needed = quantity_needed - (bl_quantity - use_ongoing[index][1])
-                    # if there is more quantity that necessary in the bl
-                    elif (bl_quantity - use_ongoing[index][1]) > quantity_needed:
-                        # we must display the bl
-                        current_line[1].append(bl.bl_id)
-                        # we increase the used quantity of the product on this bl
-                        use_ongoing[index][1] += quantity_needed
-
-                        # there is no more staying quantity
-                        quantity_needed = 0
-                else:
-                    # if the staying quantity of the product on the bl is equal to the staying quantity
-                    if bl_quantity == quantity_needed:
-                        # if the quantity for this product has not been completely used
-                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
-                            # we display the bl and indicate we don't use more this bl for the current product
-                            current_line[1].append(bl.bl_id)
-                            ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                            quantity_needed = 0
-                    # if there less staying quantity on the bl that needed
-                    elif bl_quantity < quantity_needed:
-                        # if the quantity for this product has not been completely used
-                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
-                            # we display the bl and indicate we don't use more this bl for the current product
-                            current_line[1].append(bl.bl_id)
-                            ever_used.append([bl.bl_id, invoice_line.product_id.id])
-
-                            quantity_needed = quantity_needed - bl_quantity
-                    # if there is more quantity that necessary in the bl
-                    elif bl_quantity > quantity_needed:
-                        # if the quantity for this product has not been completely used
-                        if [bl.bl_id, invoice_line.product_id.id] not in ever_used:
-                            # we display the bl and indicate what quantity has been used
-                            current_line[1].append(bl.bl_id)
-                            use_ongoing.append([[bl.bl_id, invoice_line.product_id.id], quantity_needed])
-
-                            quantity_needed = 0
-
-            lines.append(current_line)
-
-        print lines
-
-        return lines
-
+        return the_list
 
 
 class Reglement(models.Model):
