@@ -10,11 +10,12 @@
                         <tr>
                             <th class="text-right"></th>
                             <th t-if="o.origin == 'Internal'">Date Mouvement</th>
-                            <th>Référence</th>
+                            <!--<th>Référence</th>-->
                             <th>Description</th>
                             <!--<th t-if="o.origin == 'Internal'">N°série</th>-->
                             <th class="text-center">N°série</th>
                             <th class="text-right">Qté</th>
+                            <th class="text-right"></th>
                             <th class="text-right">PU HT</th>
                             <th t-if="display_discount" class="text-right">Disc.(%)</th>
                             <th class="text-right">TVA</th>
@@ -54,12 +55,12 @@
                                           t-esc-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
                                 </td>
                                 <!--Référence-->
-                                <td>
-                                    <span t-esc="itemLine['product'].default_code"/>
-                                </td>
+                                <!--<td>-->
+                                    <!--<span t-esc="itemLine['product'].default_code"/>-->
+                                <!--</td>-->
                                 <!--Description-->
                                 <td>
-                                    <span t-esc="itemLine['product'].name"/>
+                                    <span t-field="itemLine['invoice_line'].name"/>
                                 </td>
                                 <!--N°série-->
                                 <td>
@@ -75,11 +76,16 @@
                                 <!--Qté-->
                                 <td class="text-right">
                                     <span t-esc="itemLine['qty']"/>
+                                </td>
+                                <!--Unité-->
+                                <td class="text-right">
                                     <span t-esc="itemLine['uom'].name"/>
                                 </td>
                                 <!--PU HT-->
                                 <td class="text-right">
-                                    <span t-esc="itemLine['invoice_line'].price_unit"/>
+                                    <span t-esc="itemLine['invoice_line'].price_unit"
+                                          t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;o.currency_id&quot;}"
+                                    />
                                 </td>
                                 <!--Disc.(%)-->
                                 <td t-if="display_discount" class="text-right" groups="sale.group_discount_per_so_line">
