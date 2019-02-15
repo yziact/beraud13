@@ -6,7 +6,7 @@ class SaleInherit(models.Model):
 
     @api.multi
     def _prepare_invoice(self):
-        print "[%s] our _prepare_invoice" % __name__
+        print("[%s] our _prepare_invoice" % __name__)
 
         res = super(SaleInherit, self)._prepare_invoice()
 
@@ -16,7 +16,7 @@ class SaleInherit(models.Model):
 
         if self.contact:
             res['contact'] = self.contact.id
-        print res
+        print(res)
 
         return res
 

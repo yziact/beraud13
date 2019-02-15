@@ -7,6 +7,15 @@
             <xpath expr="//field[@name='company_id']" position="after">
                 <field name="name"/>
             </xpath>
+
+            <!--display proforma number if is a proforma number-->
+            <xpath expr="//field[@name='number']" position="replace">
+                <field name="document_number" string="Numéro"/>
+            </xpath>
+            <!--<xpath expr="//field[@name='number']" position="after">-->
+                <!--<field name="proforma_number" string="Pro-forma N°" attrs="{'invisible': [('state','not in',('proforma','proforma2'))]}"/>-->
+            <!--</xpath>-->
+
         </field>
     </record>
 
@@ -15,6 +24,12 @@
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
+
+            <!--Add a kind of proforma number-->
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="proforma_number" string="Pro-forma N°" attrs="{'invisible': [('state','not in',('proforma','proforma2'))]}"/>
+            </xpath>
+
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="partner_shipping_id"  attrs="{'invisible':[('type', 'in', ['in_invoice', 'in_refund'])]}"/>
             </xpath>
