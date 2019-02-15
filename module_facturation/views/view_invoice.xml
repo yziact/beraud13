@@ -7,15 +7,10 @@
             <xpath expr="//field[@name='company_id']" position="after">
                 <field name="name"/>
             </xpath>
-
-            <!--display proforma number if is a proforma number-->
+            <!--display number that can be a proforma or an invoice-->
             <xpath expr="//field[@name='number']" position="replace">
                 <field name="document_number" string="Numéro"/>
             </xpath>
-            <!--<xpath expr="//field[@name='number']" position="after">-->
-                <!--<field name="proforma_number" string="Pro-forma N°" attrs="{'invisible': [('state','not in',('proforma','proforma2'))]}"/>-->
-            <!--</xpath>-->
-
         </field>
     </record>
 

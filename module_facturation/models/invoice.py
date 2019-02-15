@@ -6,6 +6,7 @@ class AccountInvoiceInherit(models.Model):
     _inherit = 'account.invoice'
 
     proforma_number = fields.Char(compute='_compute_proforma_number')
+    # tricky solution to display both the invoice numbers and proforma number in same column in tree view
     document_number = fields.Char(compute='_compute_document_number')
 
     @api.one
