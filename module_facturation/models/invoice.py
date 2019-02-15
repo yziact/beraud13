@@ -5,6 +5,24 @@ from openerp.tools import float_compare
 class AccountInvoiceInherit(models.Model):
     _inherit = 'account.invoice'
 
+    proforma_number = fields.Char(compute='_compute_proforma_number')
+    document_number = fields.Char(compute='_compute_document_number')
+
+    @api.one
+    def _compute_proforma_number(self):
+        if self.type == 'out_invoice' and self.state == 'proforma2':
+            self.proforma_number = 'PRO' + self.id.__str__()
+
+    # tricky solution to display both the invoice numbers and proforma number in same column in tree view
+    @api.one
+    def _compute_document_number(self):
+        if self.type == 'out_invoice' and self.state == 'proforma2':
+            self.document_number = 'PRO' + self.id.__str__()
+        elif self.number:
+            self.document_number = self.number
+        else:
+            self.document_number = '-'
+
     def _default_commercial(self):
         if not self.contact_affaire:
             return self.env.user
