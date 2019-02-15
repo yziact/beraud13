@@ -315,6 +315,9 @@ class AccountInvoiceInherited(models.Model):
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
 
+    # This method is preparing lines to be shown on the printed invoice. The only goal is to be able to link the
+    # invoice lines to the related delivery and display them grouped by deliveries (which means to split some
+    # invoice lines sometimes
     def get_lines(self):
         involved_deliveries = []
         delivery_lines_unfiltered = []
@@ -332,7 +335,7 @@ class AccountInvoiceInherited(models.Model):
                 for record in delivery.pack_operation_product_ids:
                     delivery_lines_unfiltered.append([delivery, record])
 
-            # Now we can build a kind of invoice lines based on those delivery lines. But we'll have to make sure
+            # Now we can build a kind of invoice lines using on those delivery lines. But we'll have to make sure
             # that all the invoice lines and only the invoice lines are in, or add/remove what's necessary
 
             # step 1: format the delivery lines in an exploitable format
@@ -358,13 +361,14 @@ class AccountInvoiceInherited(models.Model):
                                            'qty': invoice_line.quantity,
                                            'uom': invoice_line.uom_id})
 
-        # And now, the goal is to compare the two lists. Most important is that all invoice lines arrive on the report,
-        # and only them,  by consequence that will be our starting point.
+        # And now, the goal is to compare and merge the two lists. Most important is that all invoice lines arrive
+        # on the report, and only them. By consequence that will be our starting point.
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
                     if 0 < delivery_item['qty']:
                         if invoice_item['product'] == delivery_item['product']:
+                            # We keep the most interesting field's value from both lines
                             temp_best_of_both = {
                                                 'my_key': delivery_item['my_key'],
                                                 'invoice_line': invoice_item['invoice_line'],
@@ -374,7 +378,7 @@ class AccountInvoiceInherited(models.Model):
                                                 'qty': delivery_item['qty'],
                                                 'uom':  delivery_item['uom']}
                             combined_list.append(temp_best_of_both)
-                            # and we adjust the remaining quantities in the lists
+                            # and we adjust the remaining quantities in both lists
                             if delivery_item['qty'] <= invoice_item['qty']:
                                 invoice_item['qty'] -= delivery_item['qty']
                                 delivery_item['qty'] = 0
@@ -382,35 +386,24 @@ class AccountInvoiceInherited(models.Model):
                                 delivery_item['qty'] -= invoice_item['qty']
                                 invoice_item['qty'] = 0
 
-        # print('\n//////////////// list B4 sorting (only delivery in) //////////////////')
-        # for line in combined_list:
-        #     print(line)
-
-        # and finally add potential remaining invoice lines that have not been matched to any delivery
+        # and finally we add potential remaining invoice lines that have not been matched to any delivery.
+        # This can be all if no delivery at all was found.
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0:
                 combined_list.append(invoice_item)
-
-        # print('\n//////////////// COMBINED LIST ///////////////////////////////////////')
-        # for line in combined_list:
-        #     print(line)
 
         # But before returning the list, to make the qWeb step easier,  we reformat it
         # by grouping item lines by delivery:
         the_list = []
         unique_keys = []
 
-        # step 1: make a list of deliveries header (including 'no delivery related') and remove duplicates
+        # step 1: make a list of delivery's header (including no delivery related key 999999999) and remove duplicates
         for record in combined_list:
             unique_keys.append(record['my_key'])
         unique_keys = list(set(unique_keys))
         unique_keys.sort(reverse=False)
 
-        # print('\n//////////////// UNIQUE KEY DELIVERY LIST ////////////////////////////')
-        # for one_key in unique_keys:
-        #     print(one_key)
-
-        # step 2: using the unique delivery number as key, push the item details related:
+        # step 2: using the unique delivery number as key, push the related item details lists:
         for one_key in unique_keys:
             temp2 = []
             pool_of_delivery = []
@@ -420,11 +413,6 @@ class AccountInvoiceInherited(models.Model):
             temp2.append(one_key)
             temp2.append(pool_of_delivery)
             the_list.append(temp2)
-
-        # print('\n//////////////////////////// LOOK AT THAT BODY !!! //////////////////////')
-        # for line in the_list:
-        #     print(line)
-        #     print('\n')
 
         return the_list
 

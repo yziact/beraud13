@@ -8,13 +8,13 @@
                 <table class="table table-condensed">
                     <thead>
                         <tr>
+                            <!-- triky pading -->
                             <th class="text-right"></th>
                             <th t-if="o.origin == 'Internal'">Date Mouvement</th>
-                            <!--<th>Référence</th>-->
                             <th>Description</th>
-                            <!--<th t-if="o.origin == 'Internal'">N°série</th>-->
                             <th class="text-center">N°série</th>
                             <th class="text-right">Qté</th>
+                            <!-- UoM column without header text -->
                             <th class="text-right"></th>
                             <th class="text-right">PU HT</th>
                             <th t-if="display_discount" class="text-right">Disc.(%)</th>
@@ -24,17 +24,14 @@
                     </thead>
                     <tbody class="invoice_tbody">
                         <t t-foreach="o.get_lines()" t-as="deliveryGroup">
-
                             <!--Livraison-->
                             <tr>
                                 <td colspan="8">
                                     <strong>
                                         <t t-if="deliveryGroup[1][0]['delivery']">Livraison :
-                                            <span t-esc="deliveryGroup[1][0]['delivery'].name"/>
-                                            du
+                                            <span t-esc="deliveryGroup[1][0]['delivery'].name"/> du
                                             <span t-field="deliveryGroup[1][0]['delivery'].date"
-                                                  t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
-                                             :
+                                                  t-field-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/> :
                                         </t>
                                         <!--those are invoice lines not linked to a delivery (like services)-->
                                         <t t-if="deliveryGroup[0] >= 999999999">
@@ -43,7 +40,6 @@
                                     </strong>
                                 </td>
                             </tr>
-
                             <tr t-foreach="deliveryGroup[1]" t-as="itemLine">
                                 <!--tricky padding-->
                                 <td>
@@ -54,17 +50,12 @@
                                     <span t-esc="deliveryGroup[1][0]['delivery'].date_move"
                                           t-esc-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
                                 </td>
-                                <!--Référence-->
-                                <!--<td>-->
-                                    <!--<span t-esc="itemLine['product'].default_code"/>-->
-                                <!--</td>-->
                                 <!--Description-->
                                 <td>
                                     <span t-field="itemLine['invoice_line'].name"/>
                                 </td>
                                 <!--N°série-->
                                 <td>
-                                    <!--<td t-if="o.origin == 'Internal'">-->
                                     <t t-if="itemLine['delivery_line']">
                                         <ul class="list-unstyled" t-foreach="itemLine['delivery_line'].pack_lot_ids" t-as="lot" >
                                             <li>
