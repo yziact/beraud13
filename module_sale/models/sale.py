@@ -348,7 +348,11 @@ class AccountInvoiceInherited(models.Model):
                                                 'product': delivery_line[1].product_id,
                                                 'qty': delivery_line[1].qty_done,
                                                 'uom': delivery_line[1].product_uom_id
+
                 })
+        print('///////////////////  delivery_lines_formated  ////////////////////')
+        for record in delivery_lines_formated:
+            print(record)
 
         # step 2:  format the invoice lines in an exploitable format
         for invoice_line in self.invoice_line_ids:
@@ -360,13 +364,16 @@ class AccountInvoiceInherited(models.Model):
                                            'product': invoice_line.product_id,
                                            'qty': invoice_line.quantity,
                                            'uom': invoice_line.uom_id})
+        print('///////////////////  invoice_lines_formated  ////////////////////')
+        for record in invoice_lines_formated:
+            print(record)
 
         # And now, the goal is to compare and merge the two lists. Most important is that all invoice lines arrive
         # on the report, and only them. By consequence that will be our starting point.
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
-                    if 0 < delivery_item['qty']:
+                    if delivery_item['qty'] > 0 and invoice_item['qty'] > 0:
                         if invoice_item['product'] == delivery_item['product']:
                             # We keep the most interesting field's value from both lines
                             temp_best_of_both = {
@@ -385,6 +392,10 @@ class AccountInvoiceInherited(models.Model):
                             else:
                                 delivery_item['qty'] -= invoice_item['qty']
                                 invoice_item['qty'] = 0
+
+        print('///////////////////  combined_list  ////////////////////')
+        for record in combined_list:
+            print(record)
 
         # and finally we add potential remaining invoice lines that have not been matched to any delivery.
         # This can be all if no delivery at all was found.
@@ -413,6 +424,10 @@ class AccountInvoiceInherited(models.Model):
             temp2.append(one_key)
             temp2.append(pool_of_delivery)
             the_list.append(temp2)
+
+        print('///////////////////  the_list  ////////////////////')
+        for record in the_list:
+            print(record)
 
         return the_list
 
