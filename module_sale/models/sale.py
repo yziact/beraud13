@@ -348,6 +348,7 @@ class AccountInvoiceInherited(models.Model):
                                                 'product': delivery_line[1].product_id,
                                                 'qty': delivery_line[1].qty_done,
                                                 'uom': delivery_line[1].product_uom_id
+
                 })
 
         # step 2:  format the invoice lines in an exploitable format
@@ -364,9 +365,12 @@ class AccountInvoiceInherited(models.Model):
         # And now, the goal is to compare and merge the two lists. Most important is that all invoice lines arrive
         # on the report, and only them. By consequence that will be our starting point.
         for invoice_item in invoice_lines_formated:
+            # print('//////////////////////////////// CURRENT INVOICE ITEM ///////////////////////////////////////////')
+            # print(invoice_item['product'].default_code)
+
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
-                    if 0 < delivery_item['qty']:
+                    if delivery_item['qty'] > 0 and invoice_item['qty'] > 0:
                         if invoice_item['product'] == delivery_item['product']:
                             # We keep the most interesting field's value from both lines
                             temp_best_of_both = {
@@ -388,8 +392,13 @@ class AccountInvoiceInherited(models.Model):
 
         # and finally we add potential remaining invoice lines that have not been matched to any delivery.
         # This can be all if no delivery at all was found.
+        # print('///////////////// INVOICE LIST FORMATED //////////////////////////////')
+        # for item in invoice_lines_formated:
+        #     print(item['product'].default_code)
+        #     print(item['qty'])
+
         for invoice_item in invoice_lines_formated:
-            if invoice_item['qty'] > 0:
+            if invoice_item['qty'] > 0 or invoice_item['product'].default_code == 'ACPT':
                 combined_list.append(invoice_item)
 
         # But before returning the list, to make the qWeb step easier,  we reformat it
