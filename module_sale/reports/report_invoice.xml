@@ -87,7 +87,7 @@
                                     <span t-esc="', '.join(map(lambda x: (x.description or x.name), itemLine['invoice_line'].invoice_line_tax_ids))"/>
                                 </td>
                                 <!--Price (calculation based on line qty-->
-                                <td class="text-right">
+                                <td class="col-xs-2 text-right">
                                     <t t-set="disc_fact" t-value="(itemLine['invoice_line'].discount /100)"/>
                                     <span
                                             t-esc="(itemLine['invoice_line'].price_unit - (itemLine['invoice_line'].price_unit * disc_fact)) * itemLine['qty'] "
