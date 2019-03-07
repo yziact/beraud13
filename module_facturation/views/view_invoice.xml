@@ -8,8 +8,8 @@
                 <field name="name"/>
             </xpath>
             <!--display number that can be a proforma or an invoice-->
-            <xpath expr="//field[@name='number']" position="replace">
-                <field name="document_number" string="Numéro"/>
+            <xpath expr="//field[@name='number']" position="after">
+                <field name="proforma_number" string="Proforma"/>
             </xpath>
         </field>
     </record>
