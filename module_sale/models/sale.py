@@ -330,8 +330,8 @@ class AccountInvoiceInherited(models.Model):
         if self.bl_line_ids:
 
             # if we found some delivery in the invoice header we collect the object.
-            print('\n//////////////////////////////// DELIVERIES ///////////////////////////////////////////')
-            print(self.bl_line_ids)
+            #pirnt('\n//////////////////////////////// DELIVERIES ///////////////////////////////////////////')
+            #pirnt(self.bl_line_ids)
             for delivery in self.bl_line_ids:
                 involved_deliveries.append(delivery.bl_id)
 
@@ -357,10 +357,10 @@ class AccountInvoiceInherited(models.Model):
 
         delivery_lines_formated = sorted(delivery_lines_unsorted, key=lambda k: k['my_key'], reverse=True)
 
-        print('\n///////////////////////////// delivery_lines_formated and sorted //////////////////////')
-        for bidule in delivery_lines_formated:
-            print('my_key : %s - delivery : %s - item : %s - qty : %s'
-                  % (bidule['my_key'], bidule['delivery'].name, bidule['product'].name, bidule['qty']))
+        #pirnt('\n///////////////////////////// delivery_lines_formated and sorted //////////////////////')
+        # for bidule in delivery_lines_formated:
+            #pirnt('my_key : %s - delivery : %s - item : %s - qty : %s'
+                  # % (bidule['my_key'], bidule['delivery'].name, bidule['product'].name, bidule['qty']))
 
         # step 2:  format the invoice lines in an exploitable format
         for invoice_line in self.invoice_line_ids:
@@ -373,22 +373,22 @@ class AccountInvoiceInherited(models.Model):
                                            'qty': invoice_line.quantity,
                                            'uom': invoice_line.uom_id})
 
-        print('\n//////////////////////////////// invoice_lines_formated ///////////////////////')
-        for bidule in invoice_lines_formated:
-            print('Item : %s - Qty : %s' % (bidule['product'].name, bidule['qty']))
+        #pirnt('\n//////////////////////////////// invoice_lines_formated ///////////////////////')
+        #for bidule in invoice_lines_formated:
+            #pirnt('Item : %s - Qty : %s' % (bidule['product'].name, bidule['qty']))
 
         # And now, the goal is to compare and merge the two lists. Most important is that all invoice lines arrive
         # on the report, and only them. By consequence that will be our starting point.
 
         for invoice_item in invoice_lines_formated:
-            print('\n\n---------------------- current invoice line to be match -----------------------')
-            print('Invoice item : %s - qty : %s' % (invoice_item['product'].name, invoice_item['qty']))
-            print('\n------------- Check delivery --------------------------------------------------')
+            #pirnt('\n\n---------------------- current invoice line to be match -----------------------')
+            #pirnt('Invoice item : %s - qty : %s' % (invoice_item['product'].name, invoice_item['qty']))
+            #pirnt('\n------------- Check delivery --------------------------------------------------')
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
 
-                    print('Delivery : %s - Item : %s - Qty : %s'
-                          % (delivery_item['delivery'].name, delivery_item['product'].name, delivery_item['qty']))
+                    #pirnt('Delivery : %s - Item : %s - Qty : %s'
+                          #% (delivery_item['delivery'].name, delivery_item['product'].name, delivery_item['qty']))
 
                     if delivery_item['qty'] > 0 and invoice_item['qty'] > 0:
                         if invoice_item['product'] == delivery_item['product']:
@@ -402,7 +402,7 @@ class AccountInvoiceInherited(models.Model):
                                                 'qty': delivery_item['qty'],
                                                 'uom':  delivery_item['uom']}
                             combined_list.append(temp_best_of_both)
-                            print('                            ............... This was the match ................')
+                            #pirnt('                            ............... This was the match ................')
                             if delivery_item['qty'] <= invoice_item['qty']:
                                 invoice_item['qty'] -= delivery_item['qty']
                                 delivery_item['qty'] = 0
@@ -413,10 +413,10 @@ class AccountInvoiceInherited(models.Model):
         # and finally we add potential remaining invoice lines that have not been matched to any delivery.
         # This can be all if no delivery at all was found.
 
-        print('\n///////////////// REMAINING INVOICE LINES NOT MATCHED //////////////////////////')
+        #pirnt('\n///////////////// REMAINING INVOICE LINES NOT MATCHED //////////////////////////')
         for invoice_item in invoice_lines_formated:
             if invoice_item['qty'] > 0 or invoice_item['product'].default_code == 'ACPT':
-                print('Invoice item : %s - qty : %s' % (invoice_item['product'].name, invoice_item['qty']))
+                #pirnt('Invoice item : %s - qty : %s' % (invoice_item['product'].name, invoice_item['qty']))
 
                 combined_list.append(invoice_item)
 
@@ -430,8 +430,8 @@ class AccountInvoiceInherited(models.Model):
             unique_keys.append(record['my_key'])
         unique_keys = list(set(unique_keys))
         unique_keys.sort(reverse=False)
-        print('\n***************************** LIST OF UNIQUE KEYS ******************************')
-        print(unique_keys)
+        #pirnt('\n***************************** LIST OF UNIQUE KEYS ******************************')
+        #pirnt(unique_keys)
 
         # step 2: using the unique delivery number as key, push the related item details lists:
         for one_key in unique_keys:
@@ -443,16 +443,16 @@ class AccountInvoiceInherited(models.Model):
             temp2.append(one_key)
             temp2.append(pool_of_delivery)
             the_list.append(temp2)
-        print('\n***************************** LIST WITH ITEMS GROUPED BY DELIVERY **************')
-        for machin in the_list:
-            for chose in machin[1]:
-                if chose['delivery']:
-                    print('Delivery Number : %s - Item : %s - Qty : %s'
-                          % (chose['delivery'].name, chose['product'].name, chose['qty']))
-                else:
-                    print('Delivery Number : no delivery - Item : %s - Qty : %s'
-                          % (chose['product'].name, chose['qty']))
-        print('\n')
+        #pirnt('\n***************************** LIST WITH ITEMS GROUPED BY DELIVERY **************')
+        # for machin in the_list:
+        #     for chose in machin[1]:
+        #         if chose['delivery']:
+        #             print('Delivery Number : %s - Item : %s - Qty : %s'
+        #                   % (chose['delivery'].name, chose['product'].name, chose['qty']))
+        #         else:
+        #             print('Delivery Number : no delivery - Item : %s - Qty : %s'
+        #                   % (chose['product'].name, chose['qty']))
+        # print('\n')
         return the_list
 
 
