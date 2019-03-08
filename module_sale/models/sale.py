@@ -315,57 +315,49 @@ class AccountInvoiceInherited(models.Model):
                 'warning': {'title': 'Attention', 'message': error_client_blocked},
             }
 
-    # This method is preparing lines to be shown on the printed invoice. The only goal is to be able to link the
-    # invoice lines to the related delivery and display them grouped by deliveries (which means to split some
-    # invoice lines sometimes
     def get_lines(self):
+        # This method is preparing lines to be shown on the printed invoice. The only goal is to be able to link the
+        # invoice lines to the related delivery and display them grouped by deliveries (which means to split some
+        # invoice lines sometimes)
         involved_deliveries = []
         delivery_lines_unfiltered = []
         delivery_lines_unsorted = []
         delivery_lines_formated = []
         invoice_lines_formated = []
         combined_list = []
+        unique_keys = []
+        the_list_for_qweb = []
+
+        # STEP 1 : COLLECT DELIVERIES RELATED TO THE CURRENT INVOICE
 
         # We need to make sure some deliveries are linked to this invoice
         if self.bl_line_ids:
-
             # if we found some delivery in the invoice header we collect the object.
-            #pirnt('\n//////////////////////////////// DELIVERIES ///////////////////////////////////////////')
-            #pirnt(self.bl_line_ids)
             for delivery in self.bl_line_ids:
                 involved_deliveries.append(delivery.bl_id)
-
             # and then we look at their lines
             for delivery in involved_deliveries:
-                for record in delivery.pack_operation_product_ids:
-                    delivery_lines_unfiltered.append([delivery, record])
-
-            # Now we can build a kind of invoice lines using on those delivery lines. But we'll have to make sure
-            # that all the invoice lines and only the invoice lines are in, or add/remove what's necessary
-
-            # step 1: format the delivery lines in an exploitable format
+                # we make sure the delivery has not been validated AFTER the invoice has been created
+                if self.date_invoice >= delivery.date_done:
+                    for record in delivery.pack_operation_product_ids:
+                        delivery_lines_unfiltered.append([delivery, record])
+            # format the delivery lines in an exploitable format
             for delivery_line in delivery_lines_unfiltered:
-                delivery_lines_unsorted.append({
-                                                'my_key': delivery_line[0].id,
+                delivery_lines_unsorted.append({'my_key': delivery_line[0].id,
                                                 'invoice_line': '',
                                                 'delivery': delivery_line[0],
                                                 'delivery_line': delivery_line[1],
                                                 'product': delivery_line[1].product_id,
                                                 'qty': delivery_line[1].qty_done,
-                                                'uom': delivery_line[1].product_uom_id
-                })
+                                                'uom': delivery_line[1].product_uom_id})
+            # we need to sort the list to make sur we check the most recent deliveries first when we'll make the match
+            delivery_lines_formated = sorted(delivery_lines_unsorted, key=lambda k: k['my_key'], reverse=True)
 
-        delivery_lines_formated = sorted(delivery_lines_unsorted, key=lambda k: k['my_key'], reverse=True)
+        # STEP 2 : CREATE AN INVOICE LINES LIST AND USE SAME FORMAT AS DELIVERIES
 
-        #pirnt('\n///////////////////////////// delivery_lines_formated and sorted //////////////////////')
-        # for bidule in delivery_lines_formated:
-            #pirnt('my_key : %s - delivery : %s - item : %s - qty : %s'
-                  # % (bidule['my_key'], bidule['delivery'].name, bidule['product'].name, bidule['qty']))
-
-        # step 2:  format the invoice lines in an exploitable format
+        # we put a default key 999999999 (if no delivery is found it will be put at bottom of the invoice)
         for invoice_line in self.invoice_line_ids:
-            invoice_lines_formated.append({
-                                           'my_key': 999999999,
+            invoice_lines_formated.append({'my_key': 999999999,
                                            'invoice_line': invoice_line,
                                            'delivery': '',
                                            'delivery_line': '',
@@ -373,28 +365,19 @@ class AccountInvoiceInherited(models.Model):
                                            'qty': invoice_line.quantity,
                                            'uom': invoice_line.uom_id})
 
-        #pirnt('\n//////////////////////////////// invoice_lines_formated ///////////////////////')
-        #for bidule in invoice_lines_formated:
-            #pirnt('Item : %s - Qty : %s' % (bidule['product'].name, bidule['qty']))
+        # STEP 3 : MAP FOUND DELIVERIES LINES WITH INVOICE LINES
 
-        # And now, the goal is to compare and merge the two lists. Most important is that all invoice lines arrive
-        # on the report, and only them. By consequence that will be our starting point.
-
+        # Most important is that all and only invoice lines arrive on the report. Then that is our starting point.
         for invoice_item in invoice_lines_formated:
-            #pirnt('\n\n---------------------- current invoice line to be match -----------------------')
-            #pirnt('Invoice item : %s - qty : %s' % (invoice_item['product'].name, invoice_item['qty']))
-            #pirnt('\n------------- Check delivery --------------------------------------------------')
+            # check if there is still invoice qty to be mapped on this line
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
-
-                    #pirnt('Delivery : %s - Item : %s - Qty : %s'
-                          #% (delivery_item['delivery'].name, delivery_item['product'].name, delivery_item['qty']))
-
+                    # check if there is still delivery qty to be mapped on this line but we also have to re-check the
+                    # invoice qty in this sub loop to avoid that we keep matching delivery qty greater than invoice qty
                     if delivery_item['qty'] > 0 and invoice_item['qty'] > 0:
                         if invoice_item['product'] == delivery_item['product']:
                             # We keep the most interesting field's value from both lines
-                            temp_best_of_both = {
-                                                'my_key': delivery_item['my_key'],
+                            temp_best_of_both = {'my_key': delivery_item['my_key'],
                                                 'invoice_line': invoice_item['invoice_line'],
                                                 'delivery': delivery_item['delivery'],
                                                 'delivery_line': delivery_item['delivery_line'],
@@ -402,58 +385,43 @@ class AccountInvoiceInherited(models.Model):
                                                 'qty': delivery_item['qty'],
                                                 'uom':  delivery_item['uom']}
                             combined_list.append(temp_best_of_both)
-                            #pirnt('                            ............... This was the match ................')
+                            # we adjust qty in both list. If the entire delivery was used :
                             if delivery_item['qty'] <= invoice_item['qty']:
                                 invoice_item['qty'] -= delivery_item['qty']
                                 delivery_item['qty'] = 0
+                            # else, it means the entire invoice was used :
                             else:
                                 delivery_item['qty'] -= invoice_item['qty']
                                 invoice_item['qty'] = 0
 
-        # and finally we add potential remaining invoice lines that have not been matched to any delivery.
-        # This can be all if no delivery at all was found.
+        # STEP 4 : TREAT INVOICE QTY FOR WHICH NO DELIVERY WAS FOUND
 
-        #pirnt('\n///////////////// REMAINING INVOICE LINES NOT MATCHED //////////////////////////')
+        # Theoretically this might be service items. This can be all if no delivery was found at all.
         for invoice_item in invoice_lines_formated:
+            # we look for remaining invoice qty and we treat the particular case of "acompte" item
             if invoice_item['qty'] > 0 or invoice_item['product'].default_code == 'ACPT':
-                #pirnt('Invoice item : %s - qty : %s' % (invoice_item['product'].name, invoice_item['qty']))
-
                 combined_list.append(invoice_item)
 
-        # But before returning the list, to make the qWeb step easier,  we reformat it
-        # by grouping item lines by delivery:
-        the_list = []
-        unique_keys = []
+        # STEP 5 : PREPARE THE FINAL LIST AS NEEDED IN QWEB
 
-        # step 1: make a list of delivery's header (including no delivery related key 999999999) and remove duplicates
+        # to make the qWeb step easier later, we reformat it by grouping item lines by delivery:
         for record in combined_list:
             unique_keys.append(record['my_key'])
         unique_keys = list(set(unique_keys))
+        # here as well we sort the list. This will be sequence used on the final invoice form printed.
         unique_keys.sort(reverse=False)
-        #pirnt('\n***************************** LIST OF UNIQUE KEYS ******************************')
-        #pirnt(unique_keys)
-
-        # step 2: using the unique delivery number as key, push the related item details lists:
+        # using the unique delivery number as key, push the related item details lists:
         for one_key in unique_keys:
-            temp2 = []
+            temp = []
             pool_of_delivery = []
             for record in combined_list:
                 if record['my_key'] == one_key:
                     pool_of_delivery.append(record)
-            temp2.append(one_key)
-            temp2.append(pool_of_delivery)
-            the_list.append(temp2)
-        #pirnt('\n***************************** LIST WITH ITEMS GROUPED BY DELIVERY **************')
-        # for machin in the_list:
-        #     for chose in machin[1]:
-        #         if chose['delivery']:
-        #             print('Delivery Number : %s - Item : %s - Qty : %s'
-        #                   % (chose['delivery'].name, chose['product'].name, chose['qty']))
-        #         else:
-        #             print('Delivery Number : no delivery - Item : %s - Qty : %s'
-        #                   % (chose['product'].name, chose['qty']))
-        # print('\n')
-        return the_list
+            temp.append(one_key)
+            temp.append(pool_of_delivery)
+            the_list_for_qweb.append(temp)
+
+        return the_list_for_qweb
 
 
 class Reglement(models.Model):
