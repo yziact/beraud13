@@ -10,7 +10,8 @@
                         <tr>
                             <!-- triky pading -->
                             <th class="text-right"></th>
-                            <th t-if="o.origin == 'Internal'">Date Mouvement</th>
+                            <th t-if="o.origin == 'Internal'">Date Mvt</th>
+                            <th t-if="o.origin == 'Internal'">N°BL/OR</th>
                             <th>Description</th>
                             <th class="text-center">N°série</th>
                             <th class="text-right">Qté</th>
@@ -24,10 +25,17 @@
                     </thead>
                     <tbody class="invoice_tbody">
                         <t t-foreach="o.get_lines()" t-as="deliveryGroup">
+                            <!-- get_lines() return a dictionary like:
+                                [[20265,     [{'delivery_line': stock.pack.operation(46243,), 'product': product.product(61764,), 'my_key': 20265, 'qty': 1.0, 'delivery': stock.picking(20265,), 'uom': product.uom(1,), 'invoice_line': account.invoice.line(81221,)}]],
+                                 [999999999, [{'delivery_line': '', 'product': product.product(76519,), 'my_key': 999999999, 'qty': 1.0, 'delivery': '', 'uom': product.uom(1,), 'invoice_line': account.invoice.line(81222,)},
+                                              {'delivery_line': '', 'product': product.product(76601,), 'my_key': 999999999, 'qty': 1.0, 'delivery': '', 'uom': product.uom(1,), 'invoice_line': account.invoice.line(81223,)}]]]-->
+
                             <!--Livraison-->
                             <tr>
                                 <td colspan="8">
                                     <strong>
+                                        <!--To show delivery header line information I take the first of the group
+                                         as they are all the same-->
                                         <t t-if="deliveryGroup[1][0]['delivery']">Livraison :
                                             <span t-esc="deliveryGroup[1][0]['delivery'].name"/> du
                                             <span t-field="deliveryGroup[1][0]['delivery'].date"
@@ -45,23 +53,31 @@
                                 <td>
                                     <span></span>
                                 </td>
-                                <!--Date Mouvement-->
+                                <!--Date Mouvement (used on inter company invoice)-->
                                 <td t-if="o.origin == 'Internal'">
-                                    <span t-esc="deliveryGroup[1][0]['delivery'].date_move"
+                                    <span t-esc="itemLine['invoice_line'].date_move"
                                           t-esc-options="{&quot;format&quot;:&quot;dd/MM/y&quot;}"/>
+                                </td>
+                                <!--N°BL/OR (used on inter company invoice)-->
+                                <td t-if="o.origin == 'Internal'">
+                                    <span t-esc="itemLine['invoice_line'].num_bl"/>
                                 </td>
                                 <!--Description-->
                                 <td>
                                     <span t-field="itemLine['invoice_line'].name"/>
                                 </td>
-                                <!--N°série-->
-                                <td>
+                                <!--N°série  Warning: use  t-if="o.origin == 'Internal for company invoice)-->-->
+                                <td class="col-xs-2 text-right">
                                     <t t-if="itemLine['delivery_line']">
                                         <ul class="list-unstyled" t-foreach="itemLine['delivery_line'].pack_lot_ids" t-as="lot" >
                                             <li>
                                                 <span t-esc="lot.lot_id.name"/>
                                             </li>
                                         </ul>
+                                    </t>
+                                    <t t-if="o.origin == 'Internal'">
+                                        <span t-esc="itemLine['invoice_line'].serial" />
+
                                     </t>
                                 </td>
                                 <!--Qté-->
@@ -87,7 +103,7 @@
                                     <span t-esc="', '.join(map(lambda x: (x.description or x.name), itemLine['invoice_line'].invoice_line_tax_ids))"/>
                                 </td>
                                 <!--Price (calculation based on line qty-->
-                                <td class="col-xs-2 text-right">
+                                <td class="col-xs-1 text-right">
                                     <t t-set="disc_fact" t-value="(itemLine['invoice_line'].discount /100)"/>
                                     <span
                                             t-esc="(itemLine['invoice_line'].price_unit - (itemLine['invoice_line'].price_unit * disc_fact)) * itemLine['qty'] "
