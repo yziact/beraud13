@@ -342,11 +342,7 @@ class AccountInvoiceInherited(models.Model):
                 # invoice_day = datetime.strptime(self.date_invoice, '%Y-%m-%d 23:59:59')
                 invoice_day = datetime.strptime(self.date_invoice, '%Y-%m-%d')
                 invoice_day = invoice_day + timedelta(hours=23, minutes=59, seconds=59)
-                print('\n-------------------------------------------------------------')
-                print(invoice_day)
                 delivery_day = datetime.strptime(delivery.date_done, '%Y-%m-%d %H:%M:%S')
-                print(delivery_day)
-                print('-------------------------------------------------------------\n ')
                 if invoice_day >= delivery_day:
                     for record in delivery.pack_operation_product_ids:
                         delivery_lines_unfiltered.append([delivery, record])
