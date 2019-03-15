@@ -317,6 +317,10 @@ class AccountInvoiceInherited(models.Model):
             }
 
     def get_lines(self):
+
+        print('\n----------------------------------------- For invoice')
+        print(self.number)
+
         # This method is preparing lines to be shown on the printed invoice. The only goal is to be able to link the
         # invoice lines to the related delivery and display them grouped by deliveries (which means to split some
         # invoice lines sometimes)
@@ -340,12 +344,14 @@ class AccountInvoiceInherited(models.Model):
             for delivery in involved_deliveries:
                 # we make sure the delivery has not been validated AFTER the invoice has been created
                 # invoice_day = datetime.strptime(self.date_invoice, '%Y-%m-%d 23:59:59')
-                invoice_day = datetime.strptime(self.date_invoice, '%Y-%m-%d')
-                invoice_day = invoice_day + timedelta(hours=23, minutes=59, seconds=59)
-                delivery_day = datetime.strptime(delivery.date_done, '%Y-%m-%d %H:%M:%S')
-                if invoice_day >= delivery_day:
-                    for record in delivery.pack_operation_product_ids:
-                        delivery_lines_unfiltered.append([delivery, record])
+                if delivery.date_done:
+                    invoice_day = datetime.strptime(self.date_invoice, '%Y-%m-%d')
+                    invoice_day = invoice_day + timedelta(hours=23, minutes=59, seconds=59)
+                    delivery_day = datetime.strptime(delivery.date_done, '%Y-%m-%d %H:%M:%S')
+                    if invoice_day >= delivery_day:
+                        for record in delivery.pack_operation_product_ids:
+                            delivery_lines_unfiltered.append([delivery, record])
+
             # format the delivery lines in an exploitable format
             for delivery_line in delivery_lines_unfiltered:
                 delivery_lines_unsorted.append({'my_key': delivery_line[0].id,
@@ -355,8 +361,15 @@ class AccountInvoiceInherited(models.Model):
                                                 'product': delivery_line[1].product_id,
                                                 'qty': delivery_line[1].qty_done,
                                                 'uom': delivery_line[1].product_uom_id})
+
+
             # we need to sort the list to make sur we check the most recent deliveries first when we'll make the match
             delivery_lines_formated = sorted(delivery_lines_unsorted, key=lambda k: k['my_key'], reverse=True)
+
+            print('\n----------------------------------------- delivery item in ')
+            for bidule in delivery_lines_formated:
+                print(bidule['delivery'].name, bidule['product'].name, bidule['qty'])
+
 
         # STEP 2 : CREATE AN INVOICE LINES LIST AND USE SAME FORMAT AS DELIVERIES
 
@@ -370,26 +383,54 @@ class AccountInvoiceInherited(models.Model):
                                            'qty': invoice_line.quantity,
                                            'uom': invoice_line.uom_id})
 
+            print('\n----------------------------------------- invoice items to be mapped ')
+            print(invoice_line.product_id.name, invoice_line.quantity)
+
+
         # STEP 3 : MAP FOUND DELIVERIES LINES WITH INVOICE LINES
 
         # Most important is that all and only invoice lines arrive on the report. Then that is our starting point.
         for invoice_item in invoice_lines_formated:
             # check if there is still invoice qty to be mapped on this line
+
+            print('\n----------------------------------------- actual invoice line')
+            print(invoice_item['product'].name, invoice_item['qty'])
+
             if invoice_item['qty'] > 0:
                 for delivery_item in delivery_lines_formated:
+
                     # check if there is still delivery qty to be mapped on this line but we also have to re-check the
                     # invoice qty in this sub loop to avoid that we keep matching delivery qty greater than invoice qty
                     if delivery_item['qty'] > 0 and invoice_item['qty'] > 0:
                         if invoice_item['product'] == delivery_item['product']:
+                            # Calculation of qty to be mapped
+
+                            if delivery_item['qty'] <= invoice_item['qty']:
+                                mapped_qty = delivery_item['qty']
+                            # else, it means the entire invoice was used :
+                            else:
+                                mapped_qty = invoice_item['qty']
+
+                            print('\n----------------------------------------- actual delivery line')
+                            print(delivery_item['product'].name, delivery_item['qty'])
+
                             # We keep the most interesting field's value from both lines
                             temp_best_of_both = {'my_key': delivery_item['my_key'],
                                                 'invoice_line': invoice_item['invoice_line'],
                                                 'delivery': delivery_item['delivery'],
                                                 'delivery_line': delivery_item['delivery_line'],
                                                 'product': delivery_item['product'],
-                                                'qty': delivery_item['qty'],
+                                                'qty': mapped_qty,
                                                 'uom':  delivery_item['uom']}
                             combined_list.append(temp_best_of_both)
+
+                            print('\n----------------------------------------- mapped line created')
+                            print(temp_best_of_both['product'].name, temp_best_of_both['delivery'].name, temp_best_of_both['qty'])
+
+                            print('\n----------------------------------------- remaining qty BEFORE map (invoice, delivery)')
+                            print(invoice_item['product'].name, invoice_item['qty'], delivery_item['qty'])
+
+
                             # we adjust qty in both list. If the entire delivery was used :
                             if delivery_item['qty'] <= invoice_item['qty']:
                                 invoice_item['qty'] -= delivery_item['qty']
@@ -399,6 +440,12 @@ class AccountInvoiceInherited(models.Model):
                                 delivery_item['qty'] -= invoice_item['qty']
                                 invoice_item['qty'] = 0
 
+                            print('\n----------------------------------------- remaining qty AFTER map (invoice, delivery)')
+                            print(invoice_item['product'].name, invoice_item['qty'], delivery_item['qty'])
+
+
+
+
         # STEP 4 : TREAT INVOICE QTY FOR WHICH NO DELIVERY WAS FOUND
 
         # Theoretically this might be service items. This can be all if no delivery was found at all.
@@ -406,6 +453,11 @@ class AccountInvoiceInherited(models.Model):
             # we look for remaining invoice qty and we treat the particular case of "acompte" item
             if invoice_item['qty'] > 0 or invoice_item['product'].default_code == 'ACPT':
                 combined_list.append(invoice_item)
+
+                print('\n----------------------------------------- invoice without delivery')
+                print(invoice_item['product'].name)
+                print(delivery_item['qty'])
+                print(invoice_item['qty'])
 
         # STEP 5 : PREPARE THE FINAL LIST AS NEEDED IN QWEB
 
@@ -425,6 +477,9 @@ class AccountInvoiceInherited(models.Model):
             temp.append(one_key)
             temp.append(pool_of_delivery)
             the_list_for_qweb.append(temp)
+
+            print('\n----------------------------------------- THE LIST')
+            print(temp)
 
         return the_list_for_qweb
 
