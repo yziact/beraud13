@@ -456,7 +456,6 @@ class AccountInvoiceInherited(models.Model):
 
                 print('\n----------------------------------------- invoice without delivery')
                 print(invoice_item['product'].name)
-                print(delivery_item['qty'])
                 print(invoice_item['qty'])
 
         # STEP 5 : PREPARE THE FINAL LIST AS NEEDED IN QWEB
