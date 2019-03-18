@@ -10,7 +10,7 @@
                         <tr>
                             <!-- triky pading -->
                             <th class="text-right"></th>
-                            <th t-if="o.origin == 'Internal'">Date Mvt</th>
+                            <th t-if="o.origin == 'Internal'">Date Mouvement</th>
                             <th t-if="o.origin == 'Internal'">N°BL/OR</th>
                             <th>Description</th>
                             <th class="text-center">N°série</th>
