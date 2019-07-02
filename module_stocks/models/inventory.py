@@ -8,7 +8,6 @@ from openerp.tools import float_compare
 from openerp import models, api, fields
 from lxml import etree
 import logging
-_logger = logging.getLogger(__name__)
 
 
 class our_inventory(models.Model):
@@ -22,7 +21,6 @@ class our_inventory(models.Model):
 
     @api.onchange('line_ids', 'line_ids.cout_global')
     def _compute_total(self):
-        print 'OUR COMPUTE TOTO'
         total = 0.0
         for line in self.line_ids:
             total += line.cout_global
@@ -35,10 +33,8 @@ class our_inventory(models.Model):
 
     total = fields.Float('Total', compute=_compute_total)
 
-    #Overwrite de la function pour virer les consomables  de l inventaire
+    # Overwrite de la fonction pour retirer les consommables de l'inventaire
     def _get_inventory_lines(self, cr, uid, inventory, context=None):
-        print "[%s] our _get_inventory_lines" % __name__
-
         location_obj = self.pool.get('stock.location')
         product_obj = self.pool.get('product.product')
         location_ids = location_obj.search(cr, uid, [('id', 'child_of', [inventory.location_id.id])], context=context)
@@ -57,15 +53,15 @@ class our_inventory(models.Model):
         if inventory.package_id:
             domain += ' and package_id = %s'
             args += (inventory.package_id.id,)
-
+        
         # on ajout a la requete deux LEFT JOIN pour remonter aux product_template.type
         cr.execute('''
-            SELECT q.id as quant_id, q.product_id, q.qty as product_qty, q.location_id, q.lot_id as prod_lot_id, q.package_id, q.owner_id as partner_id, t.emplacement, t.emplacement_atom
+            SELECT q.product_id, sum(q.qty) as product_qty, q.location_id, q.lot_id as prod_lot_id, q.package_id, q.owner_id as partner_id, t.emplacement, t.emplacement_atom
            FROM stock_quant q
             LEFT JOIN product_product p on p.id = q.product_id
             LEFT JOIN product_template t on t.id = p.product_tmpl_id
             WHERE t.type = 'product' AND ''' + domain + '''
-           
+            GROUP BY q.product_id, q.location_id, q.lot_id, q.package_id, q.owner_id, t.emplacement, t.emplacement_atom
         ''', args)
         #SELECT  q.product_id, sum(q.qty) as product_qty, q.location_id, q.lot_id as prod_lot_id, q.package_id, q.owner_id as partner_id, t.emplacement, t.emplacement_atom
         #GROUP BY product_id, location_id, lot_id, package_id, partner_id, emplacement, emplacement_atom
@@ -98,8 +94,6 @@ class our_inventory(models.Model):
 
     @api.model
     def fields_view_get(self, view_id=None, view_type=None, context=None, toolbar=False, submenu=False):
-        print 'OUR FIELDS VIEW GET IN SALE CONTRACT'
-
         """
         Modification dynamique des valeurs envoyees a la vue
         """
@@ -127,7 +121,6 @@ class our_inventory_line(osv.osv):
     _order = 'emplacement, emplacement_atom'
 
     def _get_quants(self, cr, uid, line, context=None):
-        print("_GET_QUANTS")
         quant_obj = self.pool["stock.quant"]
         quants = []
 
@@ -150,8 +143,6 @@ class our_inventory_line(osv.osv):
 
     @api.depends('product_id', 'product_qty')
     def _compute_cout(self):
-        print "OUR CDOMPUTE COST"
-
         for line in self:
             line.cout = line.product_id.product_tmpl_id.standard_price
 
