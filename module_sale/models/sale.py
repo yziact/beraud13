@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from openerp import models, api, fields, _
+from openerp.tools import float_is_zero
 from lxml import etree
 import datetime
 import sys
@@ -38,6 +39,22 @@ class SaleOrderLine(models.Model):
             account_id = fpos.map_account(account_id)
 
         res['account_id'] = account_id.id
+
+        return res
+
+    @api.onchange('product_uom_qty', 'product_uom', 'route_id')
+    def _onchange_product_id_check_availability(self):
+        res = super(SaleOrderLine, self)._onchange_product_id_check_availability()
+
+        if 'warning' in res or (self.product_id and float_is_zero(self.product_id.qty_available, precision_digits=6)):
+            res['warning'] = {
+                'title': _('Not enough inventory!'),
+                'message': _(
+                    'You plan to sell %.2f %s but you only have %.2f %s available!\nThe stock on hand is %.2f %s.') % \
+                           (self.product_uom_qty, self.product_uom.name,
+                            self.product_id.qty_available, self.product_id.uom_id.name,
+                            self.product_id.qty_available, self.product_id.uom_id.name)
+            }
 
         return res
 
