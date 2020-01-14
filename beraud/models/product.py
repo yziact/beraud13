@@ -54,13 +54,13 @@ class ProductTemplate(models.Model):
     @api.multi
     def atom_cout_multi(self):
         prod_obj = self.pool.get('product.template')
-        product_ids = prod_obj.search(self._cr, 13, [('standard_price', '=', 0.0)])
+        product_ids = prod_obj.search(self._cr, 13, [])
 
         for id in product_ids:
             prod = prod_obj.browse(self._cr, 13, [id])
             tarif = prod.tarif
 
-            if tarif != 0.0 and not prod.standard_price:
+            if tarif != 0.0:
                 prod.write({'standard_price': tarif})
 
     @api.multi
