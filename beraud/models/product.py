@@ -60,7 +60,7 @@ class ProductTemplate(models.Model):
             prod = prod_obj.browse(self._cr, 13, [id])
             tarif = prod.tarif
 
-            if tarif != 0.0:
+            if tarif != 0.0 and prod.tarif != prod.standard_price:
                 prod.write({'standard_price': tarif})
 
     @api.multi
