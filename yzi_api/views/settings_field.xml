@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="yzi_api.settings_field_tree" model="ir.ui.view">
+        <field name="name">Paramètres des champs pour l'API</field>
+        <field name="model">settings.field</field>
+        <field name="arch" type="xml">
+
+            <tree>
+                <field name="model_id"/>
+            </tree>
+
+        </field>
+    </record>
+
+    <record id="yzi_api.settings_field_form" model="ir.ui.view">
+        <field name="name">Paramètres des champs pour l'API</field>
+        <field name="model">settings.field</field>
+        <field name="arch" type="xml">
+
+            <form>
+                <group>
+                    <field name="model_id"/>
+                    <field name="required_field_ids" domain="[('model_id', '=', model_id)]"/>
+                    <field name="readonly_field_ids" domain="[('model_id', '=', model_id)]"/>
+                </group>
+            </form>
+
+        </field>
+    </record>
+
+    <record id="yzi_api.settings_field_action" model="ir.actions.act_window">
+        <field name="name">Paramètres des champs pour l'APIs</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">settings.field</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="yzi_api.api_menu" parent="base.menu_administration" name="API" sequence="10" groups="yzi_api.api_group"/>
+    <menuitem id="yzi_api.settings_field_menu" parent="yzi_api.api_menu" action="yzi_api.settings_field_action" name="Paramètres des champs" groups="yzi_api.api_group"/>
+
+</odoo>
