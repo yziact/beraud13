@@ -1,0 +1,15 @@
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="park_machine_inherit_form_fsm" model="ir.ui.view">
+        <field name="name">park machine</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="industry_fsm.project_task_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="lot_id"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

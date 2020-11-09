@@ -1,0 +1,71 @@
+<odoo>
+
+    <record id="pm_machine_tree" model="ir.ui.view">
+        <field name="name">All machines</field>
+        <field name="model">stock.production.lot</field>
+        <field name="arch" type="xml">
+            <tree string="All machines">
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="company_id"/>
+                <field name="name" string="Lot"/>
+                <field name="warranty_date_end"/>
+                <field name="location_id"/>
+                <field name="is_maintenance_contract"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="pm_machine_form" model="ir.ui.view">
+        <field name="name">Machine</field>
+        <field name="model">stock.production.lot</field>
+        <field name="arch" type="xml">
+            <form string="Park Machine">
+                <sheet>
+                    <div class="oe_button_box" name="button_box"></div>
+                    <group>
+                        <group>
+                            <field name="partner_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
+                            <field name="product_id"/>
+                            <field name="name"/>
+                            <field name="customer_location" context="{'show_address': 1}" options="{'always_reload': True}"/>
+                            <field name="location_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
+                        </group>
+
+                        <group>
+                            <field name="company_id"/>
+                            <field name="is_maintenance_contract"/>
+                            <field name="implementation_date"/>
+                            <field name="warranty_date_end"/>
+                        </group>
+
+                        <field name="task_ids" invisible="1"/>
+                        <field name="tasks_count" invisible="1"/>
+                        <field name="note"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="pm_machine_tree_action" model="ir.actions.act_window">
+        <field name="name">Park machine</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.production.lot</field>
+        <field name="view_ids"
+               eval="[
+                        (5,0,0),
+                        (0, 0, {'view_mode': 'tree', 'view_id': ref('pm_machine_tree')}),
+                        (0, 0, {'view_mode': 'form', 'view_id': ref('pm_machine_form')})
+               ]"/>
+
+        <field name="groups_id" eval="[(6,0,[ref('base.group_user')])]"/>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="park_machine_mod" name="Park machine" sequence="11" action="pm_machine_tree_action"
+              web_icon="park_machine,static/description/icon.png" groups="base.group_user"/>
+    <menuitem id="park_machine_tree" parent="park_machine_mod" name="All machines"
+              action="pm_machine_tree_action" sequence="1" groups="base.group_user"/>
+</odoo>
