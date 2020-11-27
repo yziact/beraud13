@@ -29,6 +29,7 @@
     'data': [
         'views/park_machine.xml',
         'views/helpdesk_ticket.xml',
+        'views/sale_order.xml',
         # 'security/ir.model.access.csv',
     ],
 }

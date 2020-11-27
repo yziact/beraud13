@@ -8,7 +8,7 @@
 
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_ticket_ids" type="object" class="btn oe_stat_button" icon="fa-life-ring"
-                            string="Inter sur site">
+                            string="SAV">
                     <field name="tickets_count" class="o_stat_value" readonly="1"
                            options="{'always_reload': True}"/>
                 </button>

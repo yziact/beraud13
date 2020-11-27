@@ -23,6 +23,7 @@
     # any module necessary for this one to work correctly
     'depends': [
         'park_machine',
+        'repair',
     ],
 
     # always loaded

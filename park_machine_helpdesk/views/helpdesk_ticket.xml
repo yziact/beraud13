@@ -6,6 +6,11 @@
         <field name="inherit_id" ref="helpdesk.helpdesk_ticket_view_form"/>
         <field name="arch" type="xml">
 
+            <header>
+                <field name="is_sale_related" invsible="1"/>
+                <button name="action_create_quotation" type="object" attrs="{'invisible': [('is_sale_related', '=', True)]}" string="Create quotation"/>
+            </header>
+
             <xpath expr="//field[@name='team_id']" position="after">
                 <field name="lot_id"/>
             </xpath>

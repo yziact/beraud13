@@ -52,6 +52,7 @@
     <record id="pm_machine_tree_action" model="ir.actions.act_window">
         <field name="name">Park machine</field>
         <field name="type">ir.actions.act_window</field>
+        <field name="domain">[('product_id.is_machine', '=', True)]</field>
         <field name="res_model">stock.production.lot</field>
         <field name="view_ids"
                eval="[

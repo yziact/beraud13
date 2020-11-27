@@ -20,8 +20,10 @@ class StockProductionLot(models.Model):
     note = fields.Html(string='Comments')
     is_maintenance_contract = fields.Boolean(string="Maintenance contract")
 
+    @api.depends('partner_id')
     def _compute_customer_location(self):
         for partner in self:
+            partner.customer_location = False
             # The delivery picking of the last order (2 l.)
             order_ids = partner.sale_order_ids
             if order_ids:
@@ -29,6 +31,7 @@ class StockProductionLot(models.Model):
                 delivery_picking = order_id.picking_ids.filtered(lambda x: x.picking_type_id.code == "outgoing")
                 if delivery_picking and delivery_picking.partner_id:
                     partner.customer_location = delivery_picking.partner_id.id
+
 
     def _compute_location_id(self):
         """

@@ -7,112 +7,110 @@ msgstr ""
 "Project-Id-Version: Odoo Server 13.0+e-20200421\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-26 09:15+0000\n"
-"PO-Revision-Date: 2020-11-26 11:19+0100\n"
+"PO-Revision-Date: 2020-11-26 09:15+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.3.1\n"
-"Last-Translator: \n"
-"Language: fr\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: park_machine
 #: model:ir.ui.menu,name:park_machine.park_machine_tree
 #: model_terms:ir.ui.view,arch_db:park_machine.pm_machine_tree
 msgid "All machines"
-msgstr "Machines"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__note
 msgid "Comments"
-msgstr "Commentaire"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model,name:park_machine.model_res_partner
 msgid "Contact"
-msgstr "Contact"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__partner_id
 msgid "Customer"
-msgstr "Client"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__customer_location
 msgid "Customer location"
-msgstr "Emplacement client"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__task_ids
 msgid "Interventions"
-msgstr "Interventions"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__location_id
 msgid "Location"
-msgstr "Emplacement"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_res_partner__lot_ids
 #: model:ir.model.fields,field_description:park_machine.field_res_users__lot_ids
 #: model_terms:ir.ui.view,arch_db:park_machine.pm_machine_tree
 msgid "Lot"
-msgstr "Lot / n° série"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model,name:park_machine.model_stock_production_lot
 msgid "Lot/Serial"
-msgstr "Lot / n° série"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_res_partner__lots_count
 #: model:ir.model.fields,field_description:park_machine.field_res_users__lots_count
 msgid "Lots Count"
-msgstr "Nombre de N° série"
+msgstr ""
 
 #. module: park_machine
 #: model_terms:ir.ui.view,arch_db:park_machine.park_machine_customer_park_form
 msgid "Machines"
-msgstr "Machines"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__is_maintenance_contract
 msgid "Maintenance contract"
-msgstr "Contrat de maintenance"
+msgstr ""
 
 #. module: park_machine
 #: model_terms:ir.ui.view,arch_db:park_machine.pm_machine_form
 msgid "Park Machine"
-msgstr "Parc machine"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.actions.act_window,name:park_machine.pm_machine_tree_action
 #: model:ir.ui.menu,name:park_machine.park_machine_mod
 msgid "Park machine"
-msgstr "Parc machine"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model,name:park_machine.model_project_task
 msgid "Task"
-msgstr "Tâche"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__tasks_count
 msgid "Tasks count"
-msgstr "Nombre de tâches"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__warranty_date_end
 msgid "Warrany date end"
-msgstr "Date fin de garantie"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_stock_production_lot__implementation_date
 msgid "implementation date"
-msgstr "Date d'implémentation"
+msgstr ""
 
 #. module: park_machine
 #: model:ir.model.fields,field_description:park_machine.field_project_task__sale_ids
 msgid "sales"
-msgstr "Ventes"
+msgstr ""

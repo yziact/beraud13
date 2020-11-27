@@ -35,6 +35,7 @@
     'data': [
         'views/park_machine.xml',
         'views/res_partner.xml',
+        'views/product_category.xml',
         # 'security/ir.model.access.csv',
     ],
 }
