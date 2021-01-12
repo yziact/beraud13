@@ -1,0 +1,9 @@
+*.xls*
+*.pyc
+*.txt
+*.zip
+.idea/*
+.vscode/*
+venv/
+*.pot
+*.mo
