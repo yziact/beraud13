@@ -1,0 +1,23 @@
+<odoo>
+    <record id="action_product_tmpl_is_machine" model="ir.actions.server">
+        <field name="name">Calculer machine</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="code">
+            action = records._set_is_machine()
+        </field>
+    </record>
+
+    <record id="action_product_is_machine" model="ir.actions.server">
+        <field name="name">Raffraichir machine</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="binding_model_id" ref="product.model_product_product"/>
+        <field name="code">
+            action = records._set_is_machine()
+        </field>
+    </record>
+</odoo>

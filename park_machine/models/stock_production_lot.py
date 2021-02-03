@@ -20,18 +20,20 @@ class StockProductionLot(models.Model):
     note = fields.Html(string='Comments')
     is_maintenance_contract = fields.Boolean(string="Maintenance contract")
 
+    company_id = fields.Many2one('res.company', 'Company', required=True, stored=True, index=True, default=lambda self: self.env.company)
+
     @api.depends('partner_id')
     def _compute_customer_location(self):
-        for partner in self:
-            partner.customer_location = False
+        for lot in self:
+            lot.customer_location = False
             # The delivery picking of the last order (2 l.)
-            order_ids = partner.sale_order_ids
+            order_ids = lot.sale_order_ids
             if order_ids:
                 order_id = order_ids[0]
+                lot.partner_id = order_id.partner_id
                 delivery_picking = order_id.picking_ids.filtered(lambda x: x.picking_type_id.code == "outgoing")
                 if delivery_picking and delivery_picking.partner_id:
-                    partner.customer_location = delivery_picking.partner_id.id
-
+                    lot.customer_location = delivery_picking.partner_id.id
 
     def _compute_location_id(self):
         """

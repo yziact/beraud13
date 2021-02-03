@@ -8,7 +8,7 @@
 
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_repair_order_ids" type="object" class="btn oe_stat_button" icon="fa-wrench"
-                            string="Repairs">
+                        string="Repairs">
                     <field name="repairs_count" class="o_stat_value" readonly="1"
                            options="{'always_reload': True}"/>
                 </button>
@@ -16,4 +16,5 @@
 
         </field>
     </record>
+
 </odoo>

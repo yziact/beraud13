@@ -17,7 +17,7 @@ class StockProductionLot(models.Model):
     def action_ticket_ids(self):
 
         action = {
-            'name': "Intervention",
+            'name': "SAV",
             'type': "ir.actions.act_window",
             'target': 'current',
             'view_type': 'form',

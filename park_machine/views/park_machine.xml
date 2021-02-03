@@ -4,14 +4,15 @@
         <field name="name">All machines</field>
         <field name="model">stock.production.lot</field>
         <field name="arch" type="xml">
-            <tree string="All machines">
+            <tree string="All machines" multi_edit="1">
                 <field name="partner_id"/>
                 <field name="product_id"/>
-                <field name="company_id"/>
+                <field name="company_id" optional="hide"/>
                 <field name="name" string="Lot"/>
-                <field name="warranty_date_end"/>
-                <field name="location_id"/>
-                <field name="is_maintenance_contract"/>
+                <field name="warranty_date_end" optional="hide"/>
+                <field name="location_id" optional="show"/>
+                <field name="customer_location" optional="show"/>
+                <field name="is_maintenance_contract" optional="show"/>
             </tree>
         </field>
     </record>
@@ -22,7 +23,9 @@
         <field name="arch" type="xml">
             <form string="Park Machine">
                 <sheet>
-                    <div class="oe_button_box" name="button_box"></div>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_lot_open_quants" icon="fa-arrows" class="oe_stat_button" string="Location" type="object"/>
+                    </div>
                     <group>
                         <group>
                             <field name="partner_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
@@ -49,6 +52,21 @@
         </field>
     </record>
 
+    <record id="search_view_from_scratch" model="ir.ui.view">
+       <field name="name">searchview park machine</field>
+       <field name="model">stock.production.lot</field>
+        <field name="arch" type="xml">
+             <search string="Product Lots Filter">
+                 <field name="name" string="Lot/Serial Number" filter_domain="[('name', 'ilike', self)]"/>
+                 <field name="partner_id" string="Customer" filter_domain="[('partner_id.name', 'ilike', self)]"/>
+                 <group expand="0" string="Group By">
+                     <filter name="group_by_customer" string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                     <filter name="group_by_product" string="Product" domain="[]" context="{'group_by': 'product_id'}"/>
+                 </group>
+             </search>
+        </field>
+    </record>
+
     <record id="pm_machine_tree_action" model="ir.actions.act_window">
         <field name="name">Park machine</field>
         <field name="type">ir.actions.act_window</field>
@@ -61,12 +79,24 @@
                         (0, 0, {'view_mode': 'form', 'view_id': ref('pm_machine_form')})
                ]"/>
 
+        <field name="search_view_id" ref="park_machine.search_view_from_scratch"/>
+        <field name="context">{'default_group_by':'group_by_customer'}</field>
         <field name="groups_id" eval="[(6,0,[ref('base.group_user')])]"/>
         <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="park_machine_mod" name="Park machine" sequence="11" action="pm_machine_tree_action"
               web_icon="park_machine,static/description/icon.png" groups="base.group_user"/>
-    <menuitem id="park_machine_tree" parent="park_machine_mod" name="All machines"
-              action="pm_machine_tree_action" sequence="1" groups="base.group_user"/>
+
+    <menuitem id="park_machine_parent_menu" parent="park_machine_mod" name="Données de base"
+              sequence="1" groups="base.group_user"/>
+
+    <menuitem id="park_machine_tree" parent="park_machine_parent_menu" name="Machines"
+              action="pm_machine_tree_action" sequence="5" groups="base.group_user"/>
+
+    <menuitem id="pm_menu_product_tmpl" name="Articles" parent="park_machine_tree"
+              action="stock.product_template_action_product" sequence="3" groups="base.group_user"/>
+
+    <menuitem id="pm_menu_product_product" name="variantes d'article" parent="park_machine_tree"
+              action="stock.stock_product_normal_action" sequence="4" groups="base.group_user"/>
 </odoo>

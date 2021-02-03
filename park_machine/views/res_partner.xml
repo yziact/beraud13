@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//div[@name='button_box']" position="inside">
+            <xpath expr="//div[@name='button_box']/button" position="before">
                 <button name="action_lot_ids"
                         type="object"
                         class="oe_stat_button"

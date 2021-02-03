@@ -29,6 +29,7 @@
     # always loaded
     'data': [
         'views/park_machine.xml',
+        'views/repair_order.xml',
         # 'security/ir.model.access.csv',
     ],
 }

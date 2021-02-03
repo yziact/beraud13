@@ -15,6 +15,11 @@
                 <field name="lot_id"/>
             </xpath>
 
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_park_machine" icon="fa-wrench" type="object" string="Park Machine"
+                attrs="{'invisible': [('lot_id','=',False)]}"/>
+            </xpath>
+
         </field>
     </record>
 </odoo>
