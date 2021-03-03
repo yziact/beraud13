@@ -1,0 +1,19 @@
+<odoo>
+    <record id="wizard_company_invoice_time" model="ir.ui.view">
+        <field name="name">Générer les sactures IS</field>
+        <field name="model">company.invoice.time</field>
+        <field name="arch" type="xml">
+            <form string="Générer les factures">
+                <sheet>
+                    <group>
+                        <field name="date"/>
+                    </group>
+                    <footer>
+                        <button string="Apply" class="btn btn-primary" type="object" name="action_save_onboarding_sale_tax" />
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
