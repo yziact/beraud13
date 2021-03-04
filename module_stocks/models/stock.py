@@ -36,14 +36,15 @@ class StockPicking(models.Model):
 
         loc_obj = self.pool.get('stock.location')
 
-        loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
-        loc_dst_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
+        # loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
+        loc_src_id = loc_obj.search(cr, uid, [('complete_name','=','Physical Locations/DAT/Stock')])
+        loc_dst_id = loc_obj.search(cr, uid, [('complete_name','=','Physical Locations/DC/Stock')])
         #print "loc_src_id : ", loc_src_id
         #print "loc_dst_id : ", loc_dst_id
 
         if c_dst_id == 3: # dest is Beraud
-            loc_src_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DC/Stock')])
-            loc_dst_id = loc_obj.search(cr, uid, [('complete_name','ilike','Physical Locations/DAT/Stock')])
+            loc_src_id = loc_obj.search(cr, uid, [('complete_name','=','Physical Locations/DC/Stock')])
+            loc_dst_id = loc_obj.search(cr, uid, [('complete_name','=','Physical Locations/DAT/Stock')])
 
         loc_src_obj = loc_obj.browse(cr, uid, loc_src_id)
         loc_dst_obj = loc_obj.browse(cr, uid, loc_dst_id)

@@ -60,7 +60,7 @@ class MrpRepairInh(models.Model):
         return (datetime.datetime.now()+datetime.timedelta(days=1)).strftime(DATETIME_FORMAT)
 
     def _set_default_location(self):
-        loc_id = self.env['stock.location'].search([('complete_name','ilike','Emplacements physiques/DC/REP')])
+        loc_id = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/REP')])
         return loc_id
 
     def _set_default_dest_location(self):
@@ -238,8 +238,8 @@ class MrpRepairInh(models.Model):
         t_obj = self.env['res.users']
         l_obj = self.env['stock.location']
 
-        rep_ber_loc_id = self.env['stock.location'].search([('complete_name','ilike','Emplacements physiques/DC/REP')])
-        rep_atom_loc_id = self.env['stock.location'].search([('complete_name','ilike','Emplacements physiques/DAT/REP')])
+        rep_ber_loc_id = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DC/REP')])
+        rep_atom_loc_id = self.env['stock.location'].search([('complete_name','ilike','Physical Locations/DAT/REP')])
 
         ber_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DC/Stock')])
         atom_loc_id = l_obj.search([('complete_name','ilike','Physical Locations/DAT/Stock')])

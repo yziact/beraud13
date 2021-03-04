@@ -75,7 +75,12 @@ class our_inventory(models.Model):
                 if not value:
                     product_line[key] = False
             product_line['inventory_id'] = inventory.id
-            product_line['theoretical_qty'] = product_line['product_qty']
+            print product_line.get('prod_lot_id')
+            if product_line.get('prod_lot_id'):
+            	product_line['theoretical_qty'] = 1
+            else:
+            	product_line['theoretical_qty'] = product_line['product_qty']
+
             if product_line['product_id']:
                 product = product_obj.browse(cr, uid, product_line['product_id'], context=context)
                 product_line['product_uom_id'] = product.uom_id.id

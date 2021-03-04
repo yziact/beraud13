@@ -21,7 +21,9 @@ class CssInterface(http.Controller):
         user = http.request.env['res.users'].search([('id','=',request.session.uid)])
 
         if not user:
-            return ''
+            css_data = '.navbar-inverse { background-color: '+ 'black' + '; border-color: '+ 'black' + '; }' \
+                    ' .o_web_client {background-color: #333333;} '
+            return request.make_response(css_data, [('Content-Type', 'text/css')])
 
         else:
             company_background_color = user.company_id.background_color or 'black'
